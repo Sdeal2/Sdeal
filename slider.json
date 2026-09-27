@@ -1,0 +1,37 @@
+[
+  {
+    "title": "Every outfit tells a story",
+    "eyebrow": "Smart Deal",
+    "text": "Handpicked products, delivered to your door — no advance payment.",
+    "button": "Shop Collection",
+    "image": ""
+  },
+  {
+    "title": "Your Banner Goes Here",
+    "eyebrow": "Slide 2",
+    "text": "Add your second banner text here.",
+    "button": "Shop Now",
+    "image": ""
+  },
+  {
+    "title": "New Collection",
+    "eyebrow": "Slide 3",
+    "text": "Add your third banner here.",
+    "button": "Explore",
+    "image": ""
+  },
+  {
+    "title": "Special Offer",
+    "eyebrow": "Slide 4",
+    "text": "Add your fourth banner here.",
+    "button": "View Products",
+    "image": ""
+  },
+  {
+    "title": "Shop Smart With Smart Deal",
+    "eyebrow": "Slide 5",
+    "text": "Add your fifth banner here.",
+    "button": "Start Shopping",
+    "image": ""
+  }
+]
