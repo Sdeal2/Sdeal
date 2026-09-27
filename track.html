@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Order — Smart Deal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --bg:#FAF7F1; --ink:#201C18; --ink-soft:#5C564C;
+    --indigo:#2E3B5B; --indigo-dark:#212A42;
+    --marigold:#E2A33D; --rose:#B5495B; --line:#E4DCCB;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:'Work Sans',sans-serif; line-height:1.5;}
+  h1,h2,h3{font-family:'Fraunces',serif; font-weight:600;}
+  a{color:inherit;}
+  button{font-family:inherit; cursor:pointer; border:none;}
+
+  header{border-bottom:1px solid var(--line); padding:16px 20px;}
+  .logo{font-family:'Fraunces',serif; font-weight:700; font-size:22px; max-width:600px; margin:0 auto;}
+  .logo span{color:var(--marigold);}
+
+  main{max-width:520px; margin:0 auto; padding:40px 20px 80px;}
+
+  .lookup-box{background:#fff; border:1px solid var(--line); padding:22px; margin-bottom:24px;}
+  .lookup-box label{font-size:13px; font-weight:600; display:block; margin-bottom:8px;}
+  .lookup-row{display:flex; gap:8px;}
+  .lookup-row input{
+    flex:1; padding:11px 12px; border:1px solid var(--line);
+    font-family:inherit; font-size:14px;
+  }
+  .lookup-row button{
+    background:var(--ink); color:#fff; padding:11px 20px;
+    font-weight:600; font-size:14px;
+  }
+
+  .state-msg{text-align:center; padding:50px 20px; color:var(--ink-soft); font-size:14px;}
+
+  .order-card{background:#fff; border:1px solid var(--line); padding:24px; margin-bottom:20px;}
+  .order-card-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;}
+  .order-id{font-size:12px; color:var(--ink-soft);}
+  .order-total{font-size:18px; font-weight:700;}
+  .order-name{font-size:15px; font-weight:600; margin-bottom:2px;}
+  .order-addr{font-size:12.5px; color:var(--ink-soft); margin-bottom:18px;}
+
+  .timeline{margin:26px 0;}
+  .step{display:flex; gap:14px; position:relative; padding-bottom:28px;}
+  .step:last-child{padding-bottom:0;}
+  .step-line{
+    position:absolute; left:11px; top:24px; bottom:0;
+    width:2px; background:var(--line);
+  }
+  .step.done .step-line{background:var(--indigo);}
+  .step-dot{
+    width:24px; height:24px; border-radius:50%;
+    border:2px solid var(--line);
+    background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; z-index:1;
+    font-size:12px;
+  }
+  .step.done .step-dot{background:var(--indigo); border-color:var(--indigo); color:#fff;}
+  .step.current .step-dot{background:var(--marigold); border-color:var(--marigold); color:var(--indigo-dark); font-weight:700;}
+  .step-label{font-size:14px; font-weight:600; padding-top:1px;}
+  .step-sub{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .step:not(.done):not(.current) .step-label{color:var(--ink-soft); font-weight:500;}
+
+  .items-list{border-top:1px solid var(--line); padding-top:16px; margin-top:4px;}
+  .item-row{display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--ink-soft);}
+
+  .return-box{background:#fff; border:1px solid var(--line); padding:22px; text-align:center;}
+  .return-box h3{font-size:16px; margin-bottom:8px;}
+  .return-box p{font-size:13px; color:var(--ink-soft); margin-bottom:16px;}
+  .return-btn{
+    background:var(--rose); color:#fff; padding:13px 24px;
+    font-weight:600; font-size:14px; width:100%;
+  }
+  .return-btn:hover{background:#9A3E4D;}
+  .return-closed{font-size:13px; color:var(--ink-soft);}
+  .return-done{font-size:13px; color:var(--indigo); font-weight:600;}
+</style>
+</head>
+<body>
+
+<header><div class="logo">SMART DEAL<span>.</span></div></header>
+
+<main>
+  <div class="lookup-box">
+    <label>Enter your Order ID</label>
+    <div class="lookup-row">
+      <input type="text" id="orderIdInput" placeholder="e.g. SD4F8K2">
+      <button onclick="lookupOrder()">Track</button>
+    </div>
+  </div>
+
+  <div id="resultArea"></div>
+</main>
+
+<script>
+const RETURN_WINDOW_DAYS = 7;
+
+// pre-fill from URL if present: track.html?id=SD4F8K2
+const params = new URLSearchParams(window.location.search);
+const prefillId = params.get('id');
+if(prefillId){
+  document.getElementById('orderIdInput').value = prefillId;
+}
+
+function stepState(order, stepKey){
+  const order_map = ["Order Placed","Shipped","Out for Delivery","Delivered"];
+  const effectiveStatus = order.status === "Return Requested" ? "Delivered" : order.status;
+  const currentIdx = order_map.indexOf(effectiveStatus);
+  const stepIdx = order_map.indexOf(stepKey);
+  if(stepIdx < currentIdx) return "done";
+  if(stepIdx === currentIdx) return "current";
+  return "";
+}
+
+function daysBetween(dateStr){
+  const then = new Date(dateStr);
+  const now = new Date();
+  return Math.floor((now - then) / (1000*60*60*24));
+}
+
+function renderOrder(order){
+  const steps = [
+    {key:"Order Placed", label:"Order Placed", sub: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ""},
+    {key:"Shipped", label:"Shipped", sub: order.shippedAt ? new Date(order.shippedAt).toLocaleDateString() : ""},
+    {key:"Out for Delivery", label:"Out for Delivery", sub: order.outForDeliveryAt ? new Date(order.outForDeliveryAt).toLocaleDateString() : ""},
+    {key:"Delivered", label:"Delivered", sub: order.deliveredAt ? new Date(order.deliveredAt).toLocaleDateString() : ""}
+  ];
+
+  const timelineHtml = steps.map(s => {
+    const state = stepState(order, s.key);
+    return `
+      <div class="step ${state}">
+        <div>
+          <div class="step-dot">${state==='done' ? '✓' : ''}</div>
+          <div class="step-line"></div>
+        </div>
+        <div>
+          <div class="step-label">${s.label}</div>
+          ${s.sub ? `<div class="step-sub">${s.sub}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  const itemsHtml = order.items.map(i =>
+    `<div class="item-row"><span>${i.name} (${i.size}) x${i.qty}</span><span>₹${i.price*i.qty}</span></div>`
+  ).join('');
+
+  let returnHtml = '';
+  if(order.status === "Delivered" || order.status === "Return Requested"){
+    const daysSince = order.deliveredAt ? daysBetween(order.deliveredAt) : 0;
+    if(order.status === "Return Requested" || order.returnRequestedAt){
+      returnHtml = `<div class="return-box"><div class="return-done">Return request received — we'll contact you soon.</div></div>`;
+    } else if(daysSince <= RETURN_WINDOW_DAYS){
+      returnHtml = `
+        <div class="return-box">
+          <h3>Not happy with your order?</h3>
+          <p>You can request a return within ${RETURN_WINDOW_DAYS} days of delivery. ${RETURN_WINDOW_DAYS - daysSince} day(s) left.</p>
+          <button class="return-btn" onclick="requestReturn('${order.orderId}')">Request Return</button>
+        </div>`;
+    } else {
+      returnHtml = `<div class="return-box"><div class="return-closed">Return window has closed for this order.</div></div>`;
+    }
+  }
+
+  document.getElementById('resultArea').innerHTML = `
+    <div class="order-card">
+      <div class="order-card-head">
+        <span class="order-id">ORDER ${order.orderId}</span>
+        <span class="order-total">₹${order.total}</span>
+      </div>
+      <div class="order-name">${order.name}</div>
+      <div class="order-addr">${order.address}, ${order.city} - ${order.pincode}</div>
+
+      <div class="timeline">${timelineHtml}</div>
+
+      <div class="items-list">${itemsHtml}</div>
+    </div>
+    ${returnHtml}
+  `;
+}
+
+async function lookupOrder(){
+  const id = document.getElementById('orderIdInput').value.trim().toUpperCase();
+  if(!id){ return; }
+  document.getElementById('resultArea').innerHTML = '<div class="state-msg">Looking up your order...</div>';
+  try{
+    const doc = await db.collection('orders').doc(id).get();
+    if(!doc.exists){
+      document.getElementById('resultArea').innerHTML = '<div class="state-msg">No order found with this ID. Please check and try again.</div>';
+      return;
+    }
+    renderOrder(doc.data());
+  }catch(e){
+    console.error(e);
+    document.getElementById('resultArea').innerHTML = '<div class="state-msg">Could not load order right now. Please try again in a moment.</div>';
+  }
+}
+
+async function requestReturn(orderId){
+  try{
+    await db.collection('orders').doc(orderId).update({
+      returnRequestedAt: new Date().toISOString(),
+      status: "Return Requested"
+    });
+  }catch(e){
+    console.error('Could not update return status:', e);
+  }
+
+  const message = `*Return Request*\n\nOrder ID: ${orderId}\nI would like to request a return for this order.`;
+  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+  lookupOrder();
+}
+
+if(prefillId){ lookupOrder(); }
+</script>
+</body>
+</html>
