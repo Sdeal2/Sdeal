@@ -245,7 +245,9 @@
     ],
     "img": "images/shirt1.jpg",
     "images": [
-      "images/shirt.jpg"
+      "images/shirt1.jpg
+      "images/shirt1.jpg"
+      "images/shirt1.jpg"
     ],
     "tag": "New",
     "swatch": [
