@@ -231,20 +231,42 @@
       "#D48CA6"
     ]
   },
-  {
+{
   "id": 14,
   "name": "Premium Black T-Shirt",
   "category": "T-Shirt",
   "price": 599,
   "mrp": 899,
+
+  "description": "Premium quality cotton T-Shirt. Soft, comfortable and perfect for everyday wear.",
+
   "sizes": ["M", "L", "XL"],
+
+  "colors": [
+    {
+      "name": "Black",
+      "code": "#000000"
+    },
+    {
+      "name": "White",
+      "code": "#FFFFFF"
+    },
+    {
+      "name": "Red",
+      "code": "#FF0000"
+    }
+  ],
+
   "img": "images/A.jpg",
+
   "images": [
     "images/A.jpg",
     "images/B.jpg",
     "images/C.jpg"
   ],
+
   "tag": "New",
+
   "swatch": ["#000000"]
 }
 ]
