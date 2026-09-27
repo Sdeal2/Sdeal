@@ -231,27 +231,20 @@
       "#D48CA6"
     ]
   },
-  {
-    "id": 13,
-    "name": "Premium Casual Shirt",
-    "category": "Shirt",
-    "price": 799,
-    "mrp": 1199,
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "img": "images/shirt1.jpg",
-    "images": [
-      "images/shirt1.jpg" 
-      "images/tshirt12.jpg"
-    ],
-    "tag": "New",
-    "swatch": [
-      "#4A5568",
-      "#7A8CA0"
-    ]
-  }
+{
+  "id": 14,
+  "name": "Premium Black T-Shirt",
+  "category": "T-Shirt",
+  "price": 599,
+  "mrp": 899,
+  "sizes": ["M", "L", "XL"],
+  "img": "images/A.jpg",
+  "images": [
+    "images/A.jpg",
+    "images/B.jpg",
+    "images/C.jpg"
+  ],
+  "tag": "New",
+  "swatch": ["#000000"]
+}
 ]
