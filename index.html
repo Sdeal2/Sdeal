@@ -57,6 +57,15 @@
     letter-spacing:0.02em;
   }
   .logo span{color:var(--marigold);}
+  .header-actions{display:flex; align-items:center; gap:10px;}
+  .icon-btn{
+    width:38px; height:38px;
+    border:1px solid var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink);
+    flex-shrink:0;
+  }
+  .icon-btn:hover{background:var(--ink); color:#fff;}
   .cart-btn{
     position:relative;
     display:flex; align-items:center; gap:8px;
@@ -64,6 +73,22 @@
     border:1px solid var(--ink);
     font-size:14px;
     font-weight:500;
+  }
+  .search-row{
+    max-width:1100px; margin:0 auto;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.22s ease, padding 0.22s ease;
+    padding:0 20px;
+  }
+  .search-row.open{max-height:64px; padding:0 20px 14px;}
+  .search-row input{
+    width:100%; padding:11px 14px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-family:'Work Sans', sans-serif;
+    font-size:14px;
+    color:var(--ink);
   }
   .cart-count{
     background:var(--rose); color:#fff;
@@ -335,9 +360,17 @@
 <header>
   <div class="header-inner">
     <div class="logo">SMART DEAL<span>.</span></div>
-    <button class="cart-btn" onclick="openCart()">
-      Cart <span class="cart-count" id="cartCount">0</span>
-    </button>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleSearch()" aria-label="Search">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="cart-btn" onclick="openCart()">
+        Cart <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </div>
+  <div class="search-row" id="searchRow">
+    <input type="text" id="searchInput" placeholder="Search products..." oninput="handleSearch(this.value)">
   </div>
 </header>
 
@@ -493,6 +526,24 @@ const PRODUCTS = [
 /* ============================================================ */
 
 let currentFilter = "All";
+let searchQuery = "";
+
+function toggleSearch(){
+  const row = document.getElementById('searchRow');
+  row.classList.toggle('open');
+  if(row.classList.contains('open')){
+    document.getElementById('searchInput').focus();
+  } else {
+    document.getElementById('searchInput').value = '';
+    searchQuery = '';
+    renderGrid();
+  }
+}
+
+function handleSearch(value){
+  searchQuery = value.trim().toLowerCase();
+  renderGrid();
+}
 let currentProduct = null;
 let selectedSize = null;
 let modalQty = 1;
@@ -518,12 +569,15 @@ function setFilter(cat){
 
 function renderGrid(){
   const grid = document.getElementById('productGrid');
-  const list = currentFilter === "All" ? PRODUCTS : PRODUCTS.filter(p => p.category === currentFilter);
-  document.getElementById('catalogTitle').textContent = currentFilter === "All" ? "All Products" : currentFilter;
+  let list = currentFilter === "All" ? PRODUCTS : PRODUCTS.filter(p => p.category === currentFilter);
+  if(searchQuery){
+    list = list.filter(p => p.name.toLowerCase().includes(searchQuery) || p.category.toLowerCase().includes(searchQuery));
+  }
+  document.getElementById('catalogTitle').textContent = searchQuery ? `Results for "${searchQuery}"` : (currentFilter === "All" ? "All Products" : currentFilter);
   document.getElementById('catalogCount').textContent = list.length + " items";
 
   if(list.length === 0){
-    grid.innerHTML = '<div class="empty-state">No products in this category yet</div>';
+    grid.innerHTML = '<div class="empty-state">No products found</div>';
     return;
   }
 
@@ -596,7 +650,8 @@ function addToCart(){
       price: currentProduct.price,
       size: selectedSize,
       qty: modalQty,
-      swatch: currentProduct.swatch
+      swatch: currentProduct.swatch,
+      img: currentProduct.img
     });
   }
   updateCartCount();
@@ -620,7 +675,7 @@ function renderCart(){
   container.innerHTML = cart.map((item, idx) => `
     <div class="cart-item">
       <div class="cart-item-img" style="--swatch1:${item.swatch[0]}; --swatch2:${item.swatch[1]}">
-        <span class="initial">${item.name.charAt(0)}</span>
+        ${item.img ? `<img src="${item.img}" style="width:100%;height:100%;object-fit:cover;">` : `<span class="initial">${item.name.charAt(0)}</span>`}
       </div>
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
