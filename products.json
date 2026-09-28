@@ -1,25 +1,5 @@
 [
   {
-    "id": 5,
-    "name": "Slim Fit Denim Jeans",
-    "category": "T-Shirt",
-    "price": 999,
-    "mrp": 1499,
-    "sizes": [
-      "30",
-      "32",
-      "34",
-      "36"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "",
-    "swatch": [
-      "#2C3E5C",
-      "#556B8C"
-    ]
-  },
-  {
     "id": 6,
     "name": "Anarkali Festive Dress",
     "category": "T-Shirt",
