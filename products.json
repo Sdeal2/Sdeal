@@ -1,25 +1,5 @@
 [
   {
-    "id": 10,
-    "name": "Embroidered Kurta Set",
-    "category": "Shirt",
-    "price": 1099,
-    "mrp": 1699,
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "Sale",
-    "swatch": [
-      "#8A5A2E",
-      "#BC8752"
-    ]
-  },
-  {
     "id": 11,
     "name": "Stretch Jeggings",
     "category": "T-Shirt",
