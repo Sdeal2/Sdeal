@@ -231,58 +231,93 @@
       "#D48CA6"
     ]
   },
-{
-  "id": 14,
-  "name": "Premium Black T-Shirt",
-  "category": "T-Shirt",
-  "price": 599,
-  "mrp": 899,
-
-  "description": "Premium quality cotton T-Shirt. Soft, comfortable and perfect for everyday wear.",
-
-  "sizes": ["M", "L", "XL"],
-
-  "colors": [
-    {
-      "name": "Black",
-      "code": "#000000"
-    },
-    {
-      "name": "White",
-      "code": "#FFFFFF"
-    },
-    {
-      "name": "Red",
-      "code": "#FF0000"
-    }
-  ],
-
-  "img": "images/A.jpg",
-
-  "images": [
-    "images/A.jpg",
-    "images/B.jpg",
-    "images/C.jpg"
-  ],
-
-  "tag": "New",
-
-  "swatch": ["#000000"]
-},
-{
-  "id": 14,
-  "name": "SbI",
-  "category": "Shirt",
-  "description": "Dddd",
-  "price": 299,
-  "mrp": 999,
-  "sizes": ["Free Size"],
-  "img": "images/B1.jpg",
-  "images": ["images/B1.jpg"],
-  "colors": [
-
-  ],
-  "tag": "New",
-  "swatch": ["#2E3B5B","#778094"]
-}
+  {
+    "id": 14,
+    "name": "Premium Black T-Shirt",
+    "category": "T-Shirt",
+    "price": 599,
+    "mrp": 899,
+    "description": "Premium quality cotton T-Shirt. Soft, comfortable and perfect for everyday wear.",
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      {
+        "name": "Black",
+        "code": "#000000"
+      },
+      {
+        "name": "White",
+        "code": "#FFFFFF"
+      },
+      {
+        "name": "Red",
+        "code": "#FF0000"
+      }
+    ],
+    "img": "images/A.jpg",
+    "images": [
+      "images/A.jpg",
+      "images/B.jpg",
+      "images/C.jpg"
+    ],
+    "tag": "New",
+    "swatch": [
+      "#000000"
+    ]
+  },
+  {
+    "id": 14,
+    "name": "SbI",
+    "category": "Shirt",
+    "description": "Dddd",
+    "price": 299,
+    "mrp": 999,
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/B1.jpg",
+    "images": [
+      "images/B1.jpg"
+    ],
+    "colors": [],
+    "tag": "New",
+    "swatch": [
+      "#2E3B5B",
+      "#778094"
+    ]
+  },
+  {
+    "id": 15,
+    "name": "shirt black",
+    "category": "Shirt",
+    "description": "Good",
+    "price": 399,
+    "mrp": 999,
+    "sizes": [
+      "S",
+      "M",
+      "L"
+    ],
+    "img": "images/p15-black-1.jpg",
+    "images": [
+      "images/p15-common-1.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Black",
+        "code": "#000000",
+        "images": [
+          "images/p15-black-1.jpg"
+        ]
+      }
+    ],
+    "tag": "",
+    "swatch": [
+      "#000000",
+      "#595959"
+    ]
+  }
 ]
