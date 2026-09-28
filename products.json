@@ -1,25 +1,5 @@
 [
   {
-    "id": 1,
-    "name": "Chikankari Cotton Kurta",
-    "category": "Shirt",
-    "price": 799,
-    "mrp": 1299,
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "New",
-    "swatch": [
-      "#2E3B5B",
-      "#4A5A85"
-    ]
-  },
-  {
     "id": 2,
     "name": "Banarasi Silk Saree",
     "category": "Shirt",
