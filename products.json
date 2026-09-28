@@ -268,5 +268,22 @@
   "tag": "New",
 
   "swatch": ["#000000"]
+}Code preview
+,
+{
+  "id": 14,
+  "name": "SbI",
+  "category": "Shirt",
+  "description": "Dddd",
+  "price": 299,
+  "mrp": 999,
+  "sizes": ["Free Size"],
+  "img": "images/B1.jpg",
+  "images": ["images/B1.jpg"],
+  "colors": [
+
+  ],
+  "tag": "New",
+  "swatch": ["#2E3B5B","#778094"]
 }
 ]
