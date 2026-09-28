@@ -1,24 +1,5 @@
 [
   {
-    "id": 7,
-    "name": "Linen Casual Shirt",
-    "category": "Shirt",
-    "price": 749,
-    "mrp": 1099,
-    "sizes": [
-      "M",
-      "L",
-      "XL"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "",
-    "swatch": [
-      "#4C5A3E",
-      "#7A8C64"
-    ]
-  },
-  {
     "id": 8,
     "name": "Georgette Party Saree",
     "category": "Shirt",
