@@ -319,5 +319,35 @@
       "#000000",
       "#595959"
     ]
+  },
+  {
+    "id": 16,
+    "name": "AIRPOD PRO - A True Wireless Bluetooth Headphone",
+    "category": "Electric",
+    "description": "Name: AIRPOD PRO - A True Wireless Bluetooth Headphone and Earphone\n\nBattery Charge Time: 1 Hour\nBIS/ISI Certification Number: 0\nBluetooth Range: 10m\nBluetooth Version: 5.2\nCharging Type: Type C\nColor: Black\nCompatibility: All Smartphones\nMaterial: ABS Plastic\nMic: Yes\nNet Quantity (N): 1\nNoise Cancelling: Yes\nPlay Time: 10 Hours\nType: TWS\nWarranty Period: NO WARRANTY\nWarranty Type: Carry In\nCountry of Origin: India",
+    "price": 299,
+    "mrp": 999,
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p16-common-1.jpg",
+    "images": [
+      "images/p16-common-1.jpg",
+      "images/p16-common-2.jpg",
+      "images/p16-common-3.jpg",
+      "images/p16-common-4.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Black",
+        "code": "#000000",
+        "images": []
+      }
+    ],
+    "tag": "",
+    "swatch": [
+      "#000000",
+      "#595959"
+    ]
   }
 ]
