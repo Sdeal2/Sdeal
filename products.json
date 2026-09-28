@@ -1,25 +1,5 @@
 [
   {
-    "id": 9,
-    "name": "Denim Jacket",
-    "category": "Shirt",
-    "price": 1199,
-    "mrp": 1699,
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "",
-    "swatch": [
-      "#2A3A52",
-      "#4E6284"
-    ]
-  },
-  {
     "id": 10,
     "name": "Embroidered Kurta Set",
     "category": "Shirt",
