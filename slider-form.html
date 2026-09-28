@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMART DEAL – Home Slider</title>
+<style>
+  :root{
+    --ivory:#FBF7EE; --ink:#1F2340; --indigo:#2E3B5B; --marigold:#E2A33D;
+    --line:#DDD5C4; --card:#FFFFFF; --ok:#2F7D4F; --bad:#B23A48;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ivory);color:var(--ink);
+    font-family:"Work Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+  header{background:var(--indigo);color:#fff;padding:18px 16px}
+  header h1{margin:0;font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:600}
+  header p{margin:4px 0 0;font-size:14px;opacity:.85}
+  main{max-width:640px;margin:0 auto;padding:16px 16px 40px}
+  label{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
+  .hint{font-weight:400;font-size:13px;color:#6b6a63}
+  input[type=text],input[type=password]{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:8px;font:inherit;background:var(--card);color:var(--ink)}
+  input[type=file]{width:100%;font:inherit;font-size:14px;margin:6px 0}
+  input:focus,button:focus-visible,summary:focus-visible{outline:3px solid var(--marigold);outline-offset:1px}
+  .slide{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+  .slide h2{margin:0 0 8px;font-family:Fraunces,Georgia,serif;font-size:17px}
+  .prev{width:100%;aspect-ratio:16/7;background:#e9e4d6 center/cover no-repeat;border-radius:8px;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:#6b6a63;font-size:14px;margin-bottom:8px}
+  .f{margin-bottom:10px}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .tools button{flex:1;min-width:80px;padding:10px;border:1.5px solid var(--line);background:#fff;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}
+  .tools .rm{color:var(--bad)}
+  .sub{font-size:13px;color:#6b6a63}
+  .btn{width:100%;padding:14px;border:0;border-radius:10px;font:inherit;font-weight:600;font-size:16px;cursor:pointer;margin-top:10px}
+  .btn:disabled{opacity:.55}
+  .primary{background:var(--marigold);color:var(--ink)}
+  .ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+  .status{margin-top:12px;padding:12px;border-radius:10px;background:#fff;border:1.5px solid var(--line);font-size:15px;display:none}
+  .status.show{display:block}.status.good{border-color:var(--ok);color:var(--ok)}.status.fail{border-color:var(--bad);color:var(--bad)}
+  details{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px;margin-bottom:16px}
+  summary{font-weight:600;cursor:pointer}
+  a{color:var(--indigo)}
+</style>
+</head>
+<body>
+<header>
+  <h1>SMART DEAL – Home Slider</h1>
+  <p>Change the photos and text of the slider on your home page.</p>
+</header>
+<main>
+  <details id="setup">
+    <summary id="setupTitle">Connect to GitHub</summary>
+    <p class="sub">If you already saved your token in the product form on this phone, it is connected. Otherwise paste it here once.</p>
+    <input type="password" id="token" placeholder="github_pat_..." autocomplete="off">
+    <button class="btn primary" id="saveToken" type="button">Save token</button>
+  </details>
+
+  <div id="slides"></div>
+  <button class="btn ghost" id="addSlide" type="button">+ Add another slide</button>
+  <button class="btn primary" id="save" type="button">Save slider</button>
+  <div class="status" id="status" role="status"></div>
+  <p class="sub">Tip: wide (landscape) photos look best. Changes appear on your store in 1 to 2 minutes.</p>
+  <p class="sub"><a href="product-form.html">Go to Add Product form</a></p>
+</main>
+
+<script>
+const OWNER = "Sdeal2", REPO = "Sdeal", BRANCH = "main", FILE = "slider.json";
+const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/`;
+const $ = id => document.getElementById(id);
+let slides = [];          // {data:{...}, file:File|null}
+let pending = Promise.resolve();
+let busy = false;
+
+const getToken = () => localStorage.getItem("sd_token") || "";
+const toB64Utf8 = str => { const b = new TextEncoder().encode(str); let s = ""; b.forEach(x => s += String.fromCharCode(x)); return btoa(s); };
+const fromB64Utf8 = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g,"")), c => c.charCodeAt(0)));
+function setStatus(msg, kind){ const s = $("status"); s.textContent = msg; s.className = "status show" + (kind ? " "+kind : ""); }
+
+async function gh(path, method, body){
+  const url = API + path + (method === "PUT" ? "" : `?ref=${BRANCH}&t=${Date.now()}`);
+  const res = await fetch(url, {
+    method,
+    headers: {"Authorization":"Bearer "+getToken(),"Accept":"application/vnd.github+json", ...(body ? {"Content-Type":"application/json"} : {})},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if(res.status === 401) throw new Error("GitHub token is not valid or has expired. Create a new token and save it again.");
+  if(res.status === 403) throw new Error("GitHub says access is not allowed. Check the token has Contents: Read and write for the Sdeal repository.");
+  return res;
+}
+async function readSlider(){
+  const res = await gh(FILE, "GET");
+  if(!res.ok) throw new Error("Could not read slider.json from GitHub (" + res.status + ").");
+  const j = await res.json();
+  return {list: JSON.parse(fromB64Utf8(j.content)), sha: j.sha};
+}
+
+/* ----- photos ----- */
+function drawToJpeg(src, w, h){
+  const scale = Math.min(1, 1600 / Math.max(w, h));
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(w*scale)); c.height = Math.max(1, Math.round(h*scale));
+  const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height); ctx.drawImage(src,0,0,c.width,c.height);
+  return c.toDataURL("image/jpeg", 0.85).split(",")[1];
+}
+function fileToDataURL(f){
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result);
+    r.onerror = () => rej(new Error("Could not read photo " + f.name + ". Choose it again from Files / Browse.")); r.readAsDataURL(f); });
+}
+async function compress(file){
+  try{ if(window.createImageBitmap){ const b = await createImageBitmap(file); const o = drawToJpeg(b,b.width,b.height); if(b.close) b.close(); return o; } }catch(_){}
+  const du = await fileToDataURL(file);
+  try{
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = du; });
+    return drawToJpeg(img, img.naturalWidth || img.width, img.naturalHeight || img.height);
+  }catch(_){}
+  if(file.size <= 8*1024*1024 && /^image\/(jpeg|png|webp)$/.test(file.type)) return du.split(",")[1];
+  throw new Error("Could not open photo " + file.name + ". Please choose a different photo.");
+}
+async function putFile(path, b64, message){
+  let sha; const cur = await gh(path, "GET"); if(cur.ok) sha = (await cur.json()).sha;
+  return gh(path, "PUT", {message, content: b64, branch: BRANCH, ...(sha ? {sha} : {})});
+}
+
+/* ----- UI ----- */
+function render(){
+  const box = $("slides"); box.innerHTML = "";
+  slides.forEach((sl, i) => {
+    const d = document.createElement("div"); d.className = "slide";
+    d.innerHTML = `
+      <h2>Slide ${i+1}</h2>
+      <div class="prev"></div>
+      <input type="file" accept="image/*">
+      <div class="sub pst"></div>
+      <div class="f"><label>Small line above title <span class="hint">(optional)</span></label><input type="text" data-k="eyebrow"></div>
+      <div class="f"><label>Title</label><input type="text" data-k="title"></div>
+      <div class="f"><label>Text</label><input type="text" data-k="text"></div>
+      <div class="f"><label>Button text</label><input type="text" data-k="button"></div>
+      <div class="tools">
+        <button type="button" class="up">Move up</button>
+        <button type="button" class="down">Move down</button>
+        <button type="button" class="rm">Remove</button>
+      </div>`;
+    const prev = d.querySelector(".prev");
+    const showPrev = () => {
+      const url = sl.file ? sl.previewUrl : (sl.data.image ? sl.data.image + "?v=" + (sl.v || 0) : "");
+      if(url){ prev.style.backgroundImage = `url("${url}")`; prev.textContent = ""; }
+      else { prev.style.backgroundImage = ""; prev.textContent = "No photo yet"; }
+    };
+    showPrev();
+    d.querySelectorAll("input[data-k]").forEach(inp => {
+      inp.value = sl.data[inp.dataset.k] || "";
+      inp.addEventListener("input", () => { sl.data[inp.dataset.k] = inp.value; });
+    });
+    const fi = d.querySelector('input[type=file]'), pst = d.querySelector(".pst");
+    fi.addEventListener("change", () => {
+      const f = fi.files[0]; if(!f){ return; }
+      pst.style.color = ""; pst.textContent = "Reading photo…";
+      pending = pending.then(async () => {
+        try{
+          const buf = await f.arrayBuffer();
+          sl.file = new File([buf], f.name, {type: f.type || "image/jpeg"});
+          if(sl.previewUrl) URL.revokeObjectURL(sl.previewUrl);
+          sl.previewUrl = URL.createObjectURL(sl.file);
+          pst.style.color = "var(--ok)"; pst.textContent = "New photo ready";
+          showPrev();
+        }catch(_){
+          pst.style.color = "var(--bad)";
+          pst.textContent = "Could not read this photo. Choose it from Files / Browse (Downloads or Gallery folder), not Photos or Recent.";
+        }
+      });
+    });
+    d.querySelector(".up").onclick = () => { if(i > 0){ [slides[i-1], slides[i]] = [slides[i], slides[i-1]]; render(); } };
+    d.querySelector(".down").onclick = () => { if(i < slides.length-1){ [slides[i+1], slides[i]] = [slides[i], slides[i+1]]; render(); } };
+    d.querySelector(".rm").onclick = () => { if(confirm("Remove slide " + (i+1) + "?")){ slides.splice(i,1); render(); } };
+    box.appendChild(d);
+  });
+}
+
+$("addSlide").onclick = () => { slides.push({data:{image:"", eyebrow:"", title:"", text:"", button:"Shop Now"}, file:null}); render(); window.scrollTo(0, document.body.scrollHeight); };
+
+async function save(){
+  if(busy) return;
+  await pending;
+  if(!getToken()){ $("setup").open = true; setStatus("Save your GitHub token first.", "fail"); return; }
+  if(!slides.length){ setStatus("Add at least one slide.", "fail"); return; }
+  busy = true; $("save").disabled = true;
+  try{
+    const out = [];
+    for(let i = 0; i < slides.length; i++){
+      const sl = slides[i], data = {...sl.data};
+      if(sl.file){
+        setStatus(`Uploading photo ${i+1} of ${slides.length}…`);
+        const path = `images/slider-${Date.now()}-${i+1}.jpg`;
+        const r = await putFile(path, await compress(sl.file), "Add slider photo " + path);
+        if(!r.ok) throw new Error("Photo upload failed (" + r.status + "). Please try again.");
+        data.image = path;
+      }
+      out.push(data);
+    }
+    setStatus("Saving slider…");
+    let saved = false;
+    for(let a = 0; a < 3 && !saved; a++){
+      const cur = await readSlider();
+      const res = await gh(FILE, "PUT", {message: "Update home slider", content: toB64Utf8(JSON.stringify(out, null, 2) + "\n"), branch: BRANCH, sha: cur.sha});
+      if(res.ok) saved = true; else if(res.status !== 409) throw new Error("Could not save slider (" + res.status + ").");
+    }
+    if(!saved) throw new Error("Store was busy. Please tap Save slider again.");
+    slides = out.map(d => ({data:d, file:null, v:Date.now()}));
+    render();
+    setStatus("Done! Your home slider is updated. It will change on the store in 1 to 2 minutes.", "good");
+  }catch(e){ setStatus(e.message || String(e), "fail"); }
+  finally{ busy = false; $("save").disabled = false; }
+}
+$("save").onclick = save;
+
+/* ----- token + start ----- */
+function tokenState(){ const has = !!getToken(); $("setupTitle").textContent = has ? "GitHub connected on this phone" : "Connect to GitHub"; $("setup").open = !has; }
+async function load(){
+  try{
+    setStatus("Loading your slider…");
+    const d = await readSlider();
+    slides = d.list.map(x => ({data:{...x}, file:null}));
+    render(); $("status").className = "status";
+  }catch(e){ setStatus(e.message, "fail"); }
+}
+$("saveToken").onclick = () => {
+  const t = $("token").value.trim(); if(!t) return;
+  localStorage.setItem("sd_token", t); $("token").value = ""; tokenState(); load();
+};
+tokenState();
+if(getToken()) load(); else setStatus("Save your GitHub token above to start.");
+</script>
+</body>
+</html>
