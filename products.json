@@ -1,24 +1,5 @@
 [
   {
-    "id": 6,
-    "name": "Anarkali Festive Dress",
-    "category": "T-Shirt",
-    "price": 1499,
-    "mrp": 2199,
-    "sizes": [
-      "S",
-      "M",
-      "L"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "New",
-    "swatch": [
-      "#A83E52",
-      "#C97187"
-    ]
-  },
-  {
     "id": 7,
     "name": "Linen Casual Shirt",
     "category": "Shirt",
