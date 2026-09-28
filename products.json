@@ -1,25 +1,5 @@
 [
   {
-    "id": 4,
-    "name": "Formal Cotton Shirt",
-    "category": "Shirt",
-    "price": 699,
-    "mrp": 999,
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "",
-    "swatch": [
-      "#3D4A63",
-      "#6B7A9C"
-    ]
-  },
-  {
     "id": 5,
     "name": "Slim Fit Denim Jeans",
     "category": "T-Shirt",
