@@ -1,22 +1,5 @@
 [
   {
-    "id": 2,
-    "name": "Banarasi Silk Saree",
-    "category": "Shirt",
-    "price": 1899,
-    "mrp": 2999,
-    "sizes": [
-      "Free Size"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "Sale",
-    "swatch": [
-      "#B5495B",
-      "#D97E8E"
-    ]
-  },
-  {
     "id": 3,
     "name": "Printed Straight Kurta",
     "category": "Shirt",
