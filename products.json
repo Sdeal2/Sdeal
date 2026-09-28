@@ -1,24 +1,5 @@
 [
   {
-    "id": 12,
-    "name": "Floral Maxi Dress",
-    "category": "T-Shirt",
-    "price": 1099,
-    "mrp": 1599,
-    "sizes": [
-      "S",
-      "M",
-      "L"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "",
-    "swatch": [
-      "#B0567A",
-      "#D48CA6"
-    ]
-  },
-  {
     "id": 14,
     "name": "Premium Black T-Shirt",
     "category": "T-Shirt",
