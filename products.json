@@ -1,26 +1,5 @@
 [
   {
-    "id": 3,
-    "name": "Printed Straight Kurta",
-    "category": "Shirt",
-    "price": 599,
-    "mrp": 899,
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "",
-    "swatch": [
-      "#E2A33D",
-      "#F0C57A"
-    ]
-  },
-  {
     "id": 4,
     "name": "Formal Cotton Shirt",
     "category": "Shirt",
