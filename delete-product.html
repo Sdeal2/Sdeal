@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMART DEAL – Delete Products</title>
+<style>
+  :root{
+    --ivory:#FBF7EE; --ink:#1F2340; --indigo:#2E3B5B; --marigold:#E2A33D;
+    --line:#DDD5C4; --card:#FFFFFF; --ok:#2F7D4F; --bad:#B23A48;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ivory);color:var(--ink);
+    font-family:"Work Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+  header{background:var(--indigo);color:#fff;padding:18px 16px}
+  header h1{margin:0;font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:600}
+  header p{margin:4px 0 0;font-size:14px;opacity:.85}
+  main{max-width:640px;margin:0 auto;padding:16px 16px 40px}
+  input[type=text],input[type=password],input[type=search]{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:8px;font:inherit;background:var(--card);color:var(--ink)}
+  input:focus,button:focus-visible,summary:focus-visible{outline:3px solid var(--marigold);outline-offset:1px}
+  details{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px;margin-bottom:16px}
+  summary{font-weight:600;cursor:pointer}
+  .sub{font-size:13px;color:#6b6a63}
+  .btn{width:100%;padding:14px;border:0;border-radius:10px;font:inherit;font-weight:600;font-size:16px;cursor:pointer;margin-top:10px}
+  .primary{background:var(--marigold);color:var(--ink)}
+  .status{margin:12px 0;padding:12px;border-radius:10px;background:#fff;border:1.5px solid var(--line);font-size:15px;display:none}
+  .status.show{display:block}.status.good{border-color:var(--ok);color:var(--ok)}.status.fail{border-color:var(--bad);color:var(--bad)}
+  .status button{margin-left:8px;padding:6px 12px;border:1.5px solid currentColor;background:transparent;color:inherit;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+  .count{margin:12px 0 8px;font-size:14px;color:#6b6a63}
+  .item{display:flex;gap:12px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
+  .th{width:64px;height:64px;flex:none;border-radius:8px;background:#e9e4d6 center/cover no-repeat;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:#6b6a63}
+  .meta{flex:1;min-width:0}
+  .meta b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .meta span{font-size:13px;color:#6b6a63}
+  .del{flex:none;padding:10px 14px;border:0;border-radius:8px;background:var(--bad);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  .del:disabled{opacity:.5}
+  a{color:var(--indigo)}
+</style>
+</head>
+<body>
+<header>
+  <h1>SMART DEAL – Delete Products</h1>
+  <p>Tap Delete on any product to remove it from your store.</p>
+</header>
+<main>
+  <details id="setup">
+    <summary id="setupTitle">Connect to GitHub</summary>
+    <p class="sub">If you already saved your token on this phone, it is connected. Otherwise paste it here once.</p>
+    <input type="password" id="token" placeholder="github_pat_..." autocomplete="off">
+    <button class="btn primary" id="saveToken" type="button">Save token</button>
+  </details>
+
+  <input type="search" id="q" placeholder="Search by product name, category or ID" autocomplete="off">
+  <div class="status" id="status" role="status"></div>
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+  <p class="sub">Photos stay in your images folder after a product is deleted. That is safe and does not affect the store.</p>
+  <p class="sub"><a href="product-form.html">Add Product</a> · <a href="slider-form.html">Home Slider</a></p>
+</main>
+
+<script>
+const OWNER = "Sdeal2", REPO = "Sdeal", BRANCH = "main", FILE = "products.json";
+const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/`;
+const $ = id => document.getElementById(id);
+let products = [];
+let lastDeleted = null;   // {product, index}
+let busy = false;
+
+const getToken = () => localStorage.getItem("sd_token") || "";
+const toB64Utf8 = str => { const b = new TextEncoder().encode(str); let s = ""; b.forEach(x => s += String.fromCharCode(x)); return btoa(s); };
+const fromB64Utf8 = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g,"")), c => c.charCodeAt(0)));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+function setStatus(msg, kind, undo){
+  const s = $("status"); s.textContent = msg; s.className = "status show" + (kind ? " "+kind : "");
+  if(undo){ const b = document.createElement("button"); b.textContent = "Undo"; b.onclick = undoDelete; s.appendChild(b); }
+}
+
+async function gh(path, method, body){
+  const url = API + path + (method === "PUT" ? "" : `?ref=${BRANCH}&t=${Date.now()}`);
+  const res = await fetch(url, {
+    method,
+    headers: {"Authorization":"Bearer "+getToken(),"Accept":"application/vnd.github+json", ...(body ? {"Content-Type":"application/json"} : {})},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if(res.status === 401) throw new Error("GitHub token is not valid or has expired. Create a new token and save it again.");
+  if(res.status === 403) throw new Error("GitHub says access is not allowed. Check the token has Contents: Read and write for the Sdeal repository.");
+  return res;
+}
+async function readProducts(){
+  const res = await gh(FILE, "GET");
+  if(!res.ok) throw new Error("Could not read products.json from GitHub (" + res.status + ").");
+  const j = await res.json();
+  return {list: JSON.parse(fromB64Utf8(j.content)), sha: j.sha};
+}
+/* read latest list, let `change` edit it, save; retry if someone saved in between */
+async function saveChange(message, change){
+  for(let a = 0; a < 3; a++){
+    const cur = await readProducts();
+    const next = change(cur.list);
+    if(next === null) return null;
+    const res = await gh(FILE, "PUT", {message, content: toB64Utf8(JSON.stringify(next, null, 2) + "\n"), branch: BRANCH, sha: cur.sha});
+    if(res.ok) return next;
+    if(res.status !== 409) throw new Error("Could not save (" + res.status + "). Please try again.");
+  }
+  throw new Error("Store was busy. Please try again.");
+}
+
+function render(){
+  const q = $("q").value.trim().toLowerCase();
+  const shown = products.filter(p => !q || String(p.name).toLowerCase().includes(q) || String(p.category).toLowerCase().includes(q) || String(p.id) === q);
+  $("count").textContent = shown.length + " of " + products.length + " products";
+  const box = $("list"); box.innerHTML = "";
+  shown.forEach(p => {
+    const d = document.createElement("div"); d.className = "item";
+    d.innerHTML = `<div class="th">${p.img ? "" : "No photo"}</div>
+      <div class="meta"><b>${esc(p.name)}</b><span>ID ${esc(p.id)} · ${esc(p.category)} · ₹${esc(p.price)}</span></div>
+      <button class="del" type="button">Delete</button>`;
+    if(p.img) d.querySelector(".th").style.backgroundImage = `url("${String(p.img).replace(/"/g,"%22")}")`;
+    d.querySelector(".del").onclick = () => deleteProduct(p);
+    box.appendChild(d);
+  });
+}
+
+async function deleteProduct(p){
+  if(busy) return;
+  if(!confirm(`Delete "${p.name}" (ID ${p.id}) from your store?`)) return;
+  busy = true; setStatus("Deleting…");
+  try{
+    let removed = null, idx = -1;
+    const next = await saveChange(`Delete product ${p.id}: ${p.name}`, list => {
+      idx = list.findIndex(x => x.id === p.id);
+      if(idx < 0) return null;
+      removed = list[idx];
+      return list.filter(x => x.id !== p.id);
+    });
+    if(next === null){ setStatus("This product was already removed.", "fail"); await load(); return; }
+    products = next; lastDeleted = {product: removed, index: idx};
+    render();
+    setStatus(`Deleted "${p.name}". It will disappear from the store in 1 to 2 minutes.`, "good", true);
+  }catch(e){ setStatus(e.message || String(e), "fail"); }
+  finally{ busy = false; }
+}
+
+async function undoDelete(){
+  if(busy || !lastDeleted) return;
+  busy = true; setStatus("Restoring…");
+  try{
+    const {product, index} = lastDeleted;
+    const next = await saveChange(`Restore product ${product.id}: ${product.name}`, list => {
+      if(list.some(x => x.id === product.id)) return null;
+      const copy = list.slice(); copy.splice(Math.min(index, copy.length), 0, product); return copy;
+    });
+    lastDeleted = null;
+    if(next) products = next; else await load();
+    render();
+    setStatus(`Restored "${product.name}".`, "good");
+  }catch(e){ setStatus(e.message || String(e), "fail"); }
+  finally{ busy = false; }
+}
+
+async function load(){
+  try{
+    setStatus("Loading your products…");
+    products = (await readProducts()).list;
+    $("status").className = "status"; render();
+  }catch(e){ setStatus(e.message, "fail"); }
+}
+$("q").addEventListener("input", render);
+
+function tokenState(){ const has = !!getToken(); $("setupTitle").textContent = has ? "GitHub connected on this phone" : "Connect to GitHub"; $("setup").open = !has; }
+$("saveToken").onclick = () => {
+  const t = $("token").value.trim(); if(!t) return;
+  localStorage.setItem("sd_token", t); $("token").value = ""; tokenState(); load();
+};
+tokenState();
+if(getToken()) load(); else setStatus("Save your GitHub token above to start.");
+</script>
+</body>
+</html>
