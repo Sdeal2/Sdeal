@@ -1,37 +1,37 @@
 [
   {
-    "title": "Every outfit tells a story",
+    "title": "Trending T-Shirts",
     "eyebrow": "Smart Deal",
-    "text": "Handpicked products, delivered to your door — no advance payment.",
-    "button": "Shop Collection",
-    "image": ""
-  },
-  {
-    "title": "Your Banner Goes Here",
-    "eyebrow": "Slide 2",
-    "text": "Add your second banner text here.",
+    "text": "Stylish T-Shirts at Amazing Prices",
     "button": "Shop Now",
-    "image": ""
+    "image": "images/Slider A.jpg"
   },
   {
-    "title": "New Collection",
-    "eyebrow": "Slide 3",
-    "text": "Add your third banner here.",
-    "button": "Explore",
-    "image": ""
+    "title": "Latest Shirts",
+    "eyebrow": "New Collection",
+    "text": "Premium Shirts for Every Occasion",
+    "button": "Shop Now",
+    "image": "images/Slider B.jpg"
   },
   {
-    "title": "Special Offer",
-    "eyebrow": "Slide 4",
-    "text": "Add your fourth banner here.",
-    "button": "View Products",
-    "image": ""
+    "title": "Premium Shoes",
+    "eyebrow": "Step Into Style",
+    "text": "Comfortable & Stylish Shoes",
+    "button": "Shop Now",
+    "image": "images/Slider C.jpg"
   },
   {
-    "title": "Shop Smart With Smart Deal",
-    "eyebrow": "Slide 5",
-    "text": "Add your fifth banner here.",
-    "button": "Start Shopping",
-    "image": ""
+    "title": "Bluetooth Headphones",
+    "eyebrow": "Audio Collection",
+    "text": "Clear Sound & Long Battery Life",
+    "button": "Shop Now",
+    "image": "images/Slider D.jpg"
+  },
+  {
+    "title": "Diwali Lighting",
+    "eyebrow": "Festival Special",
+    "text": "Light Up Your Home This Diwali",
+    "button": "Shop Now",
+    "image": "images/Slider F.jpg"
   }
 ]
