@@ -268,5 +268,29 @@
   "tag": "New",
 
   "swatch": ["#000000"]
+},
+  {
+  "id": 15,
+  "name": "Airpod Pro True Wireless Bluetooth",
+  "category": "Electric",
+  "price": 299,
+  "mrp": 999,
+  "description": "Airpod Pro True Wireless Bluetooth Earphones with 3 Hours of Playtime & Compatible for all Smartphones (BLACK)  BIS/ISI Certification Number: 0 Color: Black Material: ABS Plastic Net Quantity (N): 1 Type: TWS Country of Origin: India",
+  "tag": "New",
+  "images": [
+    "B1",
+    "B2",
+    "B3",
+    "B4"
+  ],
+  "colors": [
+    {
+      "name": "#000000",
+      "code": ""
+    }
+  ],
+  "sizes": [
+    "Free"
+  ]
 }
 ]
