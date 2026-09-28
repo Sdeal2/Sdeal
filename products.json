@@ -1,22 +1,5 @@
 [
   {
-    "id": 8,
-    "name": "Georgette Party Saree",
-    "category": "Shirt",
-    "price": 1299,
-    "mrp": 1899,
-    "sizes": [
-      "Free Size"
-    ],
-    "img": "",
-    "images": [],
-    "tag": "",
-    "swatch": [
-      "#6B3F5C",
-      "#93638A"
-    ]
-  },
-  {
     "id": 9,
     "name": "Denim Jacket",
     "category": "Shirt",
