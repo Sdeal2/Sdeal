@@ -65,37 +65,5 @@
       "#000000",
       "#595959"
     ]
-  },
-  {
-    "id": 17,
-    "name": "MY LIFE LINE M FULL BLACK",
-    "category": "Shirt",
-    "description": "Name: MY LIFE LINE M FULL BLACK\nFabric: Polyester\nSleeve Length: Long Sleeves\nPattern: Printed\nNet Quantity (N): 1\nSizes:\nS (Chest Size: 36 in, Length Size: 27 in) \nM (Chest Size: 38 in, Length Size: 28 in) \nL (Chest Size: 40 in, Length Size: 29 in) \nXL (Chest Size: 42 in, Length Size: 30 in) \n\nCountry of Origin: India",
-    "price": 149,
-    "mrp": 399,
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "img": "images/p17-black-1.jpg",
-    "images": [
-      "images/p17-common-1.jpg"
-    ],
-    "colors": [
-      {
-        "name": "Black",
-        "code": "#000000",
-        "images": [
-          "images/p17-black-1.jpg"
-        ]
-      }
-    ],
-    "tag": "New",
-    "swatch": [
-      "#000000",
-      "#595959"
-    ]
   }
 ]
