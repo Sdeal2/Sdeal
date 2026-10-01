@@ -65,5 +65,36 @@
       "#000000",
       "#595959"
     ]
+  },
+  {
+    "id": 17,
+    "name": "Chutki _Comfy Korean Love Design Printed Round Neck Tshirt for men",
+    "category": "t-shirt",
+    "description": "Name: Chutki _Comfy Korean Love Design Printed Round Neck Tshirt for men\nFabric: Polyester\nSleeve Length: Long Sleeves\nPattern: Printed\nNet Quantity (N): 1\nSizes:\nS (Chest Size: 36 in, Length Size: 26 in) \nM (Chest Size: 38 in, Length Size: 27 in) \nL (Chest Size: 40 in, Length Size: 28 in) \nXL (Chest Size: 42 in, Length Size: 29 in) \nXXL (Chest Size: 44 in, Length Size: 30 in) \n\nBlack Printed Round Neck Full Sleev Polyester Tshirts\nCountry of Origin: India",
+    "price": 150,
+    "mrp": 399,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "img": "images/p17-common-1.jpg",
+    "images": [
+      "images/p17-common-1.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Black",
+        "code": "#000000",
+        "images": []
+      }
+    ],
+    "tag": "",
+    "swatch": [
+      "#000000",
+      "#595959"
+    ]
   }
 ]
