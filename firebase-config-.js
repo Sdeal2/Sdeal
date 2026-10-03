@@ -27,7 +27,7 @@ const db = firebase.firestore();
 
 /* ============================================================
    Put your WhatsApp number here (with country code, no + or spaces)
-   Example: if your Indian number is 98765 43210, write: 919876543210
+   Example: if your Indian number is 98001 86022, write: 919800186022
    Used by index.html (orders) and track.html (return requests).
    ============================================================ */
 const WHATSAPP_NUMBER = "919800186022";
