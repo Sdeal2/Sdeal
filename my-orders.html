@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Orders – SMART DEAL</title>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --ivory:#FBF7EE; --ink:#1F2340; --ink-soft:#6b6a63; --indigo:#2E3B5B;
+    --marigold:#E2A33D; --rose:#B5495B; --line:#DDD5C4; --ok:#2F7D4F;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ivory);color:var(--ink);
+    font-family:'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+  h1,.logo{font-family:'Fraunces', Georgia, serif;}
+  header{position:sticky;top:0;z-index:10;background:var(--ivory);border-bottom:1px solid var(--line);padding:14px 16px;}
+  .back-row{display:flex;align-items:center;gap:10px;max-width:700px;margin:0 auto;}
+  .back-btn{width:38px;height:38px;flex-shrink:0;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;color:var(--ink);background:#fff;}
+  .logo{font-size:20px;font-weight:700;letter-spacing:.02em;}
+  .logo span{color:var(--marigold);}
+  main{max-width:700px;margin:0 auto;padding:18px 16px 40px;}
+  h2{font-size:17px;margin:0 0 6px;}
+  p.sub{font-size:13px;color:var(--ink-soft);margin:0 0 14px;}
+  .row{display:flex;gap:8px;}
+  input[type=tel]{flex:1;padding:12px 14px;border:1px solid var(--line);background:#fff;font:inherit;font-size:15px;color:var(--ink);}
+  input[type=tel]:focus{outline:2px solid var(--marigold);outline-offset:-1px;}
+  button.go{padding:0 20px;border:0;background:var(--indigo);color:#fff;font:inherit;font-weight:600;font-size:15px;cursor:pointer;}
+  button.go:disabled{opacity:.5;}
+  .msg{margin-top:14px;font-size:14px;color:var(--ink-soft);}
+  .msg.fail{color:var(--rose);}
+  .order{background:#fff;border:1px solid var(--line);padding:14px;margin-top:14px;cursor:pointer;}
+  .order-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px;}
+  .order-id{font-weight:700;font-size:15px;}
+  .order-date{font-size:12px;color:var(--ink-soft);}
+  .order-status{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border:1px solid var(--ok);color:var(--ok);margin-bottom:8px;}
+  .order-items{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:6px;}
+  .order-total{font-weight:700;font-size:15px;}
+  .track-link{font-size:13px;color:var(--indigo);text-decoration:underline;}
+</style>
+</head>
+<body>
+<header>
+  <div class="back-row">
+    <a class="back-btn" href="index.html" aria-label="Back to home">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <div class="logo">SMART DEAL<span>.</span></div>
+  </div>
+</header>
+
+<main>
+  <h2>My Orders</h2>
+  <p class="sub">Enter the mobile number you used while ordering to see all your past orders.</p>
+  <div class="row">
+    <input type="tel" id="phone" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" autofocus>
+    <button class="go" id="go" type="button">Show</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <div id="list"></div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+function fmtDate(iso){
+  try{ return new Date(iso).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}); }
+  catch(_){ return ''; }
+}
+function setMsg(text, fail){ $("msg").textContent = text || ''; $("msg").className = 'msg' + (fail ? ' fail' : ''); }
+
+async function search(){
+  const raw = $("phone").value.trim();
+  const digits = raw.replace(/\D/g, '').slice(-10);
+  if(digits.length !== 10){ setMsg('Please enter a valid 10-digit mobile number.', true); return; }
+  if(typeof db === 'undefined'){ setMsg('Order lookup is not set up yet. Please contact the store.', true); return; }
+
+  $("go").disabled = true; $("list").innerHTML = ''; setMsg('Looking up your orders…');
+  try{
+    const snap = await db.collection('orders').where('phone', '==', digits).get();
+    let orders = snap.docs.map(d => d.data());
+    orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    if(!orders.length){ setMsg('No orders found for this number yet.'); return; }
+    setMsg(orders.length + ' order' + (orders.length === 1 ? '' : 's') + ' found.');
+    $("list").innerHTML = orders.map(o => {
+      const items = (o.items || []).map(i => `${i.name} (x${i.qty})`).join(', ');
+      return `<div class="order" onclick="location.href='track.html?id=${encodeURIComponent(o.orderId)}'">
+        <div class="order-top"><span class="order-id">${o.orderId}</span><span class="order-date">${fmtDate(o.createdAt)}</span></div>
+        <div class="order-status">${o.status || 'Order Placed'}</div>
+        <div class="order-items">${items}</div>
+        <div class="order-total">₹${o.total ?? ''} <span class="track-link">Track order →</span></div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.error('Order lookup failed:', e);
+    setMsg('Could not load your orders right now. Please try again in a moment.', true);
+  }finally{
+    $("go").disabled = false;
+  }
+}
+$("go").onclick = search;
+$("phone").addEventListener('keydown', e => { if(e.key === 'Enter') search(); });
+</script>
+</body>
+</html>
