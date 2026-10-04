@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Smart Deal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+  :root{
+    --bg:#FAF7F1; --ink:#201C18; --ink-soft:#5C564C;
+    --indigo:#2E3B5B; --indigo-dark:#212A42;
+    --marigold:#E2A33D; --rose:#B5495B; --line:#E4DCCB;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:'Work Sans',sans-serif; line-height:1.5;}
+  h1,h2,h3{font-family:'Fraunces',serif; font-weight:700;}
+  button{font-family:inherit; cursor:pointer; border:none;}
+  input{font-family:inherit;}
+
+  header{border-bottom:1px solid var(--line); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;}
+  .logo{font-family:'Fraunces',serif; font-weight:700; font-size:20px;}
+  .logo span{color:var(--marigold);}
+  .logout-link{font-size:13px; color:var(--ink-soft); text-decoration:underline; background:none;}
+
+  main{max-width:720px; margin:0 auto; padding:30px 20px 80px;}
+
+  /* login screen */
+  .login-wrap{max-width:340px; margin:100px auto; text-align:center;}
+  .login-wrap h2{font-size:20px; margin-bottom:18px;}
+  .login-wrap input{
+    width:100%; padding:12px; border:1px solid var(--line);
+    font-size:14px; margin-bottom:12px;
+  }
+  .login-wrap button{
+    width:100%; background:var(--ink); color:#fff;
+    padding:12px; font-weight:600; font-size:14px;
+  }
+  .login-err{color:var(--rose); font-size:13px; margin-top:8px; display:none;}
+
+  .search-box{display:flex; gap:8px; margin-bottom:28px;}
+  .search-box input{flex:1; padding:11px 12px; border:1px solid var(--line); font-size:14px;}
+  .search-box button{background:var(--ink); color:#fff; padding:11px 20px; font-weight:600; font-size:14px;}
+
+  section h3{font-size:15px; margin-bottom:14px; font-family:'Work Sans',sans-serif; font-weight:700;}
+
+  .order-row{
+    background:#fff; border:1px solid var(--line);
+    padding:16px 18px; margin-bottom:10px;
+  }
+  .order-row-top{display:flex; justify-content:space-between; margin-bottom:6px;}
+  .order-row-id{font-weight:700; font-size:14px;}
+  .order-row-status{font-size:12px; padding:3px 9px; background:var(--bg); border:1px solid var(--line);}
+  .order-row-name{font-size:13.5px; margin-bottom:2px;}
+  .order-row-meta{font-size:12px; color:var(--ink-soft); margin-bottom:12px;}
+  .order-row-items{font-size:12.5px; color:var(--ink-soft); margin-bottom:12px;}
+  .status-btns{display:flex; gap:8px; flex-wrap:wrap;}
+  .status-btn{
+    padding:8px 14px; font-size:12.5px; font-weight:600;
+    border:1px solid var(--indigo); color:var(--indigo);
+    background:#fff;
+  }
+  .status-btn.active{background:var(--indigo); color:#fff;}
+  .status-btn:hover{background:var(--indigo); color:#fff;}
+  .return-row{border-color:var(--marigold);}
+  .return-btns{display:flex; gap:8px; flex-wrap:wrap;}
+  .accept-btn, .reject-btn{padding:8px 14px; font-size:12.5px; font-weight:600; border:1px solid; background:#fff;}
+  .accept-btn{border-color:#2F7D4F; color:#2F7D4F;}
+  .accept-btn:hover{background:#2F7D4F; color:#fff;}
+  .reject-btn{border-color:var(--rose); color:var(--rose);}
+  .reject-btn:hover{background:var(--rose); color:#fff;}
+  .empty{color:var(--ink-soft); font-size:13.5px; text-align:center; padding:30px;}
+  .loading{color:var(--ink-soft); font-size:13.5px; text-align:center; padding:20px;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-wrap">
+  <h2>Admin Login</h2>
+  <input type="password" id="passwordInput" placeholder="Enter password" onkeydown="if(event.key==='Enter') tryLogin()">
+  <button onclick="tryLogin()">Login</button>
+  <div class="login-err" id="loginErr">Incorrect password</div>
+</div>
+
+<div id="adminScreen" style="display:none;">
+  <header>
+    <div class="logo">SMART DEAL<span>.</span> Admin</div>
+    <button class="logout-link" onclick="logout()">Log out</button>
+  </header>
+  <main>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search by Order ID (e.g. SD4F8K2)">
+      <button onclick="searchOrder()">Find</button>
+    </div>
+
+    <section id="returnsSection" style="display:none;">
+      <h3>Return Requests</h3>
+      <div id="returnsList"></div>
+    </section>
+
+    <section>
+      <h3>Recent Orders</h3>
+      <div id="ordersList"><div class="loading">Loading orders...</div></div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   Change this password to something only you know.
+   Note: this is a simple lock for convenience, not bank-level
+   security — anyone who reads the page source could find it.
+   Good enough for a small store; don't use it for anything
+   more sensitive than order status.
+   ============================================================ */
+const ADMIN_PASSWORD = "smartd2026";
+
+const STATUS_STEPS = ["Order Placed","Shipped","Out for Delivery","Delivered"];
+
+function tryLogin(){
+  const val = document.getElementById('passwordInput').value;
+  if(val === ADMIN_PASSWORD){
+    sessionStorage.setItem('smartd_admin', 'true');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'block';
+    loadReturnRequests();
+    loadRecentOrders();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function logout(){
+  sessionStorage.removeItem('smartd_admin');
+  location.reload();
+}
+
+if(sessionStorage.getItem('smartd_admin') === 'true'){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminScreen').style.display = 'block';
+  window.addEventListener('load', () => { loadReturnRequests(); loadRecentOrders(); });
+}
+
+function renderOrderRow(order){
+  const itemsSummary = order.items.map(i => `${i.name} (${i.size}) x${i.qty}`).join(', ');
+  const btns = STATUS_STEPS.map(s =>
+    `<button class="status-btn ${order.status===s?'active':''}" onclick="updateStatus('${order.orderId}','${s}')">${s}</button>`
+  ).join('');
+
+  return `
+    <div class="order-row">
+      <div class="order-row-top">
+        <span class="order-row-id">${order.orderId}</span>
+        <span class="order-row-status">${order.status}</span>
+      </div>
+      <div class="order-row-name">${order.name} — ₹${order.total}</div>
+      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
+      <div class="order-row-items">${itemsSummary}</div>
+      <div class="status-btns">${btns}</div>
+    </div>`;
+}
+
+async function loadRecentOrders(){
+  const container = document.getElementById('ordersList');
+  try{
+    const snap = await db.collection('orders').orderBy('createdAt','desc').limit(30).get();
+    if(snap.empty){
+      container.innerHTML = '<div class="empty">No orders yet.</div>';
+      return;
+    }
+    let html = '';
+    snap.forEach(doc => { html += renderOrderRow(doc.data()); });
+    container.innerHTML = html;
+  }catch(e){
+    console.error(e);
+    container.innerHTML = '<div class="empty">Could not load orders. Check your Firebase setup.</div>';
+  }
+}
+
+function renderReturnRow(order){
+  const itemsSummary = order.items.map(i => `${i.name} (${i.size}) x${i.qty}`).join(', ');
+  return `
+    <div class="order-row return-row">
+      <div class="order-row-top">
+        <span class="order-row-id">${order.orderId}</span>
+        <span class="order-row-status">${order.status}</span>
+      </div>
+      <div class="order-row-name">${order.name} — ₹${order.total}</div>
+      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
+      <div class="order-row-items">${itemsSummary}</div>
+      <div class="return-btns">
+        <button class="accept-btn" onclick="decideReturn('${order.orderId}','Return Approved')">Accept return</button>
+        <button class="reject-btn" onclick="decideReturn('${order.orderId}','Return Rejected')">Reject return</button>
+      </div>
+    </div>`;
+}
+
+async function loadReturnRequests(){
+  const section = document.getElementById('returnsSection');
+  const container = document.getElementById('returnsList');
+  try{
+    const snap = await db.collection('orders').where('status','==','Return Requested').get();
+    if(snap.empty){
+      section.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+    let orders = [];
+    snap.forEach(doc => orders.push(doc.data()));
+    orders.sort((a,b) => new Date(b.returnRequestedAt || b.createdAt) - new Date(a.returnRequestedAt || a.createdAt));
+    container.innerHTML = orders.map(renderReturnRow).join('');
+    section.style.display = 'block';
+  }catch(e){
+    console.error(e);
+    section.style.display = 'block';
+    container.innerHTML = '<div class="empty">Could not load return requests.</div>';
+  }
+}
+
+async function decideReturn(orderId, decision){
+  try{
+    await db.collection('orders').doc(orderId).update({
+      status: decision,
+      returnDecisionAt: new Date().toISOString(),
+      statusUpdatedAt: new Date().toISOString()
+    });
+    loadReturnRequests();
+    if(document.getElementById('searchInput').value.trim()){ searchOrder(); } else { loadRecentOrders(); }
+  }catch(e){
+    console.error(e);
+    alert('Could not update this return request. Please try again.');
+  }
+}
+
+async function searchOrder(){
+  const id = document.getElementById('searchInput').value.trim().toUpperCase();
+  if(!id) { loadRecentOrders(); return; }
+  const container = document.getElementById('ordersList');
+  container.innerHTML = '<div class="loading">Searching...</div>';
+  try{
+    const doc = await db.collection('orders').doc(id).get();
+    if(!doc.exists){
+      container.innerHTML = '<div class="empty">No order found with that ID.</div>';
+      return;
+    }
+    container.innerHTML = renderOrderRow(doc.data());
+  }catch(e){
+    console.error(e);
+    container.innerHTML = '<div class="empty">Something went wrong. Please try again.</div>';
+  }
+}
+
+async function updateStatus(orderId, newStatus){
+  const timestampField = {
+    "Shipped": "shippedAt",
+    "Out for Delivery": "outForDeliveryAt",
+    "Delivered": "deliveredAt"
+  }[newStatus];
+
+  const update = {
+    status: newStatus,
+    statusUpdatedAt: new Date().toISOString()
+  };
+  if(timestampField){
+    update[timestampField] = new Date().toISOString();
+  }
+
+  try{
+    await db.collection('orders').doc(orderId).update(update);
+    if(document.getElementById('searchInput').value.trim()){
+      searchOrder();
+    } else {
+      loadRecentOrders();
+    }
+  }catch(e){
+    console.error(e);
+    alert('Could not update status. Please try again.');
+  }
+}
+</script>
+</body>
+</html>
