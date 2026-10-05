@@ -34,14 +34,16 @@
   .meta b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .meta span{font-size:13px;color:#6b6a63}
   .del{flex:none;padding:10px 14px;border:0;border-radius:8px;background:var(--bad);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  .edit{flex:none;padding:10px 14px;border:1.5px solid var(--indigo);border-radius:8px;background:#fff;color:var(--indigo);font:inherit;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;}
+  .item-btns{display:flex;gap:8px;flex:none;}
   .del:disabled{opacity:.5}
   a{color:var(--indigo)}
 </style>
 </head>
 <body>
 <header>
-  <h1>SMART DEAL – Delete Products</h1>
-  <p>Tap Delete on any product to remove it from your store.</p>
+  <h1>SMART DEAL – Manage Products</h1>
+  <p>Edit a product's details, or delete it from your store.</p>
 </header>
 <main>
   <details id="setup">
@@ -116,7 +118,10 @@ function render(){
     const d = document.createElement("div"); d.className = "item";
     d.innerHTML = `<div class="th">${p.img ? "" : "No photo"}</div>
       <div class="meta"><b>${esc(p.name)}</b><span>ID ${esc(p.id)} · ${esc(p.category)} · ₹${esc(p.price)}</span></div>
-      <button class="del" type="button">Delete</button>`;
+      <div class="item-btns">
+        <a class="edit" href="product-form.html?id=${encodeURIComponent(p.id)}">Edit</a>
+        <button class="del" type="button">Delete</button>
+      </div>`;
     if(p.img) d.querySelector(".th").style.backgroundImage = `url("${String(p.img).replace(/"/g,"%22")}")`;
     d.querySelector(".del").onclick = () => deleteProduct(p);
     box.appendChild(d);

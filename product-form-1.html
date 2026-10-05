@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMART DEAL – Add Product</title>
+<style>
+  :root{
+    --ivory:#FBF7EE; --ink:#1F2340; --indigo:#2E3B5B; --marigold:#E2A33D;
+    --line:#DDD5C4; --card:#FFFFFF; --ok:#2F7D4F; --bad:#B23A48;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ivory);color:var(--ink);
+    font-family:"Work Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;line-height:1.5}
+  header{background:var(--indigo);color:#fff;padding:18px 16px}
+  header h1{margin:0;font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:600;letter-spacing:.3px}
+  header p{margin:4px 0 0;font-size:14px;opacity:.85}
+  main{max-width:640px;margin:0 auto;padding:16px}
+  .field{margin-bottom:16px}
+  label{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
+  .hint{font-weight:400;font-size:13px;color:#6b6a63}
+  input[type=text],input[type=password],input[type=number],textarea,select{
+    width:100%;padding:12px;border:1.5px solid var(--line);border-radius:8px;
+    font:inherit;background:var(--card);color:var(--ink)}
+  input[type=file]{width:100%;font:inherit;font-size:14px;margin-bottom:8px}
+  textarea{min-height:90px;resize:vertical}
+  input:focus,textarea:focus,select:focus,button:focus-visible,summary:focus-visible{outline:3px solid var(--marigold);outline-offset:1px}
+  .row{display:flex;gap:12px}
+  .row>.field{flex:1;min-width:0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+    padding:9px 14px;border-radius:999px;font:inherit;font-size:15px;cursor:pointer}
+  .chip[aria-pressed=true]{background:var(--indigo);border-color:var(--indigo);color:#fff}
+  .colorrow{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .colorrow input[type=color]{width:52px;height:46px;padding:2px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);flex:none}
+  .crow{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+  .crow .rm{flex:none;border:0;background:transparent;color:var(--bad);font:inherit;font-size:14px;cursor:pointer;padding:8px}
+  .sub{font-size:13px;color:#6b6a63;margin:2px 0 4px}
+  .off{font-size:14px;color:var(--ok);margin-top:6px;min-height:20px}
+  .out{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:14px;margin-top:8px}
+  pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:13px;line-height:1.55;max-height:300px;overflow:auto}
+  .btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .btn{flex:1;min-width:130px;padding:14px;border:0;border-radius:10px;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+  .btn:disabled{opacity:.55;cursor:default}
+  .primary{background:var(--marigold);color:var(--ink)}
+  .ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+  .errors{color:var(--bad);font-size:14px;margin-top:10px;min-height:20px}
+  .status{margin-top:12px;padding:12px;border-radius:10px;background:#fff;border:1.5px solid var(--line);font-size:15px;display:none}
+  .status.show{display:block}
+  .status.good{border-color:var(--ok);color:var(--ok)}
+  .status.fail{border-color:var(--bad);color:var(--bad)}
+  details{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px;margin-bottom:18px}
+  summary{font-weight:600;cursor:pointer}
+  details .btn{margin-top:10px;flex:none;width:100%}
+  h2{font-family:Fraunces,Georgia,serif;font-size:18px;margin:26px 0 4px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:12px 20px;border-radius:999px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}
+  .toast.show{opacity:1}
+  @media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="pageTitle">SMART DEAL – Add Product</h1>
+  <p id="pageSub">Fill the form and tap "Add to store". Photos and product details are saved for you.</p>
+</header>
+
+<main>
+  <details id="setup">
+    <summary id="setupTitle">One-time setup: connect to GitHub</summary>
+    <p class="sub">Paste your GitHub access token once. It is saved only in this phone's browser, never in the website code.</p>
+    <input type="password" id="token" placeholder="github_pat_..." autocomplete="off">
+    <button class="btn primary" id="saveToken" type="button">Save token</button>
+    <button class="btn ghost" id="clearToken" type="button" style="display:none">Remove token from this phone</button>
+  </details>
+
+  <div class="row">
+    <div class="field">
+      <label for="id">Product ID</label>
+      <input type="number" id="id" inputmode="numeric" min="1" placeholder="14">
+    </div>
+    <div class="field">
+      <label for="tag">Tag</label>
+      <select id="tag">
+        <option value="">None</option>
+        <option value="New">New</option>
+        <option value="Sale">Sale</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="name">Product name</label>
+    <input type="text" id="name" placeholder="Premium Casual Shirt" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label for="category">Category <span class="hint">(same spelling as in your store)</span></label>
+    <input type="text" id="category" placeholder="Shirt" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label>Colors and photos <span class="hint">(add every color this product comes in)</span></label>
+    <div id="colorList"></div>
+    <button type="button" class="btn ghost" id="addColor" style="width:100%;margin-top:4px">+ Add another color</button>
+  </div>
+
+  <div class="field">
+    <label>Sizes <span class="hint">(tap to select)</span></label>
+    <div class="chips" id="sizeChips"></div>
+    <input type="text" id="sizeCustom" placeholder="Other sizes, separated by commas (e.g. 3XL, 42)" style="margin-top:10px">
+  </div>
+
+  <div class="field">
+    <label for="desc">Description</label>
+    <textarea id="desc" placeholder="Soft cotton fabric, regular fit, easy to wash."></textarea>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="mrp">MRP (₹)</label>
+      <input type="number" id="mrp" inputmode="numeric" min="0" placeholder="1199">
+    </div>
+    <div class="field">
+      <label for="price">Selling price (₹)</label>
+      <input type="number" id="price" inputmode="numeric" min="0" placeholder="799">
+    </div>
+  </div>
+  <div class="off" id="off"></div>
+
+  <details>
+    <summary>Extra photos (optional)</summary>
+    <p class="sub">Shown when a color has no photos of its own.</p>
+    <input type="file" id="commonFiles" accept="image/*" multiple>
+    <div class="pstat sub" id="commonStat"></div>
+    <input type="text" id="imgs" placeholder="Or file names already in the images folder: shirt1.jpg" autocomplete="off">
+  </details>
+
+  <div class="errors" id="errors" role="alert"></div>
+  <div class="status" id="status" role="status"></div>
+
+  <div class="btns">
+    <button class="btn primary" id="publish" type="button">Add to store</button>
+    <a class="btn ghost" id="cancelEdit" href="delete-product.html" style="display:none; text-align:center; text-decoration:none;">Cancel edit</a>
+  </div>
+  <div class="btns">
+    <button class="btn ghost" id="copy" type="button">Copy code instead</button>
+    <button class="btn ghost" id="reset" type="button">Clear form</button>
+  </div>
+
+  <h2>Code preview</h2>
+  <div class="out"><pre id="code">Fill the form above and the code will appear here.</pre></div>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------- settings ---------- */
+const OWNER = "Sdeal2", REPO = "Sdeal", BRANCH = "main", DATA_FILE = "products.json";
+const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/`;
+const $ = id => document.getElementById(id);
+const BASE_SIZES = ["S","M","L","XL","XXL","Free Size"];
+const selected = new Set();
+let running = false;
+let editMode = false, editingId = null;
+
+/* ---------- helpers ---------- */
+function lighten(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  r=Math.round(r+(255-r)*amt); g=Math.round(g+(255-g)*amt); b=Math.round(b+(255-b)*amt);
+  return "#"+[r,g,b].map(x=>x.toString(16).padStart(2,"0")).join("").toUpperCase();
+}
+const slug = s => (s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const fixImgs = str => str.split(",").map(s=>s.trim()).filter(Boolean)
+  .map(f => f.startsWith("images/") ? f : "images/" + f.replace(/^\/+/, ""));
+function toB64Utf8(str){
+  const bytes = new TextEncoder().encode(str); let bin = "";
+  bytes.forEach(b => bin += String.fromCharCode(b)); return btoa(bin);
+}
+function fromB64Utf8(b64){
+  const bin = atob(b64.replace(/\s/g,""));
+  return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2200);
+}
+function setStatus(msg, kind){
+  const s = $("status"); s.textContent = msg; s.className = "status show" + (kind ? " "+kind : "");
+}
+
+/* size chips */
+BASE_SIZES.forEach(s => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.textContent = s;
+  b.setAttribute("aria-pressed","false");
+  b.onclick = () => {
+    if (selected.has(s)) selected.delete(s); else selected.add(s);
+    b.setAttribute("aria-pressed", selected.has(s));
+    update();
+  };
+  $("sizeChips").appendChild(b);
+});
+
+/* color rows */
+function addColorRow(){
+  const d = document.createElement("div");
+  d.className = "crow";
+  d.innerHTML = `
+    <div class="colorrow">
+      <input type="color" class="cpick" value="#2E3B5B" aria-label="Pick color">
+      <input type="text" class="cname" placeholder="Color name, e.g. Navy Blue" autocomplete="off">
+      <button type="button" class="rm">Remove</button>
+    </div>
+    <div class="sub">Photos of this color</div>
+    <input type="file" class="cfiles" accept="image/*" multiple>
+    <div class="pstat sub"></div>
+    <input type="text" class="cimgs" placeholder="Or file names already uploaded: navy1.jpg" autocomplete="off">`;
+  d.querySelector(".rm").onclick = () => { d.remove(); update(); };
+  const fi = d.querySelector(".cfiles");
+  fi.addEventListener("change", () => cachePhotos(fi, d.querySelector(".pstat")));
+  $("colorList").appendChild(d);
+  update();
+  return d;
+}
+const stripImg = path => String(path || "").replace(/^images\//, "");
+
+/* Copy chosen photos into memory right away, so Android cannot take access back later */
+let pendingReads = Promise.resolve();
+function cachePhotos(input, statEl){
+  const files = [...input.files];
+  input._cache = [];
+  if(!files.length){ statEl.textContent = ""; statEl.style.color = ""; update(); return; }
+  statEl.style.color = ""; statEl.textContent = "Reading photo…";
+  pendingReads = pendingReads.then(async () => {
+    const ok = [], bad = [];
+    for(const f of files){
+      try{
+        const buf = await f.arrayBuffer();
+        ok.push(new File([buf], f.name, {type: f.type || "image/jpeg"}));
+      }catch(_){ bad.push(f.name); }
+    }
+    input._cache = ok;
+    if(bad.length){
+      statEl.style.color = "var(--bad)";
+      statEl.textContent = "Could not read " + bad.join(", ") + ". Tap Choose files, then pick it from Files / Browse (Downloads or Gallery folder), not from Photos or Recent.";
+    }else{
+      statEl.style.color = "var(--ok)";
+      statEl.textContent = ok.length + (ok.length === 1 ? " photo ready" : " photos ready");
+    }
+    update();
+  });
+}
+$("commonFiles").addEventListener("change", () => cachePhotos($("commonFiles"), $("commonStat")));
+
+function getSizes(){
+  const custom = $("sizeCustom").value.split(",").map(s=>s.trim()).filter(Boolean);
+  return [...new Set(BASE_SIZES.filter(s=>selected.has(s)).concat(custom))];
+}
+
+/* ---------- build the product + list of photos to upload ---------- */
+function plan(){
+  const id = +$("id").value || 0;
+  const uploads = [];
+  const pathsFor = (files, tag) => [...files].map((f,j) => {
+    const path = `images/p${id}-${tag}-${j+1}.jpg`;
+    uploads.push({path, file:f});
+    return path;
+  });
+
+  const colors = [...document.querySelectorAll(".crow")].map((r,i) => {
+    const name = r.querySelector(".cname").value.trim();
+    if(!name) return null;
+    const tag = (slug(name) || "color") + (i ? "-"+(i+1) : "");
+    const images = pathsFor(r.querySelector(".cfiles")._cache || [], tag)
+      .concat(fixImgs(r.querySelector(".cimgs").value));
+    return {name, code: r.querySelector(".cpick").value.toUpperCase(), images};
+  }).filter(Boolean);
+
+  const common = pathsFor($("commonFiles")._cache || [], "common").concat(fixImgs($("imgs").value));
+  const firstWithPhotos = colors.find(c => c.images.length);
+  const main = (colors[0] && colors[0].images[0]) || common[0] || (firstWithPhotos ? firstWithPhotos.images[0] : "");
+  const base = (colors[0] && colors[0].code) || "#2E3B5B";
+
+  const obj = {
+    id,
+    name: $("name").value.trim(),
+    category: $("category").value.trim(),
+    description: $("desc").value.trim(),
+    price: +$("price").value,
+    mrp: +$("mrp").value,
+    sizes: getSizes(),
+    img: main,
+    images: common,
+    colors,
+    tag: $("tag").value,
+    swatch: [base, lighten(base, .35)]
+  };
+  return {obj, uploads};
+}
+
+function toText(obj){
+  const colorLines = obj.colors.map(c =>
+    `    {"name": ${JSON.stringify(c.name)}, "code": ${JSON.stringify(c.code)}, "images": ${JSON.stringify(c.images)}}`).join(",\n");
+  return "{\n" + [
+    `  "id": ${obj.id},`,
+    `  "name": ${JSON.stringify(obj.name)},`,
+    `  "category": ${JSON.stringify(obj.category)},`,
+    `  "description": ${JSON.stringify(obj.description)},`,
+    `  "price": ${obj.price},`,
+    `  "mrp": ${obj.mrp},`,
+    `  "sizes": ${JSON.stringify(obj.sizes)},`,
+    `  "img": ${JSON.stringify(obj.img)},`,
+    `  "images": ${JSON.stringify(obj.images)},`,
+    `  "colors": [\n${colorLines}\n  ],`,
+    `  "tag": ${JSON.stringify(obj.tag)},`,
+    `  "swatch": ${JSON.stringify(obj.swatch)}`
+  ].join("\n") + "\n}";
+}
+
+function validate(){
+  const p = plan(), o = p.obj, e = [];
+  if(!o.id) e.push("Enter a Product ID.");
+  if(!o.name) e.push("Enter the product name.");
+  if(!o.category) e.push("Enter a category.");
+  if(!o.colors.length) e.push("Add at least one color with a name.");
+  if(!o.sizes.length) e.push("Select at least one size.");
+  if(!o.mrp) e.push("Enter the MRP.");
+  if(!o.price) e.push("Enter the selling price.");
+  if(o.mrp && o.price && o.price > o.mrp) e.push("Selling price is higher than MRP. Please check.");
+  if(!o.img) e.push("Add at least one photo.");
+  return e;
+}
+
+function update(){
+  const mrp = +$("mrp").value, price = +$("price").value;
+  $("off").textContent = (mrp && price && price < mrp)
+    ? Math.round((mrp-price)/mrp*100) + "% off will be shown to customers" : "";
+  const errs = validate();
+  $("errors").textContent = errs.length ? errs[0] : "";
+  const o = plan().obj;
+  $("code").textContent = (!o.name && !o.id)
+    ? "Fill the form above and the code will appear here." : ",\n" + toText(o);
+}
+
+["id","name","category","sizeCustom","desc","mrp","price","imgs","tag","commonFiles"]
+  .forEach(id => { $(id).addEventListener("input", update); $(id).addEventListener("change", update); });
+$("colorList").addEventListener("input", update);
+$("colorList").addEventListener("change", update);
+$("addColor").onclick = addColorRow;
+
+/* ---------- GitHub ---------- */
+const getToken = () => localStorage.getItem("sd_token") || "";
+
+async function gh(path, method, body){
+  const t = getToken();
+  const url = API + path + (method === "PUT" ? "" : `?ref=${BRANCH}&t=${Date.now()}`);
+  const res = await fetch(url, {
+    method,
+    headers: {
+      "Authorization": "Bearer " + t,
+      "Accept": "application/vnd.github+json",
+      ...(body ? {"Content-Type":"application/json"} : {})
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if(res.status === 401) throw new Error("GitHub token is not valid or has expired. Create a new token and save it again.");
+  if(res.status === 403) throw new Error("GitHub says access is not allowed. Check the token has Contents: Read and write for the Sdeal repository.");
+  return res;
+}
+
+async function readProducts(){
+  const res = await gh(DATA_FILE, "GET");
+  if(!res.ok) throw new Error("Could not read products.json from GitHub (" + res.status + ").");
+  const j = await res.json();
+  return {list: JSON.parse(fromB64Utf8(j.content)), sha: j.sha};
+}
+
+async function putFile(path, contentB64, message){
+  let sha;
+  const cur = await gh(path, "GET");
+  if(cur.ok){ sha = (await cur.json()).sha; }
+  const res = await gh(path, "PUT", {message, content: contentB64, branch: BRANCH, ...(sha ? {sha} : {})});
+  return res;
+}
+
+function fileToDataURL(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(new Error("Could not read photo " + file.name + ". Tap Choose files and select it again."));
+    r.readAsDataURL(file);
+  });
+}
+function drawToJpeg(src, w, h){
+  const scale = Math.min(1, 1200 / Math.max(w, h));
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(w*scale)); c.height = Math.max(1, Math.round(h*scale));
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.85).split(",")[1];
+}
+/* Try several ways to read the photo, so one phone quirk does not block the upload */
+async function compress(file){
+  // 1) direct decode
+  try{
+    if(window.createImageBitmap){
+      const bmp = await createImageBitmap(file);
+      const out = drawToJpeg(bmp, bmp.width, bmp.height);
+      if(bmp.close) bmp.close();
+      return out;
+    }
+  }catch(_){}
+  // 2) read file first, then decode from its data
+  const dataUrl = await fileToDataURL(file);
+  try{
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = dataUrl; });
+    return drawToJpeg(img, img.naturalWidth || img.width, img.naturalHeight || img.height);
+  }catch(_){}
+  // 3) last option: upload the original photo as it is
+  if(file.size <= 8*1024*1024 && /^image\/(jpeg|png|webp)$/.test(file.type)){
+    return dataUrl.split(",")[1];
+  }
+  throw new Error("Could not open photo " + file.name + ". Please choose a different photo or a smaller one.");
+}
+
+async function loadForEdit(id){
+  setStatus("Loading product…");
+  try{
+    const d = await readProducts();
+    const p = d.list.find(x => String(x.id) === String(id));
+    if(!p){ setStatus("Product ID " + id + " was not found in your store.", "fail"); return; }
+    editMode = true; editingId = p.id;
+    $("pageTitle").textContent = "SMART DEAL – Edit Product";
+    $("pageSub").textContent = 'Update the details below and tap "Save changes".';
+    $("publish").textContent = "Save changes";
+    $("cancelEdit").style.display = "block";
+    $("id").value = p.id; $("id").disabled = true;
+    $("name").value = p.name || "";
+    $("category").value = p.category || "";
+    $("desc").value = p.description || "";
+    $("mrp").value = p.mrp ?? "";
+    $("price").value = p.price ?? "";
+    $("tag").value = p.tag || "";
+
+    selected.clear();
+    document.querySelectorAll(".chip").forEach(c => {
+      const match = (p.sizes || []).includes(c.textContent);
+      c.setAttribute("aria-pressed", match);
+      if(match) selected.add(c.textContent);
+    });
+    $("sizeCustom").value = (p.sizes || []).filter(s => !BASE_SIZES.includes(s)).join(", ");
+
+    $("colorList").innerHTML = "";
+    const colorsToLoad = (p.colors && p.colors.length) ? p.colors : [{name:"", code:"#2E3B5B", images:[]}];
+    colorsToLoad.forEach(c => {
+      const row = addColorRow();
+      row.querySelector(".cname").value = c.name || "";
+      row.querySelector(".cpick").value = c.code || "#2E3B5B";
+      row.querySelector(".cimgs").value = (c.images || []).map(stripImg).join(", ");
+    });
+    $("imgs").value = (p.images || []).map(stripImg).join(", ");
+
+    $("status").className = "status";
+    update();
+  }catch(e){
+    setStatus(e.message, "fail");
+  }
+}
+
+async function publish(){
+  if(running) return;
+  await pendingReads;
+  const errs = validate();
+  if(errs.length){ $("errors").textContent = errs[0]; toast("Please complete the form"); return; }
+  if(!getToken()){ $("setup").open = true; $("setup").scrollIntoView({behavior:"smooth"}); toast("Save your GitHub token first"); return; }
+
+  running = true; $("publish").disabled = true; setStatus(editMode ? "Checking your store…" : "Checking your store…");
+  try{
+    const {obj, uploads} = plan();
+
+    if(!editMode){
+      const data0 = await readProducts();
+      if(data0.list.some(p => p.id === obj.id)){
+        const next = Math.max(0, ...data0.list.map(p => +p.id || 0)) + 1;
+        throw new Error(`Product ID ${obj.id} is already used. Use ${next} instead.`);
+      }
+    }
+
+    for(let i = 0; i < uploads.length; i++){
+      setStatus(`Uploading photo ${i+1} of ${uploads.length}…`);
+      const b64 = await compress(uploads[i].file);
+      const r = await putFile(uploads[i].path, b64, `${editMode ? "Update" : "Add"} photo ${uploads[i].path}`);
+      if(!r.ok) throw new Error("Photo upload failed (" + r.status + "). Please try again.");
+    }
+
+    setStatus(editMode ? "Saving changes…" : "Saving product…");
+    let saved = false;
+    for(let attempt = 0; attempt < 3 && !saved; attempt++){
+      const data = await readProducts();
+      let list = data.list;
+      if(editMode){
+        const idx = list.findIndex(p => p.id === editingId);
+        if(idx < 0) throw new Error("This product no longer exists in the store.");
+        list = list.slice(); list[idx] = obj;
+      } else {
+        if(list.some(p => p.id === obj.id)) throw new Error(`Product ID ${obj.id} is already used.`);
+        list = list.slice(); list.push(obj);
+      }
+      const res = await gh(DATA_FILE, "PUT", {
+        message: `${editMode ? "Edit" : "Add"} product ${obj.id}: ${obj.name}`,
+        content: toB64Utf8(JSON.stringify(list, null, 2) + "\n"),
+        branch: BRANCH, sha: data.sha
+      });
+      if(res.ok) saved = true;
+      else if(res.status !== 409) throw new Error("Could not save (" + res.status + ").");
+    }
+    if(!saved) throw new Error("Store was busy. Please tap the button again.");
+
+    if(editMode){
+      setStatus(`Done! Changes to "${obj.name}" are saved. It will update on the store in 1 to 2 minutes.`, "good");
+    } else {
+      setStatus(`Done! "${obj.name}" is added. It will appear on the store in 1 to 2 minutes.`, "good");
+      resetForm(obj.id + 1, true);
+    }
+  }catch(err){
+    setStatus(err.message || String(err), "fail");
+  }finally{
+    running = false; $("publish").disabled = false;
+  }
+}
+$("publish").onclick = publish;
+
+/* ---------- copy fallback ---------- */
+$("copy").onclick = async () => {
+  const errs = validate();
+  if(errs.length){ $("errors").textContent = errs[0]; toast("Please complete the form"); return; }
+  const text = $("code").textContent;
+  try{ await navigator.clipboard.writeText(text); }
+  catch(_){
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); document.body.removeChild(ta);
+  }
+  toast("Copied!");
+};
+
+/* ---------- reset ---------- */
+function resetForm(nextId, keepStatus){
+  ["name","category","sizeCustom","desc","mrp","price","imgs"].forEach(id=>$(id).value="");
+  $("commonFiles").value = ""; $("commonFiles")._cache = []; $("commonStat").textContent = "";
+  $("id").value = nextId || ""; $("tag").value = "";
+  $("colorList").innerHTML = ""; addColorRow();
+  selected.clear();
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false"));
+  if(!keepStatus) $("status").className = "status";
+  update();
+}
+$("reset").onclick = () => resetForm($("id").value ? +$("id").value : "", false);
+
+/* ---------- token setup ---------- */
+function showTokenState(){
+  const has = !!getToken();
+  $("setupTitle").textContent = has ? "GitHub connected on this phone" : "One-time setup: connect to GitHub";
+  $("clearToken").style.display = has ? "block" : "none";
+  $("setup").open = !has;
+}
+$("saveToken").onclick = async () => {
+  const t = $("token").value.trim();
+  if(!t){ toast("Paste the token first"); return; }
+  localStorage.setItem("sd_token", t); $("token").value = "";
+  try{
+    if(urlEditId){
+      await loadForEdit(urlEditId);
+      showTokenState();
+    } else {
+      const d = await readProducts();
+      if(!$("id").value){ $("id").value = Math.max(0, ...d.list.map(p => +p.id || 0)) + 1; update(); }
+      setStatus("Connected. Found " + d.list.length + " products.", "good");
+      showTokenState();
+    }
+  }catch(e){
+    localStorage.removeItem("sd_token"); showTokenState();
+    setStatus(e.message, "fail");
+  }
+};
+$("clearToken").onclick = () => { localStorage.removeItem("sd_token"); showTokenState(); toast("Token removed"); };
+
+/* ---------- fill the form from a shared product link ---------- */
+async function prefillFromLink(){
+  const params = new URLSearchParams(location.search);
+  if(!params.has("name") && !params.has("price") && !params.has("img")) return;
+
+  setStatus("Filling the form from the link you shared…");
+  if(params.get("name")) $("name").value = params.get("name").slice(0, 120);
+  if(params.get("desc")) $("desc").value = params.get("desc").slice(0, 400);
+
+  const src = parseFloat(params.get("price"));
+  if(src && isFinite(src)){
+    const sell = Math.round(src * 3);
+    const mrp = Math.round(sell * 1.35 / 10) * 10;
+    $("price").value = sell;
+    $("mrp").value = mrp;
+  }
+
+  const imgUrl = params.get("img");
+  if(imgUrl){
+    const row = document.querySelector(".crow") || addColorRow();
+    row.querySelector(".cname").value = "Default";
+    const stat = row.querySelector(".pstat");
+    stat.style.color = ""; stat.textContent = "Fetching photo from the link…";
+    try{
+      const res = await fetch(imgUrl, {mode: "cors"});
+      if(!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      if(!blob.type.startsWith("image/")) throw new Error("not an image");
+      const name = (imgUrl.split("/").pop() || "photo").split("?")[0] || "photo.jpg";
+      row.querySelector(".cfiles")._cache = [new File([blob], name, {type: blob.type})];
+      stat.style.color = "var(--ok)";
+      stat.textContent = "Photo imported from the link";
+    }catch(_){
+      stat.style.color = "var(--bad)";
+      stat.innerHTML = 'Could not fetch this photo automatically (the site blocked it). ' +
+        '<a href="' + imgUrl.replace(/"/g,"%22") + '" target="_blank" rel="noopener">Open the photo</a>, save it to your phone, then use "Choose files" above.';
+    }
+  }
+
+  $("status").className = "status";
+  $("errors").textContent = "Check the name, photo and price, then fill the category and sizes.";
+  update();
+}
+
+/* ---------- start ---------- */
+const urlEditId = new URLSearchParams(location.search).get("id");
+if(!urlEditId){
+  prefillFromLink(); // adds a color row itself only when a photo link was shared
+  if(![...document.querySelectorAll(".crow")].length) addColorRow();
+}
+showTokenState();
+if(getToken()){
+  if(urlEditId){
+    loadForEdit(urlEditId);
+  } else {
+    readProducts().then(d => {
+      if(!$("id").value){ $("id").value = Math.max(0, ...d.list.map(p => +p.id || 0)) + 1; update(); }
+    }).catch(e => setStatus(e.message, "fail"));
+  }
+} else if(urlEditId){
+  setStatus("Connect to GitHub above to load this product for editing.", "fail");
+}
+</script>
+</body>
+</html>
