@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Product - Smart Deal</title><style>body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#171a24}.top{padding:14px 18px;background:#fff;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;position:sticky;top:0;z-index:5}.top a{color:#171a24;text-decoration:none}.wrap{max-width:1000px;margin:auto;padding:20px}.gallery{background:#fff;border-radius:0;overflow:hidden}.wrap{background:#fff}.main{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:#eee}.main img{width:100%;height:100%;object-fit:contain}.arrow{position:absolute;top:50%;transform:translateY(-50%);border:0;border-radius:50%;width:40px;height:40px;font-size:25px;background:#fff;box-shadow:0 2px 10px #0002}.prev{left:12px}.next{right:12px}.thumbs{display:flex;gap:8px;padding:10px;overflow:auto}.thumb{width:64px;height:64px;flex:0 0 64px;border:2px solid #ddd;padding:0;background:#fff;border-radius:8px;overflow:hidden}.thumb.active{border-color:#111}.thumb img{width:100%;height:100%;object-fit:cover}.info{background:#fff;border-radius:0;padding:22px;margin-top:16px}.description{margin:20px 0;padding-top:16px;border-top:1px solid #eee;line-height:1.7;color:#444}.actions{display:flex;gap:10px;flex-wrap:wrap}.buy{background:#25D366;color:#fff}.btn{flex:1;min-width:150px}.price{font-size:25px;font-weight:700}.mrp{text-decoration:line-through;color:#888;font-size:15px;margin-left:8px}.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.pill{padding:9px 13px;border:1px solid #ccc;background:#fff;border-radius:20px}.pill.active{border-color:#111;background:#111;color:#fff}.color{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #bbb}.color.active{box-shadow:0 0 0 2px #111}.btn{border:0;padding:13px 18px;border-radius:8px;margin:6px 6px 0 0;font-weight:700}.cart{background:#111;color:#fff}.share{background:#eee}.msg{color:#555;font-size:13px}</style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Product - Smart Deal</title>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#171a24}.top{padding:14px 18px;background:#fff;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;position:sticky;top:0;z-index:5}.top a{color:#171a24;text-decoration:none}.wrap{max-width:1000px;margin:auto;padding:20px}.gallery{background:#fff;border-radius:0;overflow:hidden}.wrap{background:#fff}.main{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:#eee}.main img{width:100%;height:100%;object-fit:contain}.arrow{position:absolute;top:50%;transform:translateY(-50%);border:0;border-radius:50%;width:40px;height:40px;font-size:25px;background:#fff;box-shadow:0 2px 10px #0002}.prev{left:12px}.next{right:12px}.thumbs{display:flex;gap:8px;padding:10px;overflow:auto}.thumb{width:64px;height:64px;flex:0 0 64px;border:2px solid #ddd;padding:0;background:#fff;border-radius:8px;overflow:hidden}.thumb.active{border-color:#111}.thumb img{width:100%;height:100%;object-fit:cover}.info{background:#fff;border-radius:0;padding:22px;margin-top:16px}.description{margin:20px 0;padding-top:16px;border-top:1px solid #eee;line-height:1.7;color:#444}.actions{display:flex;gap:10px;flex-wrap:wrap}.buy{background:#25D366;color:#fff}.btn{flex:1;min-width:150px}.price{font-size:25px;font-weight:700}.mrp{text-decoration:line-through;color:#888;font-size:15px;margin-left:8px}.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.pill{padding:9px 13px;border:1px solid #ccc;background:#fff;border-radius:20px}.pill.active{border-color:#111;background:#111;color:#fff}.color{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #bbb}.color.active{box-shadow:0 0 0 2px #111}.btn{border:0;padding:13px 18px;border-radius:8px;margin:6px 6px 0 0;font-weight:700}.cart{background:#111;color:#fff}.share{background:#eee}.msg{color:#555;font-size:13px}</style>
 <style>
 /* Fixed product action bar */
 .product-action-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#fff;border-top:1px solid #ddd;padding:10px max(12px,calc((100vw - 1100px)/2));display:flex;gap:10px;box-shadow:0 -4px 18px rgba(0,0,0,.08)}
@@ -6,16 +10,208 @@
 @media(max-width:480px){.product-action-bar{padding:8px}.product-action-bar .btn{height:46px;font-size:14px}}
 body{padding-bottom:78px!important}
 </style>
-</head><body><div class="top"><a href="index.html">← Back to Shop</a></div><main class="wrap"><div id="app">Loading product...</div></main><script>
+<style>
+/* Trust strip */
+.trust-strip{display:flex; gap:0; margin:14px 0; border:1px solid #eee; border-radius:8px; overflow:hidden}
+.trust-item{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 6px; text-align:center; border-right:1px solid #eee; font-size:11.5px; color:#444; font-weight:600}
+.trust-item:last-child{border-right:0}
+.trust-ic{font-size:19px}
+
+/* Reviews */
+.reviews{padding:22px; border-top:1px solid #eee; margin-top:16px}
+.reviews h3{margin-bottom:10px; font-size:17px}
+.rev-summary{display:flex; align-items:center; gap:12px; margin-bottom:18px}
+.rev-avg{font-size:30px; font-weight:800; line-height:1}
+.rev-stars{color:#E2A33D; font-size:17px; letter-spacing:1px}
+.rev-count{color:#777; font-size:12.5px}
+.rev-list{margin-bottom:8px}
+.rev-item{padding:14px 0; border-top:1px solid #eee}
+.rev-item:first-child{border-top:0}
+.rev-item-top{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+.rev-name{font-weight:700; font-size:13.5px}
+.rev-date{font-size:11.5px; color:#999; white-space:nowrap}
+.rev-stars-sm{color:#E2A33D; font-size:13px; margin:3px 0 6px}
+.rev-text{color:#333; line-height:1.55; font-size:13.5px; margin-bottom:8px; white-space:pre-wrap}
+.rev-photo{width:76px; height:76px; object-fit:cover; border-radius:8px; border:1px solid #ddd; cursor:pointer}
+.rev-empty{color:#888; font-size:13.5px; padding:6px 0 10px}
+
+.rev-form{margin-top:18px; padding:16px; background:#faf8f3; border-radius:10px}
+.rev-form h4{font-size:14.5px; margin-bottom:10px}
+.star-pick{display:flex; gap:6px; font-size:28px; margin:4px 0 12px; cursor:pointer; line-height:1}
+.star-pick span{color:#ccc}
+.star-pick span.on{color:#E2A33D}
+.rev-form input[type=text],.rev-form textarea{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px; font:inherit; font-size:14px}
+.rev-form textarea{min-height:72px; resize:vertical}
+.rev-form input[type=file]{font-size:13px; margin-bottom:10px}
+.rev-photo-stat{font-size:12px; color:#777; margin:-4px 0 10px}
+.rev-submit{background:#111; color:#fff; border:0; padding:12px 20px; border-radius:8px; font-weight:700; font-size:14px}
+.rev-submit:disabled{opacity:.5}
+.rev-status{font-size:13px; margin-top:10px}
+.rev-status.good{color:#2F7D4F}
+.rev-status.fail{color:#B5495B}
+.rev-lightbox{position:fixed; inset:0; background:rgba(0,0,0,.85); display:flex; align-items:center; justify-content:center; z-index:99999; padding:20px}
+.rev-lightbox img{max-width:100%; max-height:100%; border-radius:8px}
+</style>
+</head><body><div class="top"><a href="index.html">← Back to Shop</a></div><main class="wrap"><div id="app">Loading product...</div><div id="reviewsRoot"></div></main><script>
 let products=[],product=null,images=[],idx=0,selectedColor=null,selectedSize=null,qty=1;
 const params=new URLSearchParams(location.search);const id=Number(params.get('id'));
 function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function getColors(){return Array.isArray(product.colors)?product.colors:[]}
 function getImages(){if(selectedColor&&selectedColor.images?.length)return selectedColor.images;if(product.images?.length)return product.images;if(product.img)return [product.img];return []}
-function render(){images=getImages();if(idx>=images.length)idx=0;document.getElementById('app').innerHTML=`<section class="gallery"><div class="main"><button class="arrow prev" onclick="move(-1)">‹</button><img src="${esc(images[idx]||'')}" onerror="this.style.display='none'" alt="${esc(product.name)}"><button class="arrow next" onclick="move(1)">›</button></div><div class="thumbs">${images.map((x,i)=>`<button class="thumb ${i===idx?'active':''}" onclick="idx=${i};render()"><img src="${esc(x)}"></button>`).join('')}</div></section><section class="info"><div>${esc(product.category||'')}</div><h1>${esc(product.name)}</h1><div class="price">₹${product.price}${product.mrp?`<span class="mrp">₹${product.mrp}</span>`:''}</div><div class="description"><h3>Description</h3><p>${esc(product.description||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.')}</p></div><h4>Color</h4><div class="row">${getColors().length?getColors().map((c,i)=>`<button class="color ${selectedColor?.name===c.name?'active':''}" title="${esc(c.name)}" style="background:${esc(c.code||'#ddd')}" onclick="chooseColor(${i})"></button>`).join(''):'<span class="msg">Default color</span>'}</div>${selectedColor?`<div class="msg">Selected: ${esc(selectedColor.name)}</div>`:''}<h4>Size</h4><div class="row">${(product.sizes||[]).map((s,i)=>`<button class="pill ${selectedSize===s?'active':''}" onclick="selectedSize='${esc(s)}';render()">${esc(s)}</button>`).join('')}</div><h4>Quantity</h4><div class="row"><button class="pill" onclick="qty=Math.max(1,qty-1);render()">−</button><span style="padding:10px">${qty}</span><button class="pill" onclick="qty++;render()">+</button></div><div class="product-action-bar"><button class="btn cart" onclick="addCart()">Add to Cart</button><button class="btn buy" onclick="buyNow()">Buy Now</button></div><button class="btn share" onclick="shareProduct()">↗ Share Product</button><p class="msg">Cash on Delivery available.</p></section>`}
+function render(){images=getImages();if(idx>=images.length)idx=0;document.getElementById('app').innerHTML=`<section class="gallery"><div class="main"><button class="arrow prev" onclick="move(-1)">‹</button><img src="${esc(images[idx]||'')}" onerror="this.style.display='none'" alt="${esc(product.name)}"><button class="arrow next" onclick="move(1)">›</button></div><div class="thumbs">${images.map((x,i)=>`<button class="thumb ${i===idx?'active':''}" onclick="idx=${i};render()"><img src="${esc(x)}"></button>`).join('')}</div></section><section class="info"><div>${esc(product.category||'')}</div><h1>${esc(product.name)}</h1><div class="price">₹${product.price}${product.mrp?`<span class="mrp">₹${product.mrp}</span>`:''}</div><div class="trust-strip"><div class="trust-item"><span class="trust-ic">↩️</span><span>7 Day<br>Return Policy</span></div><div class="trust-item"><span class="trust-ic">💵</span><span>Cash on<br>Delivery</span></div><div class="trust-item"><span class="trust-ic">🇮🇳</span><span>Made in<br>India</span></div></div><div class="description"><h3>Description</h3><p>${esc(product.description||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.')}</p></div><h4>Color</h4><div class="row">${getColors().length?getColors().map((c,i)=>`<button class="color ${selectedColor?.name===c.name?'active':''}" title="${esc(c.name)}" style="background:${esc(c.code||'#ddd')}" onclick="chooseColor(${i})"></button>`).join(''):'<span class="msg">Default color</span>'}</div>${selectedColor?`<div class="msg">Selected: ${esc(selectedColor.name)}</div>`:''}<h4>Size</h4><div class="row">${(product.sizes||[]).map((s,i)=>`<button class="pill ${selectedSize===s?'active':''}" onclick="selectedSize='${esc(s)}';render()">${esc(s)}</button>`).join('')}</div><h4>Quantity</h4><div class="row"><button class="pill" onclick="qty=Math.max(1,qty-1);render()">−</button><span style="padding:10px">${qty}</span><button class="pill" onclick="qty++;render()">+</button></div><div class="product-action-bar"><button class="btn cart" onclick="addCart()">Add to Cart</button><button class="btn buy" onclick="buyNow()">Buy Now</button></div><button class="btn share" onclick="shareProduct()">↗ Share Product</button><p class="msg">Cash on Delivery available.</p></section>`}
 function chooseColor(i){selectedColor=getColors()[i];idx=0;render()}function move(n){if(!images.length)return;idx=(idx+n+images.length)%images.length;render()}
 function addCart(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');const color=selectedColor?.name||'Default';let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color);if(e)e.qty+=qty;else cart.push({id:product.id,name:product.name,price:product.price,size:selectedSize||'',color,qty,img:(images[0]||product.img||'')});localStorage.setItem('smartDealCart',JSON.stringify(cart));alert('Added to cart');}
 function buyNow(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}const color=selectedColor?.name||'Default';let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color);if(e)e.qty+=qty;else cart.push({id:product.id,name:product.name,price:product.price,size:selectedSize||'',color,qty,img:(images[0]||product.img||''),swatch:product.swatch});localStorage.setItem('smartDealCart',JSON.stringify(cart));location.href='index.html?checkout=1'}
 async function shareProduct(){const url=location.href;if(navigator.share){try{await navigator.share({title:product.name,text:'Check this product on Smart Deal',url})}catch(e){}}else{await navigator.clipboard?.writeText(url);alert('Product link copied');}}
-(async()=>{try{products=await (await fetch('products.json?ts='+Date.now())).json();product=products.find(p=>p.id===id);if(!product){document.getElementById('app').innerHTML='<h2>Product not found</h2>';return}selectedColor=getColors()[0]||null;selectedSize=(product.sizes||[])[0]||null;render()}catch(e){document.getElementById('app').innerHTML='<h2>Could not load products.json</h2>'}})();
+(async()=>{try{products=await (await fetch('products.json?ts='+Date.now())).json();product=products.find(p=>p.id===id);if(!product){document.getElementById('app').innerHTML='<h2>Product not found</h2>';return}selectedColor=getColors()[0]||null;selectedSize=(product.sizes||[])[0]||null;render();initReviews()}catch(e){document.getElementById('app').innerHTML='<h2>Could not load products.json</h2>'}})();
+
+/* ---------- Reviews (no login needed) ---------- */
+let reviews=[], revRating=0, revPhotoFile=null, revBusy=false;
+
+function revEsc(x){return esc(x);}
+function revStars(n){let s='';for(let i=1;i<=5;i++)s+= i<=Math.round(n)?'★':'☆';return s;}
+function revTimeAgo(iso){
+  const then=new Date(iso), days=Math.floor((Date.now()-then)/86400000);
+  if(days<=0)return 'Today'; if(days===1)return '1 day ago'; if(days<30)return days+' days ago';
+  const months=Math.floor(days/30); if(months<12)return months+(months===1?' month ago':' months ago');
+  return then.toLocaleDateString();
+}
+
+function renderReviews(){
+  const root=document.getElementById('reviewsRoot');
+  const count=reviews.length;
+  const avg=count?reviews.reduce((s,r)=>s+(Number(r.rating)||0),0)/count:0;
+  const summaryHtml=count
+    ? `<div class="rev-summary"><div class="rev-avg">${avg.toFixed(1)}</div><div><div class="rev-stars">${revStars(avg)}</div><div class="rev-count">${count} review${count===1?'':'s'}</div></div></div>`
+    : `<div class="rev-empty">No reviews yet. Be the first to share how this product was!</div>`;
+  const listHtml=reviews.map(r=>`
+    <div class="rev-item">
+      <div class="rev-item-top"><span class="rev-name">${revEsc(r.name||'Anonymous')}</span><span class="rev-date">${revTimeAgo(r.createdAt)}</span></div>
+      <div class="rev-stars-sm">${revStars(r.rating)}</div>
+      ${r.text?`<div class="rev-text">${revEsc(r.text)}</div>`:''}
+      ${r.photo?`<img class="rev-photo" src="${r.photo}" onclick="openRevPhoto(this.src)">`:''}
+    </div>`).join('');
+
+  root.innerHTML=`
+    <section class="reviews">
+      <h3>Customer Reviews</h3>
+      ${summaryHtml}
+      <div class="rev-list">${listHtml}</div>
+      <div class="rev-form">
+        <h4>Write a review</h4>
+        <div class="star-pick" id="starPick">${[1,2,3,4,5].map(n=>`<span data-n="${n}" onclick="setRevRating(${n})">★</span>`).join('')}</div>
+        <input type="text" id="revName" placeholder="Your name (optional)" autocomplete="off">
+        <textarea id="revText" placeholder="How was the product? (fit, quality, fabric...)"></textarea>
+        <input type="file" id="revPhoto" accept="image/*">
+        <div class="rev-photo-stat" id="revPhotoStat"></div>
+        <button class="rev-submit" id="revSubmitBtn" onclick="submitReview()">Submit Review</button>
+        <div class="rev-status" id="revStatus"></div>
+      </div>
+    </section>`;
+
+  document.querySelectorAll('#starPick span').forEach(s=>{
+    if(+s.dataset.n<=revRating) s.classList.add('on');
+  });
+  document.getElementById('revPhoto').addEventListener('change', onRevPhotoChange);
+}
+
+function setRevRating(n){
+  revRating=n;
+  document.querySelectorAll('#starPick span').forEach(s=>s.classList.toggle('on', +s.dataset.n<=n));
+}
+
+function openRevPhoto(src){
+  const d=document.createElement('div');
+  d.className='rev-lightbox';
+  d.innerHTML=`<img src="${src}">`;
+  d.onclick=()=>d.remove();
+  document.body.appendChild(d);
+}
+
+async function revFileToDataURL(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('read failed'));r.readAsDataURL(file);});
+}
+function revDrawJpeg(src,w,h){
+  const scale=Math.min(1,700/Math.max(w,h));
+  const c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(w*scale));c.height=Math.max(1,Math.round(h*scale));
+  const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(src,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg',0.7);
+}
+async function revCompress(file){
+  try{
+    if(window.createImageBitmap){const b=await createImageBitmap(file);const o=revDrawJpeg(b,b.width,b.height);if(b.close)b.close();return o;}
+  }catch(_){}
+  const du=await revFileToDataURL(file);
+  const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=du;});
+  return revDrawJpeg(img,img.naturalWidth||img.width,img.naturalHeight||img.height);
+}
+
+async function onRevPhotoChange(e){
+  const f=e.target.files[0];
+  const stat=document.getElementById('revPhotoStat');
+  revPhotoFile=null;
+  if(!f){stat.textContent='';return;}
+  stat.style.color='';stat.textContent='Reading photo…';
+  try{
+    revPhotoFile=await revCompress(f);
+    stat.style.color='#2F7D4F';stat.textContent='Photo ready';
+  }catch(_){
+    stat.style.color='#B5495B';stat.textContent='Could not read this photo. Try choosing it again, or skip the photo.';
+  }
+}
+
+async function loadReviews(){
+  try{
+    const snap=await db.collection('reviews').where('productId','==',id).get();
+    reviews=[]; snap.forEach(d=>reviews.push(d.data()));
+    reviews.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  }catch(e){
+    console.error('Could not load reviews:',e);
+    reviews=[];
+  }
+  renderReviews();
+}
+
+function initReviews(){
+  if(typeof db==='undefined'){
+    document.getElementById('reviewsRoot').innerHTML='';
+    return;
+  }
+  loadReviews();
+}
+
+async function submitReview(){
+  if(revBusy) return;
+  const statusEl=document.getElementById('revStatus');
+  if(!revRating){ statusEl.textContent='Please tap a star to rate this product.'; statusEl.className='rev-status fail'; return; }
+  if(typeof db==='undefined'){ statusEl.textContent='Reviews are not available right now.'; statusEl.className='rev-status fail'; return; }
+
+  revBusy=true;
+  document.getElementById('revSubmitBtn').disabled=true;
+  statusEl.className='rev-status'; statusEl.textContent='Submitting…';
+  try{
+    const review={
+      productId:id,
+      name:(document.getElementById('revName').value||'').trim().slice(0,60),
+      rating:revRating,
+      text:(document.getElementById('revText').value||'').trim().slice(0,600),
+      photo:revPhotoFile||'',
+      createdAt:new Date().toISOString()
+    };
+    await db.collection('reviews').add(review);
+    reviews.unshift(review);
+    revRating=0; revPhotoFile=null;
+    renderReviews();
+    const s=document.getElementById('revStatus');
+    s.textContent='Thank you! Your review has been posted.'; s.className='rev-status good';
+  }catch(e){
+    console.error(e);
+    statusEl.textContent='Could not submit your review right now. Please try again.';
+    statusEl.className='rev-status fail';
+  }finally{
+    revBusy=false;
+    const btn=document.getElementById('revSubmitBtn'); if(btn) btn.disabled=false;
+  }
+}
 </script></body></html>

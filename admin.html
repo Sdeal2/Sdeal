@@ -72,6 +72,8 @@
   .accept-btn:hover{background:#2F7D4F; color:#fff;}
   .reject-btn{border-color:var(--rose); color:var(--rose);}
   .reject-btn:hover{background:var(--rose); color:#fff;}
+  .cancel-order-btn{padding:8px 14px; font-size:12.5px; font-weight:600; border:1px solid var(--rose); color:var(--rose); background:#fff;}
+  .cancel-order-btn:hover{background:var(--rose); color:#fff;}
   .empty{color:var(--ink-soft); font-size:13.5px; text-align:center; padding:30px;}
   .loading{color:var(--ink-soft); font-size:13.5px; text-align:center; padding:20px;}
 </style>
@@ -146,9 +148,12 @@ if(sessionStorage.getItem('smartd_admin') === 'true'){
 
 function renderOrderRow(order){
   const itemsSummary = order.items.map(i => `${i.name} (${i.size}) x${i.qty}`).join(', ');
+  const isFinal = order.status === "Cancelled" || RETURN_STATUSES.includes(order.status);
   const btns = STATUS_STEPS.map(s =>
     `<button class="status-btn ${order.status===s?'active':''}" onclick="updateStatus('${order.orderId}','${s}')">${s}</button>`
   ).join('');
+  const cancelBtn = (order.status === "Delivered" || isFinal) ? '' :
+    `<button class="cancel-order-btn" onclick="cancelOrderAdmin('${order.orderId}')">Cancel order</button>`;
 
   return `
     <div class="order-row">
@@ -159,8 +164,23 @@ function renderOrderRow(order){
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
       <div class="order-row-items">${itemsSummary}</div>
-      <div class="status-btns">${btns}</div>
+      <div class="status-btns">${btns}${cancelBtn}</div>
     </div>`;
+}
+
+async function cancelOrderAdmin(orderId){
+  if(!confirm('Cancel order ' + orderId + '? This cannot be undone.')) return;
+  try{
+    await db.collection('orders').doc(orderId).update({
+      status: "Cancelled",
+      cancelledAt: new Date().toISOString(),
+      statusUpdatedAt: new Date().toISOString()
+    });
+    if(document.getElementById('searchInput').value.trim()){ searchOrder(); } else { loadRecentOrders(); }
+  }catch(e){
+    console.error(e);
+    alert('Could not cancel this order. Please try again.');
+  }
 }
 
 async function loadRecentOrders(){

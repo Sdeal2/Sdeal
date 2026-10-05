@@ -83,6 +83,11 @@
   .return-btn:hover{background:#9A3E4D;}
   .return-closed{font-size:13px; color:var(--ink-soft);}
   .return-done{font-size:13px; color:var(--indigo); font-weight:600;}
+  .cancel-btn{
+    background:#fff; color:var(--rose); padding:13px 24px;
+    font-weight:600; font-size:14px; width:100%; border:1.5px solid var(--rose);
+  }
+  .cancel-btn:hover{background:var(--rose); color:#fff;}
 </style>
 </head>
 <body>
@@ -114,7 +119,8 @@ if(prefillId){
 const RETURN_STATUSES = ["Return Requested","Return Approved","Return Rejected"];
 function stepState(order, stepKey){
   const order_map = ["Order Placed","Shipped","Out for Delivery","Delivered"];
-  const effectiveStatus = RETURN_STATUSES.includes(order.status) ? "Delivered" : order.status;
+  const effectiveStatus = RETURN_STATUSES.includes(order.status) ? "Delivered"
+    : (order.status === "Cancelled" ? "Order Placed" : order.status);
   const currentIdx = order_map.indexOf(effectiveStatus);
   const stepIdx = order_map.indexOf(stepKey);
   if(stepIdx < currentIdx) return "done";
@@ -156,7 +162,16 @@ function renderOrder(order){
   ).join('');
 
   let returnHtml = '';
-  if(order.status === "Delivered" || RETURN_STATUSES.includes(order.status)){
+  if(order.status === "Order Placed"){
+    returnHtml = `
+      <div class="return-box">
+        <h3>Need to cancel?</h3>
+        <p>You can cancel this order any time before it ships.</p>
+        <button class="cancel-btn" onclick="cancelOrder('${order.orderId}')">Cancel Order</button>
+      </div>`;
+  } else if(order.status === "Cancelled"){
+    returnHtml = `<div class="return-box"><div class="return-closed">This order was cancelled.</div></div>`;
+  } else if(order.status === "Delivered" || RETURN_STATUSES.includes(order.status)){
     const daysSince = order.deliveredAt ? daysBetween(order.deliveredAt) : 0;
     if(order.status === "Return Approved"){
       returnHtml = `<div class="return-box"><div class="return-done">Your return has been approved. We will reach out about pickup soon.</div></div>`;
@@ -208,6 +223,22 @@ async function lookupOrder(){
     console.error(e);
     document.getElementById('resultArea').innerHTML = '<div class="state-msg">Could not load order right now. Please try again in a moment.</div>';
   }
+}
+
+async function cancelOrder(orderId){
+  if(!confirm('Cancel this order? This cannot be undone.')) return;
+  try{
+    await db.collection('orders').doc(orderId).update({
+      status: "Cancelled",
+      cancelledAt: new Date().toISOString(),
+      statusUpdatedAt: new Date().toISOString()
+    });
+  }catch(e){
+    console.error('Could not cancel order:', e);
+    alert('Could not cancel your order right now. Please try again in a moment.');
+    return;
+  }
+  lookupOrder();
 }
 
 async function requestReturn(orderId){

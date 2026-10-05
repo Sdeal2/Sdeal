@@ -76,6 +76,9 @@
   .accept-btn:hover{background:var(--ok); color:#fff;}
   .reject-btn{border-color:var(--rose); color:var(--rose);}
   .reject-btn:hover{background:var(--rose); color:#fff;}
+  .cancel-order-btn{padding:8px 14px; font-size:12.5px; font-weight:600; border:1px solid var(--rose); color:var(--rose); background:#fff;}
+  .cancel-order-btn:hover{background:var(--rose); color:#fff;}
+  .cancelled-tag{font-size:12px; color:var(--rose); font-weight:600;}
   .empty{color:var(--ink-soft); font-size:13.5px; text-align:center; padding:30px;}
   .loading{color:var(--ink-soft); font-size:13.5px; text-align:center; padding:20px;}
 </style>
@@ -184,8 +187,8 @@ async function loadStats(){
     snap.forEach(doc => orders.push(doc.data()));
 
     const totalOrders = orders.length;
-    const cancelledLike = new Set(["Return Approved"]);
-    const totalSales = orders.reduce((sum, o) => sum + (cancelledLike.has(o.status) ? 0 : (Number(o.total) || 0)), 0);
+    const excludedFromSales = new Set(["Return Approved", "Cancelled"]);
+    const totalSales = orders.reduce((sum, o) => sum + (excludedFromSales.has(o.status) ? 0 : (Number(o.total) || 0)), 0);
     const pending = orders.filter(o => STATUS_STEPS.includes(o.status) && o.status !== "Delivered").length;
     const returns = orders.filter(o => o.status === "Return Requested").length;
 
@@ -201,9 +204,12 @@ async function loadStats(){
 
 function renderOrderRow(order){
   const itemsSummary = order.items.map(i => `${i.name} (${i.size}) x${i.qty}`).join(', ');
+  const isFinal = order.status === "Cancelled" || RETURN_STATUSES.includes(order.status);
   const btns = STATUS_STEPS.map(s =>
     `<button class="status-btn ${order.status===s?'active':''}" onclick="updateStatus('${order.orderId}','${s}')">${s}</button>`
   ).join('');
+  const cancelBtn = (order.status === "Delivered" || isFinal) ? '' :
+    `<button class="cancel-order-btn" onclick="cancelOrderAdmin('${order.orderId}')">Cancel order</button>`;
 
   return `
     <div class="order-row">
@@ -214,8 +220,24 @@ function renderOrderRow(order){
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
       <div class="order-row-items">${itemsSummary}</div>
-      <div class="status-btns">${btns}</div>
+      <div class="status-btns">${btns}${cancelBtn}</div>
     </div>`;
+}
+
+async function cancelOrderAdmin(orderId){
+  if(!confirm('Cancel order ' + orderId + '? This cannot be undone.')) return;
+  try{
+    await db.collection('orders').doc(orderId).update({
+      status: "Cancelled",
+      cancelledAt: new Date().toISOString(),
+      statusUpdatedAt: new Date().toISOString()
+    });
+    loadStats();
+    if(document.getElementById('searchInput').value.trim()){ searchOrder(); } else { loadRecentOrders(); }
+  }catch(e){
+    console.error(e);
+    alert('Could not cancel this order. Please try again.');
+  }
 }
 
 async function loadRecentOrders(){
