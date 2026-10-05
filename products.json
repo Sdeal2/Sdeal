@@ -126,5 +126,36 @@
       "#0000FF",
       "#5959FF"
     ]
+  },
+  {
+    "id": 19,
+    "name": "COOPERWINGS Men's Stylish Casual Sports Walking Sneakers Shoes For Boys And Men",
+    "category": "Shoes",
+    "description": "Product Highlights\n\nSole Material      Material\nPVC                    Canvas\nNet Quantity (N) 1       Type\n                                   Slip-on Sneakers\nAdditional Details\nColor\nMulticolor\nAnkle Height\nRegular\nInsole\nComfort\nPattern\nPrinted\nHeel Type\nComfort\nGeneric Name\nSneakers\nCountry of Origin\nIndia\nProduct Safety\nInformation\nProduct may be regulated by BIS Quality Control Order. Visit https://www.bis.gov.in/know-your-standard/for more information; check IS mark on item/ upon delivery.",
+    "price": 295,
+    "mrp": 999,
+    "sizes": [
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "img": "images/p19-common-1.jpg",
+    "images": [
+      "images/p19-common-1.jpg"
+    ],
+    "colors": [
+      {
+        "name": "White",
+        "code": "#FFFFFF",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ]
   }
 ]
