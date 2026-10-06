@@ -418,6 +418,16 @@
   .drawer.full #checkoutView,
   .drawer.full #successView{ width:100%; max-width:560px; margin:0 auto; flex:1; overflow-y:auto; }
   .drawer.full #checkoutView .checkout-form{ padding:20px 20px 40px; }
+
+  /* ---------- Long product titles: 2 lines, tap to expand ---------- */
+  .card-name{ display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer; }
+  .card-name.expanded{ display:block; overflow:visible; }
+
+  /* ---------- Checkout summary: one line per product ---------- */
+  .order-summary-mini .sum-row{ gap:8px; align-items:baseline; }
+  .sum-name{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sum-meta{ flex:none; white-space:nowrap; color:var(--ink-soft); }
+  .sum-price{ flex:none; white-space:nowrap; font-weight:600; }
 </style>
 </head>
 <body>
@@ -789,7 +799,7 @@ function goToCheckout(){
 
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   document.getElementById('orderSummaryMini').innerHTML =
-    cart.map(i => `<div><span>${i.name} (${i.size}) x${i.qty}</span><span>₹${i.price * i.qty}</span></div>`).join('') +
+    cart.map(i => `<div class="sum-row"><span class="sum-name">${i.name}</span><span class="sum-meta">(${i.size}) x${i.qty}</span><span class="sum-price">₹${i.price * i.qty}</span></div>`).join('') +
     `<div style="font-weight:700; border-top:1px solid var(--line); margin-top:6px; padding-top:8px;"><span>Total</span><span>₹${total}</span></div>`;
 }
 
@@ -953,6 +963,14 @@ loadStoreData();
   mo.observe(ok,{attributes:true,attributeFilter:['style']});
   update();
 })();
+</script>
+<script>
+document.addEventListener('click',function(e){
+  var n=e.target.closest&&e.target.closest('.card-name');
+  if(!n) return;
+  e.stopPropagation();
+  n.classList.toggle('expanded');
+},true);
 </script>
 </body>
 </html>
