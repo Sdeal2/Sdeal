@@ -378,18 +378,72 @@
     padding:30px 20px; text-align:center;
     font-size:12.5px; color:var(--ink-soft);
   }
+
+  /* ---------- Demo-style top & bottom bars ---------- */
+  :root{ --sd-brand:#e8561f; --sd-ink:#2b2b2b; --sd-muted:#6f6f6f; --sd-line:#dcdcdc; --sd-badge:#e53935; }
+  header{ background:#fff; border-bottom:1px solid #eee; }
+  .sd-top{ max-width:1100px; margin:0 auto; padding:0 14px 10px; }
+  .sd-row{ display:flex; align-items:center; justify-content:space-between; height:56px; }
+  .sd-logo{ font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif; font-size:26px; font-weight:700; letter-spacing:-0.5px; color:var(--sd-ink); margin-left:6px; }
+  .sd-logo b{ color:var(--sd-brand); font-weight:700; }
+  .sd-icons{ display:flex; align-items:center; gap:18px; }
+  .sd-ibtn{ position:relative; display:grid; place-items:center; color:var(--sd-ink); }
+  .sd-ibtn svg{ width:26px; height:26px; }
+  .sd-badge{ position:absolute; top:-7px; right:-9px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--sd-badge); color:#fff; font-size:11px; font-weight:700; line-height:18px; text-align:center; }
+  .sd-search{ display:flex; align-items:center; gap:10px; height:42px; padding:0 12px; border:1.5px solid var(--sd-line); border-radius:8px; background:#fff; color:var(--sd-muted); font-size:16px; }
+  .sd-search svg{ width:22px; height:22px; flex:none; }
+  .sd-search span{ flex:1; }
+  .filter-bar{ top:109px; }
+
+  .bottom-nav{ background:#fff; border-top:1px solid #eee; box-shadow:none; }
+  .bottom-nav button{ color:var(--sd-muted); font-size:12px; font-weight:500; }
+  .bottom-nav button.active{ color:var(--sd-brand); font-weight:500; }
+  .bottom-nav .nav-icon{ display:block; line-height:0; }
+  .bottom-nav .nav-icon svg{ width:26px; height:26px; }
+  .nav-badge{ top:2px; background:var(--sd-badge); border-radius:9px; min-width:18px; height:18px; font-size:11px; font-weight:700; }
+
+  /* ---------- Full-screen My Account page ---------- */
+  #accountModal{
+    max-width:none !important; width:100vw; height:100%; max-height:none;
+    top:0; left:0; transform:none; border-radius:0; background:#fff;
+    z-index:70 !important;
+  }
+  #accountModal .modal-close{ position:fixed; top:14px; right:14px; z-index:3; }
+  #accountModal .account-panel{ max-width:560px; margin:0 auto; padding:70px 20px 40px; }
+  #accountOverlay{ z-index:65; }
+
+  /* ---------- Full-screen Checkout page ---------- */
+  .drawer.full{ width:100vw; z-index:70; background:var(--bg); }
+  .drawer.full .drawer-head{ background:#fff; }
+  .drawer.full #checkoutView,
+  .drawer.full #successView{ width:100%; max-width:560px; margin:0 auto; flex:1; overflow-y:auto; }
+  .drawer.full #checkoutView .checkout-form{ padding:20px 20px 40px; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-inner">
-    <div class="logo">SMART DEAL<span>.</span></div>
-    <div class="header-actions">
-      <a class="icon-btn" href="search.html" aria-label="Search">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </a>
+  <div class="sd-top">
+    <div class="sd-row">
+      <div class="sd-logo"><b>Smart</b> Deal</div>
+      <div class="sd-icons">
+        <button class="sd-ibtn" onclick="navAccount()" aria-label="Account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        </button>
+        <button class="sd-ibtn" onclick="navWishlist()" aria-label="Wishlist">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-9.3-9.2C1.5 7.5 3.5 4.5 6.7 4.5c2 0 3.7 1.1 5.3 3 1.6-1.9 3.3-3 5.3-3 3.2 0 5.2 3 4 6.3C19.5 15.4 12 20 12 20z"/></svg>
+        </button>
+        <button class="sd-ibtn" onclick="openCart()" aria-label="Cart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>
+          <span class="sd-badge" id="topCartCount">0</span>
+        </button>
+      </div>
     </div>
+    <a class="sd-search" href="search.html" aria-label="Search for products">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <span>Search for products</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8.5" y="8.5" width="7" height="7" rx="1"/></svg>
+    </a>
   </div>
 </header>
 
@@ -413,10 +467,10 @@
 </main>
 
 <nav class="bottom-nav" id="bottomNav">
-  <button id="navHome" class="active" onclick="navHome()"><span class="nav-icon">⌂</span><span>Home</span></button>
-  <button id="navAccount" onclick="navAccount()"><span class="nav-icon">♙</span><span>Account</span></button>
-  <button id="navCart" onclick="openCart()"><span class="nav-icon">🛒</span><span>Cart</span><span class="nav-badge" id="cartCount">0</span></button>
-  <button id="navWishlist" onclick="navWishlist()"><span class="nav-icon">♡</span><span>Wishlist</span><span class="nav-badge" id="wishCount">0</span></button>
+  <button id="navHome" class="active" onclick="navHome()"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2.5 11.5H5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-8.5h2.5z"/></svg></span><span>Home</span></button>
+  <button id="navAccount" onclick="navAccount()"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span><span>Account</span></button>
+  <button id="navCart" onclick="openCart()"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg></span><span>Cart</span><span class="nav-badge" id="cartCount">0</span></button>
+  <button id="navWishlist" onclick="navWishlist()"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-9.3-9.2C1.5 7.5 3.5 4.5 6.7 4.5c2 0 3.7 1.1 5.3 3 1.6-1.9 3.3-3 5.3-3 3.2 0 5.2 3 4 6.3C19.5 15.4 12 20 12 20z"/></svg></span><span>Wishlist</span><span class="nav-badge" id="wishCount">0</span></button>
 </nav>
 
 <div class="overlay" id="accountOverlay" onclick="closeAccount()"></div>
@@ -871,5 +925,34 @@ async function loadStoreData(){
 loadStoreData();
 </script>
 
+<script>
+(function(){
+  var s=document.getElementById('cartCount'), t=document.getElementById('topCartCount');
+  if(!s||!t) return;
+  function sync(){ t.textContent=s.textContent; }
+  sync();
+  new MutationObserver(sync).observe(s,{childList:true,characterData:true,subtree:true});
+})();
+</script>
+<script>
+/* Checkout / success open as a full-screen page inside the cart drawer */
+(function(){
+  var drawer=document.getElementById('cartDrawer'),
+      co=document.getElementById('checkoutView'),
+      ok=document.getElementById('successView'),
+      title=drawer&&drawer.querySelector('.drawer-head h3');
+  if(!drawer||!co||!ok) return;
+  function update(){
+    var inCheckout=co.style.display==='block', inSuccess=ok.style.display==='block';
+    drawer.classList.toggle('full', inCheckout||inSuccess);
+    if(title) title.textContent = inCheckout ? 'Checkout' : inSuccess ? 'Order Placed' : 'Your Cart';
+    if(inCheckout||inSuccess) co.scrollTop=0;
+  }
+  var mo=new MutationObserver(update);
+  mo.observe(co,{attributes:true,attributeFilter:['style']});
+  mo.observe(ok,{attributes:true,attributeFilter:['style']});
+  update();
+})();
+</script>
 </body>
 </html>
