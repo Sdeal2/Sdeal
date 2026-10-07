@@ -972,5 +972,20 @@ document.addEventListener('click',function(e){
   n.classList.toggle('expanded');
 },true);
 </script>
+<script>
+/* Product page se Add to Cart / Wishlist karne ke baad wapas aane par cart apne aap update ho */
+(function(){
+  function syncFromStorage(){
+    try{ cart = JSON.parse(localStorage.getItem('smartDealCart') || '[]'); }catch(e){ cart = []; }
+    try{ wishlist = JSON.parse(localStorage.getItem('smartDealWishlist') || '[]'); }catch(e){ wishlist = []; }
+    updateCartCount();
+    updateWishlistCount();
+    renderCart();
+  }
+  window.addEventListener('pageshow', syncFromStorage);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) syncFromStorage(); });
+  window.addEventListener('storage', function(e){ if(e.key==='smartDealCart'||e.key==='smartDealWishlist') syncFromStorage(); });
+})();
+</script>
 </body>
 </html>
