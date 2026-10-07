@@ -3,7 +3,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <style>
-:root{--brand:#e8561f;--ink:#1f1f1f;--muted:#6f6f6f;--line:#e6e0d4;--bg:#faf6ef;--green:#0f8a3c;--blue:#1565d8;--badge:#e53935}
+:root{--brand:#e8561f;--ink:#1f1f1f;--muted:#6f6f6f;--line:#e6e0d4;--bg:#fff;--green:#0f8a3c;--blue:#1565d8;--badge:#e53935}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink);padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 button{font-family:inherit;cursor:pointer}
@@ -14,8 +14,12 @@ svg{display:block}
 
 /* ---------- Gallery ---------- */
 .gallery{position:relative;padding:10px 10px 0;background:var(--bg);border-radius:0;overflow:visible}
-.main{position:relative;aspect-ratio:1/1.05;display:flex;align-items:center;justify-content:center;background:#efefef;border-radius:14px;overflow:hidden}
-.main img{width:100%;height:100%;object-fit:contain}
+.main{position:relative;aspect-ratio:1/1.05;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;background:#f1f1f1;border-radius:14px;-webkit-overflow-scrolling:touch}
+.main::-webkit-scrollbar{display:none}
+.main img{flex:none;width:100%;height:100%;object-fit:contain;scroll-snap-align:center;scroll-snap-stop:always}
+.bars{display:flex;gap:4px;padding:10px 14px 0}
+.bars i{flex:1;height:3px;background:#ddd;border-radius:2px;transition:background .2s}
+.bars i.on{background:var(--ink)}
 .arrow{position:absolute;top:50%;transform:translateY(-50%);border:0;border-radius:50%;width:38px;height:38px;font-size:24px;line-height:1;background:#fff;box-shadow:0 2px 10px #0002;color:var(--ink)}
 .prev{left:10px}.next{right:10px}
 .float-btns{position:absolute;top:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:2}
@@ -94,6 +98,15 @@ svg{display:block}
 .product-action-bar .btn{flex:1;margin:0;height:50px;font-size:16px;font-weight:700;border-radius:12px;border:0;min-width:0}
 .btn.cart{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
 .btn.buy{background:var(--brand);color:#fff}
+
+/* ---------- Info chips (Return / COD / Made in India) ---------- */
+.chips{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:16px 16px 4px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:9px 14px;font-size:15px;white-space:nowrap}
+.chip-ic{width:34px;height:34px;border-radius:10px;background:#f1eee6;display:grid;place-items:center;font-size:18px;flex:none}
+
+.desc-text{display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.desc-text.open{display:block;overflow:visible}
 </style>
 <style>
 /* Trust strip */
@@ -120,7 +133,7 @@ svg{display:block}
 .rev-photo{width:76px; height:76px; object-fit:cover; border-radius:8px; border:1px solid #ddd; cursor:pointer}
 .rev-empty{color:#888; font-size:13.5px; padding:6px 0 10px}
 
-.rev-form{margin-top:18px; padding:16px; background:#faf8f3; border-radius:10px}
+.rev-form{margin-top:18px; padding:16px; background:#f6f6f6; border-radius:10px}
 .rev-form h4{font-size:14.5px; margin-bottom:10px}
 .star-pick{display:flex; gap:6px; font-size:28px; margin:4px 0 12px; cursor:pointer; line-height:1}
 .star-pick span{color:#ccc}
@@ -139,7 +152,7 @@ svg{display:block}
 </style>
 </head><body><div class="top"><a href="index.html">← Back to Shop</a></div><main class="wrap"><div id="app">Loading product...</div><div id="reviewsRoot"></div></main><script>
 let products=[],product=null,images=[],idx=0,selectedColor=null,selectedSize=null,qty=1;
-let pinVal='',pinMsg='',pinCls='',delOpen=true,titleOpen=false;
+let pinVal='',pinMsg='',pinCls='',delOpen=true,titleOpen=false,descOpen=false;
 const params=new URLSearchParams(location.search);const id=Number(params.get('id'));
 function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function formatDescription(text){
@@ -160,6 +173,7 @@ function isWish(){return wl().includes(product.id)}
 function toggleWish(){let a=wl();a=a.includes(product.id)?a.filter(x=>x!==product.id):[...a,product.id];localStorage.setItem('smartDealWishlist',JSON.stringify(a));const b=document.getElementById('wishBtn');if(b)b.classList.toggle('on',a.includes(product.id))}
 
 /* title more / less */
+function toggleDesc(){descOpen=!descOpen;const t=document.getElementById('descText'),b=document.getElementById('descMore');if(t)t.classList.toggle('open',descOpen);if(b)b.textContent=descOpen?'less':'...more'}
 function toggleTitle(){titleOpen=!titleOpen;const t=document.getElementById('ptitle'),b=document.getElementById('moreBtn');if(t)t.classList.toggle('open',titleOpen);if(b)b.textContent=titleOpen?'less':'...more'}
 
 /* delivery */
@@ -197,17 +211,13 @@ function render(){
   const sim=similarList();
   document.getElementById('app').innerHTML=`
   <section class="gallery">
-    <div class="main">
-      ${images.length>1?`<button class="arrow prev" onclick="move(-1)">‹</button>`:''}
-      <img src="${esc(images[idx]||'')}" onerror="this.style.display='none'" alt="${esc(product.name)}">
-      ${images.length>1?`<button class="arrow next" onclick="move(1)">›</button>`:''}
-    </div>
+    <div class="main" id="slider" onscroll="onSlide(this)">${images.map(x=>`<img src="${esc(x)}" onerror="this.style.visibility='hidden'" alt="${esc(product.name)}" draggable="false">`).join('')}</div>
     <div class="float-btns">
       <button class="fbtn ${isWish()?'on':''}" id="wishBtn" onclick="toggleWish()" aria-label="Wishlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-9.3-9.2C1.5 7.5 3.5 4.5 6.7 4.5c2 0 3.7 1.1 5.3 3 1.6-1.9 3.3-3 5.3-3 3.2 0 5.2 3 4 6.3C19.5 15.4 12 20 12 20z"/></svg></button>
       <button class="fbtn" onclick="shareProduct()" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7z"/><path d="M21 3 10 13.5"/></svg></button>
     </div>
     <div class="rating-chip" id="ratingChip"></div>
-    ${images.length>1?`<div class="thumbs">${images.map((x,i)=>`<button class="thumb ${i===idx?'active':''}" onclick="idx=${i};render()"><img src="${esc(x)}"></button>`).join('')}</div>`:''}
+    ${images.length>1?`<div class="bars" id="bars">${images.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('')}</div>`:''}
   </section>
 
   <section class="info">
@@ -241,9 +251,9 @@ function render(){
     </div>
   </div>
 
-  <div class="info" style="padding-top:0"><div class="trust-strip"><div class="trust-item"><span class="trust-ic">↩️</span><span>7 Day<br>Return Policy</span></div><div class="trust-item"><span class="trust-ic">💵</span><span>Cash on<br>Delivery</span></div><div class="trust-item"><span class="trust-ic">🇮🇳</span><span>Made in<br>India</span></div></div></div>
+  <div class="chips"><div class="chip"><span class="chip-ic">↩️</span>7-Day Return Policy</div><div class="chip"><span class="chip-ic">💵</span>Cash on Delivery</div><div class="chip"><span class="chip-ic">🇮🇳</span>Made in India</div></div>
 
-  <div class="description"><h3>Description</h3><p>${esc(formatDescription(product.description))||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.'}</p></div>
+  <div class="description"><h3>Description</h3><p class="desc-text ${descOpen?'open':''}" id="descText" onclick="toggleDesc()">${esc(formatDescription(product.description))||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.'}</p><button class="more" id="descMore" onclick="toggleDesc()">${descOpen?'less':'...more'}</button></div>
 
   ${sim.length?`<div class="section"><div class="sec-head"><h3>Similar Products</h3><button class="round-btn dark" onclick="simNext()" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button></div></div>
   <div class="sim-list" id="simList">${sim.map(p=>`<a class="sim" href="product.html?id=${encodeURIComponent(p.id)}"><div class="sim-img"><img src="${esc(p.img||(p.images||[])[0]||'')}" alt="" onerror="this.style.display='none'"></div><div class="sim-name">${esc(p.name)}</div>${pct(p.price,p.mrp)?`<div class="sim-off">${pct(p.price,p.mrp)}% OFF</div>`:''}<div class="sim-price">${p.mrp&&p.mrp>p.price?`<s>₹${p.mrp}</s>`:''}₹${p.price}</div></a>`).join('')}</div>`:''}
@@ -254,7 +264,11 @@ function render(){
   const t=document.getElementById('ptitle'),mb=document.getElementById('moreBtn');
   if(t&&mb&&!titleOpen&&t.scrollHeight<=t.clientHeight+1)mb.style.display='none';
   updateRatingChip();
+  const sl=document.getElementById('slider');if(sl&&idx>0)sl.scrollLeft=idx*sl.clientWidth;
+  const dp=document.getElementById('descText'),db=document.getElementById('descMore');
+  if(dp&&db&&!descOpen&&dp.scrollHeight<=dp.clientHeight+1)db.style.display='none';
 }
+function onSlide(el){const i=Math.round(el.scrollLeft/(el.clientWidth||1));if(i!==idx&&i>=0&&i<images.length){idx=i;const b=document.getElementById('bars');if(b)[...b.children].forEach((x,k)=>x.classList.toggle('on',k===i))}}
 function chooseColor(i){selectedColor=getColors()[i];idx=0;render()}function move(n){if(!images.length)return;idx=(idx+n+images.length)%images.length;render()}
 function addCart(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');const color=selectedColor?.name||'Default';let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color);if(e)e.qty+=qty;else cart.push({id:product.id,name:product.name,price:product.price,size:selectedSize||'',color,qty,img:(images[0]||product.img||'')});localStorage.setItem('smartDealCart',JSON.stringify(cart));alert('Added to cart');}
 function buyNow(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}const color=selectedColor?.name||'Default';let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color);if(e)e.qty+=qty;else cart.push({id:product.id,name:product.name,price:product.price,size:selectedSize||'',color,qty,img:(images[0]||product.img||''),swatch:product.swatch});localStorage.setItem('smartDealCart',JSON.stringify(cart));location.href='index.html?checkout=1'}
