@@ -99,11 +99,11 @@ svg{display:block}
 .btn.cart{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
 .btn.buy{background:var(--brand);color:#fff}
 
-/* ---------- Info chips (Return / COD / Made in India) - fixed, all 3 in one row ---------- */
-.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;padding:12px 16px 2px}
-.chip{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 4px;font-size:11.5px;font-weight:500;line-height:1.25;text-align:center;white-space:normal;color:#222;min-width:0}
-.chip-ic{width:28px;height:28px;border-radius:9px;background:#f1eee6;display:grid;place-items:center;flex:none;font-size:15px;line-height:1}
-.chip-ic svg{width:17px;height:17px;color:#444}
+/* ---------- Info chips (Return / COD / Made in India) - one row, fixed, scales with screen ---------- */
+.chips{display:flex;justify-content:space-between;gap:6px;overflow:visible;padding:12px 16px 2px;font-size:clamp(9px,2.8vw,12.5px)}
+.chip{flex:none;display:flex;align-items:center;gap:.55em;background:#fff;border:1px solid var(--line);border-radius:1em;padding:.3em .7em .3em .3em;font-size:1em;font-weight:500;line-height:1.2;white-space:nowrap;color:#222}
+.chip-ic{width:2em;height:2em;border-radius:.65em;background:#f1eee6;display:grid;place-items:center;flex:none;font-size:1.05em;line-height:1}
+.chip-ic svg{width:1.2em;height:1.2em;color:#444}
 
 /* ---------- Description: 4 lines, ...more for full ---------- */
 .desc-text{display:-webkit-box;-webkit-line-clamp:4;line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
@@ -252,7 +252,7 @@ function render(){
     </div>
   </div>
 
-  <div class="chips"><div class="chip"><span class="chip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></span>7-Day Return<br>Policy</div><div class="chip"><span class="chip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></span>Cash on<br>Delivery</div><div class="chip"><span class="chip-ic">🇮🇳</span>Made in<br>India</div></div>
+  <div class="chips"><div class="chip"><span class="chip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></span>7-Day Return Policy</div><div class="chip"><span class="chip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></span>Cash on Delivery</div><div class="chip"><span class="chip-ic">🇮🇳</span>Made in India</div></div>
 
   <div class="description"><h3>Description</h3><p class="desc-text ${descOpen?'open':''}" id="descText" onclick="toggleDesc()">${esc(formatDescription(product.description))||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.'}</p><button class="more" id="descMore" onclick="toggleDesc()">${descOpen?'less':'...more'}</button></div>
 

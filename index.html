@@ -128,24 +128,26 @@
     border-bottom:1px solid var(--line);
     overflow-x:auto;
     white-space:nowrap;
-    padding:14px 20px;
+    padding:10px 12px 0;
     scrollbar-width:none;
   }
   .filter-bar::-webkit-scrollbar{display:none;}
   .filter-inner{max-width:1100px; margin:0 auto; display:flex; gap:10px;}
   .filter-pill{
-    display:inline-block;
-    padding:8px 18px;
-    border:1px solid var(--line);
-    font-size:13.5px;
-    font-weight:500;
+    flex:1 0 auto; min-width:64px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding:2px 8px 6px;
+    background:none; border:none; border-bottom:2.5px solid transparent;
+    font-size:12.5px; font-weight:500;
     color:var(--ink-soft);
     white-space:nowrap;
   }
+  .filter-pill svg{ width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
   .filter-pill.active{
-    background:var(--ink);
-    color:#fff;
-    border-color:var(--ink);
+    background:none;
+    color:var(--sd-brand, var(--ink));
+    border-bottom-color:var(--sd-brand, var(--ink));
+    font-weight:600;
   }
 
   /* ---------- Catalog ---------- */
@@ -629,10 +631,19 @@ let cart = JSON.parse(localStorage.getItem("smartDealCart") || "[]");
 const STORE_CATEGORIES = ["Shirt","T-Shirt","Shoes","Electric"];
 function getCategories(){ return ["All", ...STORE_CATEGORIES]; }
 
+const CAT_ICONS = {
+  "All":'<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>',
+  "Shirt":'<svg viewBox="0 0 24 24"><path d="M9 3.5 4 6l-1.5 5 3 1V20.5h13V12l3-1L20 6l-5-2.5"/><path d="M9 3.5 12 8l3-4.5"/><path d="M12 8v12.5"/></svg>',
+  "T-Shirt":'<svg viewBox="0 0 24 24"><path d="M8.5 3.5 3 6.5l2 4.5 2.5-1V20.5h9V10l2.5 1 2-4.5-5.5-3a3.6 3.6 0 0 1-7 0z"/></svg>',
+  "Shoes":'<svg viewBox="0 0 24 24"><path d="M3 15.5V8.5l4 1.5 2.5-2 2.5 2.5c2 .5 4 1.5 5.5 3l3 1.5c.8.4 1 1.2 1 2V18H3z"/><path d="M3 15.5h19"/><path d="M9.5 8l1.5 3"/></svg>',
+  "Electric":'<svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="10" rx="1.5"/><path d="M2.5 19h19l-1.5-4H4z"/></svg>'
+};
+const CAT_ICON_DEFAULT='<svg viewBox="0 0 24 24"><path d="M3.5 12.5V4.5h8l9 9-8 8z"/><circle cx="8" cy="9" r="1.2"/></svg>';
+
 function renderFilters(){
   const bar = document.getElementById('filterBar');
   bar.innerHTML = getCategories().map(cat =>
-    `<button class="filter-pill ${cat===currentFilter?'active':''}" onclick="setFilter('${cat}')">${cat}</button>`
+    `<button class="filter-pill ${cat===currentFilter?'active':''}" onclick="setFilter('${cat}')">${CAT_ICONS[cat]||CAT_ICON_DEFAULT}<span>${cat}</span></button>`
   ).join('');
 }
 
