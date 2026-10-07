@@ -105,6 +105,10 @@ svg{display:block}
 .chip{flex:none;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 12px 4px 4px;font-size:13px;font-weight:500;white-space:nowrap;color:#222}
 .chip-ic{width:28px;height:28px;border-radius:9px;background:#f1eee6;display:grid;place-items:center;flex:none;font-size:15px;line-height:1}
 .chip-ic svg{width:17px;height:17px;color:#444}
+
+/* ---------- Description: 4 lines, ...more for full ---------- */
+.desc-text{display:-webkit-box;-webkit-line-clamp:4;line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.desc-text.open{display:block;overflow:visible}
 </style>
 <style>
 /* Trust strip */
