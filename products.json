@@ -157,46 +157,5 @@
       "#FFFFFF",
       "#FFFFFF"
     ]
-  },
-  {
-    "id": 20,
-    "name": "Women's Embroidered Kurta Set with Dupatta",
-    "category": "Kurti",
-    "description": "Name: Women's Embroidered Kurta Set with Dupatta\nKurta Fabric: Rayon\nBottomwear Fabric: Rayon\nDupatta Fabric: Chiffon\nKurta Color: Pink\nBottomwear Color: White\nDupatta Color: White\nSleeve Length: Three-Quarter Sleeves\nSleeve Styling: Regular\nLength: Calf Length\nNeck: Round\nBottom Type: Pants\nPattern: Printed\nPrint or Pattern Type: Floral\nOrnamentation: Embroidered\nFit/ Shape: A-line\nOccasion: Party\nNet Quantity (N): Single\nWomen's Embroidered Kurta Pant Dupatta Set. Features embroidery work on kurta with matching pant and dupatta. Suitable for daily wear, office wear, casual wear, festive wear and family gatherings. Comfortable fit and easy to maintain. Package contains 1 Kurta, 1 Pant and 1 Dupatta.\nCountry of Origin: India",
-    "price": 470,
-    "mrp": 650,
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-    "img": "images/p20-common-1.jpg",
-    "images": [
-      "images/p20-common-1.jpg",
-      "images/p20-common-2.jpg",
-      "images/p20-common-3.jpg",
-      "images/p20-common-4.jpg",
-      "images/p20-common-5.jpg",
-      "images/p20-common-6.jpg",
-      "images/p20-common-7.jpg",
-      "images/p20-common-8.jpg",
-      "images/p20-common-9.jpg",
-      "images/p20-common-10.jpg",
-      "images/p20-common-11.jpg"
-    ],
-    "colors": [
-      {
-        "name": "Yellow",
-        "code": "#FFFF00",
-        "images": []
-      }
-    ],
-    "tag": "New",
-    "swatch": [
-      "#FFFF00",
-      "#FFFF59"
-    ]
   }
 ]
