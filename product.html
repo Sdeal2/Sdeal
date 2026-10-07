@@ -1,17 +1,99 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Product - Smart Deal</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Product - Smart Deal</title>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-<style>body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#171a24}.top{padding:14px 18px;background:#fff;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;position:sticky;top:0;z-index:5}.top a{color:#171a24;text-decoration:none}.wrap{max-width:1000px;margin:auto;padding:20px}.gallery{background:#fff;border-radius:0;overflow:hidden}.wrap{background:#fff}.main{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:#eee}.main img{width:100%;height:100%;object-fit:contain}.arrow{position:absolute;top:50%;transform:translateY(-50%);border:0;border-radius:50%;width:40px;height:40px;font-size:25px;background:#fff;box-shadow:0 2px 10px #0002}.prev{left:12px}.next{right:12px}.thumbs{display:flex;gap:8px;padding:10px;overflow:auto}.thumb{width:64px;height:64px;flex:0 0 64px;border:2px solid #ddd;padding:0;background:#fff;border-radius:8px;overflow:hidden}.thumb.active{border-color:#111}.thumb img{width:100%;height:100%;object-fit:cover}.info{background:#fff;border-radius:0;padding:22px;margin-top:16px}.description{margin:20px 0;padding-top:16px;border-top:1px solid #eee;line-height:1.8;color:#444}
-.description p{white-space:pre-line}
-.btn.share{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid #ccc!important;color:#171a24}
-.btn.share svg{flex:none}.actions{display:flex;gap:10px;flex-wrap:wrap}.buy{background:#25D366;color:#fff}.btn{flex:1;min-width:150px}.price{font-size:25px;font-weight:700}.mrp{text-decoration:line-through;color:#888;font-size:15px;margin-left:8px}.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.pill{padding:9px 13px;border:1px solid #ccc;background:#fff;border-radius:20px}.pill.active{border-color:#111;background:#111;color:#fff}.color{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #bbb}.color.active{box-shadow:0 0 0 2px #111}.btn{border:0;padding:13px 18px;border-radius:8px;margin:6px 6px 0 0;font-weight:700}.cart{background:#111;color:#fff}.share{background:#eee}.msg{color:#555;font-size:13px}</style>
 <style>
-/* Fixed product action bar */
-.product-action-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#fff;border-top:1px solid #ddd;padding:10px max(12px,calc((100vw - 1100px)/2));display:flex;gap:10px;box-shadow:0 -4px 18px rgba(0,0,0,.08)}
-.product-action-bar .btn{flex:1;margin:0;height:48px;font-size:15px;border-radius:6px}
-@media(max-width:480px){.product-action-bar{padding:8px}.product-action-bar .btn{height:46px;font-size:14px}}
-body{padding-bottom:78px!important}
+:root{--brand:#e8561f;--ink:#1f1f1f;--muted:#6f6f6f;--line:#e6e0d4;--bg:#faf6ef;--green:#0f8a3c;--blue:#1565d8;--badge:#e53935}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink);padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+button{font-family:inherit;cursor:pointer}
+svg{display:block}
+.top{padding:14px 16px;background:#fff;border-bottom:1px solid #eee;display:flex;justify-content:space-between;position:sticky;top:0;z-index:5;font-weight:600}
+.top a{color:var(--ink);text-decoration:none}
+.wrap{max-width:600px;margin:0 auto;padding:0;background:var(--bg)}
+
+/* ---------- Gallery ---------- */
+.gallery{position:relative;padding:10px 10px 0;background:var(--bg);border-radius:0;overflow:visible}
+.main{position:relative;aspect-ratio:1/1.05;display:flex;align-items:center;justify-content:center;background:#efefef;border-radius:14px;overflow:hidden}
+.main img{width:100%;height:100%;object-fit:contain}
+.arrow{position:absolute;top:50%;transform:translateY(-50%);border:0;border-radius:50%;width:38px;height:38px;font-size:24px;line-height:1;background:#fff;box-shadow:0 2px 10px #0002;color:var(--ink)}
+.prev{left:10px}.next{right:10px}
+.float-btns{position:absolute;top:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:2}
+.fbtn{width:40px;height:40px;border-radius:10px;background:#fff;border:0;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.15);color:var(--ink)}
+.fbtn svg{width:22px;height:22px}
+.fbtn.on svg{fill:var(--badge);stroke:var(--badge)}
+.rating-chip{position:absolute;left:22px;bottom:14px;background:#fff;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;display:none;align-items:center;gap:5px;box-shadow:0 1px 4px rgba(0,0,0,.12);z-index:2}
+.rating-chip .star{color:var(--green)}.rating-chip .sep{color:#bbb;font-weight:400}.rating-chip .cnt{color:var(--muted);font-weight:500}
+.thumbs{display:flex;gap:8px;padding:10px 4px 0;overflow:auto;scrollbar-width:none}
+.thumbs::-webkit-scrollbar{display:none}
+.thumb{width:62px;height:62px;flex:0 0 62px;border:2px solid #ddd;padding:0;background:#fff;border-radius:10px;overflow:hidden}
+.thumb.active{border-color:var(--ink)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+
+/* ---------- Info ---------- */
+.info{background:transparent;border-radius:0;padding:16px 16px 4px;margin-top:0}
+.seller-name{font-size:15px;font-weight:700}
+.ptitle{margin:4px 0 0;font-size:15.5px;font-weight:400;line-height:1.4;color:#333;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.ptitle.open{display:block;overflow:visible}
+.more{color:var(--blue);font-weight:600;font-size:14px;margin-top:2px;border:0;background:none;padding:0}
+.price-row{margin-top:14px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.off{color:var(--green);font-size:24px;font-weight:800;display:flex;align-items:center;gap:2px}
+.off svg{width:20px;height:20px}
+.mrp{color:var(--muted);font-size:19px;text-decoration:line-through;margin:0}
+.price{font-size:26px;font-weight:800}
+.info h4{margin:18px 0 0;font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+.pill{padding:9px 14px;border:1.5px solid var(--line);background:#fff;border-radius:8px;font-weight:600;font-size:14px}
+.pill.active{border-color:var(--ink);background:var(--ink);color:#fff}
+.color{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #bbb;padding:0}
+.color.active{box-shadow:0 0 0 2px var(--ink)}
+.msg{color:#555;font-size:13px}
+
+/* ---------- Sections ---------- */
+.section{padding:20px 16px 4px}
+.sec-head{display:flex;justify-content:space-between;align-items:center}
+.sec-head h3{font-size:19px;font-weight:700;margin:0}
+.round-btn{width:44px;height:36px;border-radius:10px;background:#ece7db;display:grid;place-items:center;border:0;color:var(--ink)}
+.round-btn svg{width:20px;height:20px;transition:transform .2s}
+.round-btn.dark{background:var(--ink);color:#fff;border-radius:18px;width:60px}
+.collapsed .round-btn svg{transform:rotate(180deg)}
+.delivery-card{margin-top:12px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:6px 14px}
+.collapsed .delivery-card{display:none}
+.d-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #eee}
+.d-row:last-child{border-bottom:0}
+.d-ico{width:40px;height:40px;border-radius:10px;background:#f1eee6;display:grid;place-items:center;flex:none}
+.d-ico svg{width:22px;height:22px;color:#444}
+.d-text{font-size:15px;line-height:1.35;flex:1;min-width:0}
+.pin-box{padding:12px 0;border-bottom:1px solid #eee}
+.pin-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.pin-row{display:flex;gap:8px}
+.pin-row input{flex:1;min-width:0;height:44px;padding:0 12px;font-size:16px;border:1.5px solid var(--line);border-radius:8px;outline:none;background:#fff;letter-spacing:1px;font-family:inherit}
+.pin-row input:focus{border-color:var(--brand)}
+.pin-row button{padding:0 20px;height:44px;border:0;border-radius:8px;background:var(--ink);color:#fff;font-weight:700;font-size:14px}
+.pin-result{margin-top:8px;font-size:14px;min-height:20px}
+.pin-result.ok{color:var(--green);font-weight:600}
+.pin-result.err{color:var(--badge)}
+
+.description{margin:20px 16px 0;padding-top:16px;border-top:1px solid #e6e0d4;line-height:1.8;color:#444}
+.description h3{margin:0 0 6px}
+.description p{white-space:pre-line;margin:0}
+
+/* ---------- Similar products ---------- */
+.sim-list{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding:14px 16px 8px}
+.sim-list::-webkit-scrollbar{display:none}
+.sim{flex:none;width:44%;max-width:200px;scroll-snap-align:start;cursor:pointer;text-decoration:none;color:inherit}
+.sim-img{aspect-ratio:1/1.1;border-radius:14px;background:#efefef;overflow:hidden}
+.sim-img img{width:100%;height:100%;object-fit:cover}
+.sim-name{margin-top:8px;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sim-off{margin-top:3px;font-size:13px;font-weight:700;color:var(--green)}
+.sim-price{margin-top:2px;font-size:16px;font-weight:700}
+.sim-price s{font-size:12.5px;color:var(--muted);font-weight:400;margin-right:4px}
+
+/* ---------- Sticky action bar ---------- */
+.product-action-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#fff;border-top:1px solid #eee;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:12px;box-shadow:0 -4px 18px rgba(0,0,0,.06)}
+.product-action-bar .btn{flex:1;margin:0;height:50px;font-size:16px;font-weight:700;border-radius:12px;border:0;min-width:0}
+.btn.cart{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.buy{background:var(--brand);color:#fff}
 </style>
 <style>
 /* Trust strip */
@@ -57,6 +139,7 @@ body{padding-bottom:78px!important}
 </style>
 </head><body><div class="top"><a href="index.html">← Back to Shop</a></div><main class="wrap"><div id="app">Loading product...</div><div id="reviewsRoot"></div></main><script>
 let products=[],product=null,images=[],idx=0,selectedColor=null,selectedSize=null,qty=1;
+let pinVal='',pinMsg='',pinCls='',delOpen=true,titleOpen=false;
 const params=new URLSearchParams(location.search);const id=Number(params.get('id'));
 function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function formatDescription(text){
@@ -68,7 +151,110 @@ function formatDescription(text){
 }
 function getColors(){return Array.isArray(product.colors)?product.colors:[]}
 function getImages(){if(selectedColor&&selectedColor.images?.length)return selectedColor.images;if(product.images?.length)return product.images;if(product.img)return [product.img];return []}
-function render(){images=getImages();if(idx>=images.length)idx=0;document.getElementById('app').innerHTML=`<section class="gallery"><div class="main"><button class="arrow prev" onclick="move(-1)">‹</button><img src="${esc(images[idx]||'')}" onerror="this.style.display='none'" alt="${esc(product.name)}"><button class="arrow next" onclick="move(1)">›</button></div><div class="thumbs">${images.map((x,i)=>`<button class="thumb ${i===idx?'active':''}" onclick="idx=${i};render()"><img src="${esc(x)}"></button>`).join('')}</div></section><section class="info"><div>${esc(product.category||'')}</div><h1>${esc(product.name)}</h1><div class="price">₹${product.price}${product.mrp?`<span class="mrp">₹${product.mrp}</span>`:''}</div><div class="trust-strip"><div class="trust-item"><span class="trust-ic">↩️</span><span>7 Day<br>Return Policy</span></div><div class="trust-item"><span class="trust-ic">💵</span><span>Cash on<br>Delivery</span></div><div class="trust-item"><span class="trust-ic">🇮🇳</span><span>Made in<br>India</span></div></div><div class="description"><h3>Description</h3><p>${esc(formatDescription(product.description))||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.'}</p></div><h4>Color</h4><div class="row">${getColors().length?getColors().map((c,i)=>`<button class="color ${selectedColor?.name===c.name?'active':''}" title="${esc(c.name)}" style="background:${esc(c.code||'#ddd')}" onclick="chooseColor(${i})"></button>`).join(''):'<span class="msg">Default color</span>'}</div>${selectedColor?`<div class="msg">Selected: ${esc(selectedColor.name)}</div>`:''}<h4>Size</h4><div class="row">${(product.sizes||[]).map((s,i)=>`<button class="pill ${selectedSize===s?'active':''}" onclick="selectedSize='${esc(s)}';render()">${esc(s)}</button>`).join('')}</div><h4>Quantity</h4><div class="row"><button class="pill" onclick="qty=Math.max(1,qty-1);render()">−</button><span style="padding:10px">${qty}</span><button class="pill" onclick="qty++;render()">+</button></div><div class="product-action-bar"><button class="btn cart" onclick="addCart()">Add to Cart</button><button class="btn buy" onclick="buyNow()">Buy Now</button></div><button class="btn share" onclick="shareProduct()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share Product</button><p class="msg">Cash on Delivery available.</p></section>`}
+function rupee(n){return '₹'+Number(n).toLocaleString('en-IN')}
+function pct(p,m){return m>p?Math.round((m-p)/m*100):0}
+
+/* wishlist (same storage as the shop page) */
+function wl(){try{return JSON.parse(localStorage.getItem('smartDealWishlist')||'[]')}catch(e){return[]}}
+function isWish(){return wl().includes(product.id)}
+function toggleWish(){let a=wl();a=a.includes(product.id)?a.filter(x=>x!==product.id):[...a,product.id];localStorage.setItem('smartDealWishlist',JSON.stringify(a));const b=document.getElementById('wishBtn');if(b)b.classList.toggle('on',a.includes(product.id))}
+
+/* title more / less */
+function toggleTitle(){titleOpen=!titleOpen;const t=document.getElementById('ptitle'),b=document.getElementById('moreBtn');if(t)t.classList.toggle('open',titleOpen);if(b)b.textContent=titleOpen?'less':'...more'}
+
+/* delivery */
+function toggleDel(){delOpen=!delOpen;const s=document.getElementById('delSec');if(s)s.classList.toggle('collapsed',!delOpen)}
+function onPin(el){pinVal=el.value=el.value.replace(/\D/g,'')}
+function checkPin(){
+  const v=pinVal.trim(),r=document.getElementById('pinResult');
+  if(!/^\d{6}$/.test(v)){pinCls='err';pinMsg='Please enter a valid 6-digit pincode'}
+  else{const d=new Date();d.setDate(d.getDate()+7);const dt=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});pinCls='ok';pinMsg='✓ Delivery available to '+v+' — in 7 days, by '+dt}
+  if(r){r.className='pin-result '+pinCls;r.textContent=pinMsg}
+}
+
+/* similar products */
+function similarList(){
+  const cat=(product.category||'').toLowerCase();
+  const others=products.filter(p=>p.id!==product.id);
+  const same=others.filter(p=>(p.category||'').toLowerCase()===cat);
+  const rest=others.filter(p=>!same.includes(p));
+  return [...same,...rest].slice(0,10);
+}
+function simNext(){const l=document.getElementById('simList');if(l)l.scrollBy({left:l.clientWidth*0.6,behavior:'smooth'})}
+
+/* rating chip on image (from reviews) */
+function updateRatingChip(){
+  const el=document.getElementById('ratingChip');if(!el)return;
+  if(typeof reviews==='undefined'||!reviews.length){el.style.display='none';return}
+  const avg=reviews.reduce((s,r)=>s+(Number(r.rating)||0),0)/reviews.length;
+  el.style.display='flex';
+  el.innerHTML='<span>'+avg.toFixed(1)+'</span><span class="star">★</span><span class="sep">|</span><span class="cnt">'+reviews.length+'</span>';
+}
+
+function render(){
+  images=getImages();if(idx>=images.length)idx=0;
+  const off=pct(product.price,product.mrp);
+  const sim=similarList();
+  document.getElementById('app').innerHTML=`
+  <section class="gallery">
+    <div class="main">
+      ${images.length>1?`<button class="arrow prev" onclick="move(-1)">‹</button>`:''}
+      <img src="${esc(images[idx]||'')}" onerror="this.style.display='none'" alt="${esc(product.name)}">
+      ${images.length>1?`<button class="arrow next" onclick="move(1)">›</button>`:''}
+    </div>
+    <div class="float-btns">
+      <button class="fbtn ${isWish()?'on':''}" id="wishBtn" onclick="toggleWish()" aria-label="Wishlist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-9.3-9.2C1.5 7.5 3.5 4.5 6.7 4.5c2 0 3.7 1.1 5.3 3 1.6-1.9 3.3-3 5.3-3 3.2 0 5.2 3 4 6.3C19.5 15.4 12 20 12 20z"/></svg></button>
+      <button class="fbtn" onclick="shareProduct()" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7z"/><path d="M21 3 10 13.5"/></svg></button>
+    </div>
+    <div class="rating-chip" id="ratingChip"></div>
+    ${images.length>1?`<div class="thumbs">${images.map((x,i)=>`<button class="thumb ${i===idx?'active':''}" onclick="idx=${i};render()"><img src="${esc(x)}"></button>`).join('')}</div>`:''}
+  </section>
+
+  <section class="info">
+    <div class="seller-name">Smart Deal</div>
+    <h1 class="ptitle ${titleOpen?'open':''}" id="ptitle" onclick="toggleTitle()">${esc(product.name)}</h1>
+    <button class="more" id="moreBtn" onclick="toggleTitle()">${titleOpen?'less':'...more'}</button>
+
+    <div class="price-row">
+      ${off?`<div class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M5 13l7 7 7-7"/></svg><span>${off}%</span></div>`:''}
+      ${product.mrp&&product.mrp>product.price?`<span class="mrp">₹${product.mrp}</span>`:''}
+      <span class="price">₹${product.price}</span>
+    </div>
+
+    <h4>Color</h4><div class="row">${getColors().length?getColors().map((c,i)=>`<button class="color ${selectedColor?.name===c.name?'active':''}" title="${esc(c.name)}" style="background:${esc(c.code||'#ddd')}" onclick="chooseColor(${i})"></button>`).join(''):'<span class="msg">Default color</span>'}</div>${selectedColor?`<div class="msg">Selected: ${esc(selectedColor.name)}</div>`:''}
+    <h4>Size</h4><div class="row">${(product.sizes||[]).map((s,i)=>`<button class="pill ${selectedSize===s?'active':''}" onclick="selectedSize='${esc(s)}';render()">${esc(s)}</button>`).join('')}</div>
+    <h4>Quantity</h4><div class="row"><button class="pill" onclick="qty=Math.max(1,qty-1);render()">−</button><span style="padding:10px">${qty}</span><button class="pill" onclick="qty++;render()">+</button></div>
+  </section>
+
+  <div class="section ${delOpen?'':'collapsed'}" id="delSec">
+    <div class="sec-head"><h3>Delivery details</h3>
+      <button class="round-btn" onclick="toggleDel()" aria-label="Toggle delivery details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>
+    </div>
+    <div class="delivery-card">
+      <div class="d-row"><div class="d-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 3l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div><div class="d-text"><b>7 days</b> Your Home Delivery</div></div>
+      <div class="pin-box">
+        <div class="pin-title">Check delivery for your pincode</div>
+        <div class="pin-row"><input type="tel" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit pincode" value="${esc(pinVal)}" oninput="onPin(this)" onkeydown="if(event.key==='Enter')checkPin()"><button onclick="checkPin()">Check</button></div>
+        <div class="pin-result ${pinCls}" id="pinResult">${esc(pinMsg)}</div>
+      </div>
+      <div class="d-row"><div class="d-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16l-1-5H5zM5 9v11h14V9M9 20v-6h6v6"/></svg></div><div class="d-text">Sold By <b>Smart Deal</b></div></div>
+    </div>
+  </div>
+
+  <div class="info" style="padding-top:0"><div class="trust-strip"><div class="trust-item"><span class="trust-ic">↩️</span><span>7 Day<br>Return Policy</span></div><div class="trust-item"><span class="trust-ic">💵</span><span>Cash on<br>Delivery</span></div><div class="trust-item"><span class="trust-ic">🇮🇳</span><span>Made in<br>India</span></div></div></div>
+
+  <div class="description"><h3>Description</h3><p>${esc(formatDescription(product.description))||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.'}</p></div>
+
+  ${sim.length?`<div class="section"><div class="sec-head"><h3>Similar Products</h3><button class="round-btn dark" onclick="simNext()" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button></div></div>
+  <div class="sim-list" id="simList">${sim.map(p=>`<a class="sim" href="product.html?id=${encodeURIComponent(p.id)}"><div class="sim-img"><img src="${esc(p.img||(p.images||[])[0]||'')}" alt="" onerror="this.style.display='none'"></div><div class="sim-name">${esc(p.name)}</div>${pct(p.price,p.mrp)?`<div class="sim-off">${pct(p.price,p.mrp)}% OFF</div>`:''}<div class="sim-price">${p.mrp&&p.mrp>p.price?`<s>₹${p.mrp}</s>`:''}₹${p.price}</div></a>`).join('')}</div>`:''}
+
+  <div class="product-action-bar"><button class="btn cart" onclick="addCart()">Add to cart</button><button class="btn buy" onclick="buyNow()">Buy at ${rupee(product.price*qty)}</button></div>`;
+
+  /* show "...more" only when the title is really cut */
+  const t=document.getElementById('ptitle'),mb=document.getElementById('moreBtn');
+  if(t&&mb&&!titleOpen&&t.scrollHeight<=t.clientHeight+1)mb.style.display='none';
+  updateRatingChip();
+}
 function chooseColor(i){selectedColor=getColors()[i];idx=0;render()}function move(n){if(!images.length)return;idx=(idx+n+images.length)%images.length;render()}
 function addCart(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');const color=selectedColor?.name||'Default';let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color);if(e)e.qty+=qty;else cart.push({id:product.id,name:product.name,price:product.price,size:selectedSize||'',color,qty,img:(images[0]||product.img||'')});localStorage.setItem('smartDealCart',JSON.stringify(cart));alert('Added to cart');}
 function buyNow(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}const color=selectedColor?.name||'Default';let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color);if(e)e.qty+=qty;else cart.push({id:product.id,name:product.name,price:product.price,size:selectedSize||'',color,qty,img:(images[0]||product.img||''),swatch:product.swatch});localStorage.setItem('smartDealCart',JSON.stringify(cart));location.href='index.html?checkout=1'}
@@ -123,6 +309,7 @@ function renderReviews(){
     if(+s.dataset.n<=revRating) s.classList.add('on');
   });
   document.getElementById('revPhoto').addEventListener('change', onRevPhotoChange);
+  updateRatingChip();
 }
 
 function setRevRating(n){
@@ -224,4 +411,5 @@ async function submitReview(){
     const btn=document.getElementById('revSubmitBtn'); if(btn) btn.disabled=false;
   }
 }
+
 </script></body></html>
