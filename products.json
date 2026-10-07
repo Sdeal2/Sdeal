@@ -157,5 +157,65 @@
       "#FFFFFF",
       "#FFFFFF"
     ]
+  },
+  {
+    "id": 20,
+    "name": "Women's Embroidered Kurta Set with Dupatta Kurta",
+    "category": "Kurti",
+    "description": "Name: Women's Embroidered Kurta Set with Dupatta\nKurta\nFabric: Rayon\nBottomwear\nFabric: Rayon\nDupatta\nFabric: Chiffon\nKurta Color: Pink\nBottomwear Color: White\nDupatta Color: White\n\nSleeve Length: Three-Quarter Sleeves\nSleeve Styling: Regular\nLength: Calf Length\n\nNeck: Round\nBottom Type: Pants\n\nPattern: Printed\n\nPrint or Pattern Type: Floral\nOrnamentation: Embroidered\nFit/ Shape: A-line\n\nOccasion: Party\n\nNet Quantity (N): Single\nWomen's Embroidered Kurta Pant Dupatta Set. Features embroidery work on kurta with matching pant and dupatta. Suitable for daily wear, office wear, casual wear, festive wear and family gatherings. Comfortable fit and easy to maintain. Package contains 1 Kurta, 1 Pant and 1 Dupatta.\n\nCountry of Origin: India",
+    "price": 470,
+    "mrp": 599,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "img": "images/p20-common-1.jpg",
+    "images": [
+      "images/p20-common-1.jpg",
+      "images/p20-common-2.jpg",
+      "images/p20-common-3.jpg",
+      "images/p20-common-4.jpg",
+      "images/p20-common-5.jpg",
+      "images/p20-common-6.jpg",
+      "images/p20-common-7.jpg",
+      "images/p20-common-8.jpg",
+      "images/p20-common-9.jpg",
+      "images/p20-common-10.jpg",
+      "images/p20-common-11.jpg",
+      "images/p20-common-12.jpg",
+      "images/p20-common-13.jpg",
+      "images/p20-common-14.jpg",
+      "images/p20-common-15.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Pink",
+        "code": "#FF12BC",
+        "images": []
+      },
+      {
+        "name": "Purple",
+        "code": "#52374C",
+        "images": []
+      },
+      {
+        "name": "Aqua Blue",
+        "code": "#3DCFFF",
+        "images": []
+      },
+      {
+        "name": "Yellow",
+        "code": "#FFFF00",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#FF12BC",
+      "#FF65D3"
+    ]
   }
 ]
