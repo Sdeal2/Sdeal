@@ -250,5 +250,57 @@
       "#FF05BC",
       "#FF5DD3"
     ]
+  },
+  {
+    "id": 22,
+    "name": "Men Formal Shirts - Light Color",
+    "category": "Shirt",
+    "description": "Men Formal Shirts - Light Color\nName: Men Formal Shirts - Light Color\nFabric: Cotton\nSleeve Length: Long Sleeves\nPattern: Solid\nNet Quantity (N): 1\nSizes:\nM (Chest Size: 40 in, Length Size: 28.5 in) \nL (Chest Size: 42 in, Length Size: 29.5 in) \nXL (Chest Size: 44 in, Length Size: 30 in) \nXXL (Chest Size: 46 in, Length Size: 31 in) \n\nCare Instructions: Hand Wash Or  Machine Wash  Fit Type: Regular Fit Material: Cotton , Occasion: Casual,Party,Beach,Formal, Due To Different Monitor And Light Effect, Actual Color Maybe Slight Different From Picture Color; Pack Of 1 Shirt \n\nCountry of Origin: India\nCountry of Origin: India",
+    "price": 450,
+    "mrp": 650,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "img": "images/p22-maroon-1.jpg",
+    "images": [
+      "images/p22-common-1.jpg",
+      "images/p22-common-2.jpg",
+      "images/p22-common-3.jpg",
+      "images/p22-common-4.jpg",
+      "images/p22-common-5.jpg",
+      "images/p22-common-6.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Maroon",
+        "code": "#614646",
+        "images": [
+          "images/p22-maroon-1.jpg"
+        ]
+      },
+      {
+        "name": "White",
+        "code": "#FFFFFF",
+        "images": [
+          "images/p22-white-2-1.jpg"
+        ]
+      },
+      {
+        "name": "Black",
+        "code": "#000000",
+        "images": [
+          "images/p22-black-3-1.jpg"
+        ]
+      }
+    ],
+    "tag": "Sale",
+    "swatch": [
+      "#614646",
+      "#988787"
+    ]
   }
 ]
