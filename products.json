@@ -217,5 +217,38 @@
       "#FF12BC",
       "#FF65D3"
     ]
+  },
+  {
+    "id": 21,
+    "name": "Women's Cotton Bland Printed Anarkali Kurta Set With Dupatta",
+    "category": "Kurti",
+    "description": "Women's Cotton Bland Printed Anarkali Kurta Set With Dupatta\nName: Women's Cotton Bland Printed Anarkali Kurta Set With Dupatta\nKurta Fabric: Cotton Blend\nBottomwear Fabric: Cotton\nDupatta Fabric: Chiffon\nKurta Color: Pink\nBottomwear Color: Pink\nDupatta Color: Pink\nSleeve Length: Three-Quarter Sleeves\nSleeve Styling: Regular\nLength: Calf Length\nNeck: V-neck\nBottom Type: Pants\nPattern: Embroidered\nPrint or Pattern Type: Floral\nOrnamentation: Embroidered\nFit/ Shape: Naira Cut\nOccasion: Party\nNet Quantity (N): Single\nWomen's Pink Cotton Printed Anarkali Kurta Pant with Nazmin Dupatta Set designed with fit and flare silhouette and V-neck pattern. Comfortable cotton fabric suitable for festive wear, casual ethnic styling, college wear and family functions.\nCountry of Origin: India",
+    "price": 850,
+    "mrp": 1199,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "img": "images/p21-common-1.jpg",
+    "images": [
+      "images/p21-common-1.jpg",
+      "images/p21-common-2.jpg",
+      "images/p21-common-3.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Pink",
+        "code": "#FF05BC",
+        "images": []
+      }
+    ],
+    "tag": "Sale",
+    "swatch": [
+      "#FF05BC",
+      "#FF5DD3"
+    ]
   }
 ]
