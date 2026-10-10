@@ -331,5 +331,54 @@
       "#FFFF00",
       "#FFFF59"
     ]
+  },
+  {
+    "id": 24,
+    "name": "Multicolor LED String Lights for Home Decoration | Red, Blue, Yellow, Green & Pink Decorative Lights for Festivals, Parties & Weddings",
+    "category": "Electric",
+    "description": "Brighten up your home with these beautiful Multicolor LED String Lights! 🌟 Perfect for decorating your home, bedroom, balcony, parties, weddings, festivals and special occasions.\n✨ Product Features:\n🌈 5 Attractive Colors: Red, Blue, Yellow, Green and Pink.\n🏠 Multipurpose Decoration: Ideal for homes, bedrooms, balconies, parties and celebrations.\n🎉 Perfect for Every Occasion: Suitable for birthdays, weddings, festivals and special events.\n💡 Bright LED Lights: Add a colorful and attractive glow to your decorations.\n🎁 Easy Decoration: Suitable for decorating different indoor spaces.\n📦 Product Specifications\nProduct Name: Multicolor LED String Lights\nCategory: Home & Decor / Decorative Lights\nColor: Multicolor\nMaterial: As per actual product\nQuantity: 1 Set\nIdeal For: Home Decoration, Parties, Weddings & Festivals",
+    "price": 25,
+    "mrp": 79,
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p24-common-1.jpg",
+    "images": [
+      "images/p24-common-1.jpg",
+      "images/p24-common-2.jpg",
+      "images/p24-common-3.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Blue",
+        "code": "#0000FF",
+        "images": []
+      },
+      {
+        "name": "Yellow",
+        "code": "#FFFF00",
+        "images": []
+      },
+      {
+        "name": "Red",
+        "code": "#FF0000",
+        "images": []
+      },
+      {
+        "name": "Pink",
+        "code": "#EB1A6D",
+        "images": []
+      },
+      {
+        "name": "Green",
+        "code": "#00C261",
+        "images": []
+      }
+    ],
+    "tag": "Sale",
+    "swatch": [
+      "#0000FF",
+      "#5959FF"
+    ]
   }
 ]
