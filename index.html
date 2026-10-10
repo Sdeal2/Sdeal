@@ -453,6 +453,21 @@
     .card-price{ font-size:13px; }
     .card-mrp{ font-size:11px; margin-left:5px; }
   }
+
+  /* ---------- Checkout: coupon + payment ---------- */
+  .cp-row{ display:flex; gap:8px; }
+  .cp-row input{ flex:1; text-transform:uppercase; }
+  .cp-row button{ flex:none; padding:0 18px; border:none; background:var(--sd-brand); color:#fff; font-weight:600; font-size:13px; border-radius:8px; cursor:pointer; }
+  .cp-row button:disabled{ opacity:.6; }
+  .cp-msg{ font-size:12px; margin-top:6px; min-height:14px; }
+  .cp-msg.ok{ color:#1b8a3a; } .cp-msg.no{ color:#d33; }
+  .pay-opt{ display:flex; gap:10px; align-items:center; border:1px solid var(--line); border-radius:10px; padding:11px; font-size:14px; margin-bottom:8px; }
+  .pay-opt.on{ border-color:var(--sd-brand); background:#fdf3ee; }
+  .pay-opt.off{ opacity:.55; background:#fafafa; cursor:not-allowed; }
+  .pay-opt small{ display:block; font-size:11px; color:#888; margin-top:1px; }
+  .pay-rd{ width:16px; height:16px; border-radius:50%; border:2px solid #bbb; flex:none; }
+  .pay-opt.on .pay-rd{ border:5px solid var(--sd-brand); }
+  .pay-soon{ margin-left:auto; font-size:10.5px; background:#eee; color:#666; padding:2px 8px; border-radius:10px; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -605,6 +620,21 @@
       <div class="form-group">
         <label>Pincode</label>
         <input type="text" id="custPincode" placeholder="6-digit pincode">
+      </div>
+
+      <div class="form-group">
+        <label>Coupon code</label>
+        <div class="cp-row">
+          <input type="text" id="couponInput" placeholder="Enter coupon code" autocapitalize="characters" autocomplete="off">
+          <button type="button" id="couponBtn" onclick="applyCoupon()">Apply</button>
+        </div>
+        <div class="cp-msg" id="couponMsg"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Payment method</label>
+        <div class="pay-opt on"><span class="pay-rd"></span><div>Cash on Delivery<small>Pay when your order arrives</small></div></div>
+        <div class="pay-opt off"><span class="pay-rd"></span><div>Online Payment<small>UPI, Cards, Net Banking</small></div><span class="pay-soon">Coming soon</span></div>
       </div>
 
       <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrderOnWhatsApp()">
@@ -836,15 +866,51 @@ function closeCart(){
   document.getElementById('cartDrawer').classList.remove('open');
 }
 
+let appliedCoupon = null; // {code,type,value,minOrder}
+function cartSubtotal(){ return cart.reduce((sum, i) => sum + i.price * i.qty, 0); }
+function couponDiscount(sub){
+  if(!appliedCoupon) return 0;
+  if(appliedCoupon.minOrder && sub < appliedCoupon.minOrder) return 0;
+  const d = appliedCoupon.type === 'percent' ? Math.round(sub * appliedCoupon.value / 100) : appliedCoupon.value;
+  return Math.max(0, Math.min(d, sub));
+}
+function renderCheckoutSummary(){
+  const sub = cartSubtotal(), disc = couponDiscount(sub), total = sub - disc;
+  if(appliedCoupon && !disc){ appliedCoupon = null; setCouponMsg('This coupon no longer applies to your cart', 'no'); }
+  document.getElementById('orderSummaryMini').innerHTML =
+    cart.map(i => `<div class="sum-row"><span class="sum-name">${i.name}</span><span class="sum-meta">(${i.size}) x${i.qty}</span><span class="sum-price">₹${i.price * i.qty}</span></div>`).join('') +
+    (disc ? `<div style="border-top:1px solid var(--line); margin-top:6px; padding-top:8px; color:#1b8a3a;"><span>Coupon (${appliedCoupon.code})</span><span>- ₹${disc}</span></div>` : '') +
+    `<div style="font-weight:700; border-top:1px solid var(--line); margin-top:6px; padding-top:8px;"><span>Total</span><span>₹${total}</span></div>`;
+}
+function setCouponMsg(t, cls){ const m=document.getElementById('couponMsg'); if(m){ m.textContent=t||''; m.className='cp-msg '+(cls||''); } }
+
+async function applyCoupon(){
+  const input = document.getElementById('couponInput'), btn = document.getElementById('couponBtn');
+  const code = input.value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(!code){ setCouponMsg('Enter a coupon code first','no'); return; }
+  if(typeof db === 'undefined' || !db){ setCouponMsg('Could not check the coupon right now. Please try again.','no'); return; }
+  btn.disabled = true; btn.textContent = '...';
+  try{
+    const doc = await db.collection('coupons').doc(code).get();
+    const c = doc.exists ? doc.data() : null, sub = cartSubtotal();
+    const today = new Date().toISOString().slice(0,10);
+    if(!c || c.active === false){ appliedCoupon = null; setCouponMsg('This coupon code is not valid','no'); }
+    else if(c.expiry && c.expiry < today){ appliedCoupon = null; setCouponMsg('This coupon has expired','no'); }
+    else if(c.minOrder && sub < Number(c.minOrder)){ appliedCoupon = null; setCouponMsg('Add items worth ₹' + c.minOrder + ' or more to use this coupon','no'); }
+    else{
+      appliedCoupon = {code, type: c.type === 'flat' ? 'flat' : 'percent', value: Number(c.value)||0, minOrder: Number(c.minOrder)||0};
+      setCouponMsg('Coupon applied: you save ₹' + couponDiscount(sub), 'ok');
+    }
+  }catch(e){ console.error(e); appliedCoupon = null; setCouponMsg('Could not check the coupon right now. Please try again.','no'); }
+  btn.disabled = false; btn.textContent = 'Apply';
+  renderCheckoutSummary();
+}
+
 function goToCheckout(){
   if(cart.length === 0) return;
   document.getElementById('cartView').style.display = 'none';
   document.getElementById('checkoutView').style.display = 'block';
-
-  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-  document.getElementById('orderSummaryMini').innerHTML =
-    cart.map(i => `<div class="sum-row"><span class="sum-name">${i.name}</span><span class="sum-meta">(${i.size}) x${i.qty}</span><span class="sum-price">₹${i.price * i.qty}</span></div>`).join('') +
-    `<div style="font-weight:700; border-top:1px solid var(--line); margin-top:6px; padding-top:8px;"><span>Total</span><span>₹${total}</span></div>`;
+  renderCheckoutSummary();
 }
 
 function backToCart(){
@@ -864,13 +930,13 @@ function placeOrderOnWhatsApp(){
   if(!name||!phone||!address||!city||!state||!pincode){alert('Please fill in all details');return;}
   if(!/^\d{10}$/.test(phone)){alert('Please enter a valid 10-digit mobile number');return;}
   const btn=document.getElementById('placeOrderBtn');btn.textContent='Opening WhatsApp...';btn.disabled=true;
-  const total=cart.reduce((sum,i)=>sum+i.price*i.qty,0),orderId=generateOrderId();
+  const sub=cartSubtotal(),disc=couponDiscount(sub),total=sub-disc,orderId=generateOrderId();
   const trackUrl=window.location.href.replace(/index\.html.*$/,'')+`track.html?id=${orderId}`;
-  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({name:i.name,size:i.size,qty:i.qty,price:i.price})),total,status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString()};
+  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({name:i.name,size:i.size,qty:i.qty,price:i.price})),total,...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString()};
   let message=`*New Order*\n\n*Order ID:* ${orderId}\n*Name:* ${name}\n*Mobile:* ${phone}\n*Address:* ${address}, ${city}, ${state} - ${pincode}\n\n*Products:*\n`;
   cart.forEach(item=>message+=`- ${item.name} | Color: ${item.color || 'Default'} | Size: ${item.size} | Qty: ${item.qty} | ₹${item.price*item.qty}\n`);
-  message+=`\n*Total Amount: ₹${total}*\n*Payment: Cash on Delivery*\n*Track order:* ${trackUrl}`;
-  try{if(typeof db!=='undefined'&&db&&typeof db.collection==='function'){db.collection('orders').doc(orderId).set(orderData).catch(e=>console.error('Firebase save failed:',e));}}catch(e){console.error('Firebase unavailable:',e);}
+  message+=(disc?`\n*Coupon:* ${appliedCoupon.code} (- ₹${disc})`:'')+`\n*Total Amount: ₹${total}*\n*Payment: Cash on Delivery*\n*Track order:* ${trackUrl}`;
+  try{if(typeof db!=='undefined'&&db&&typeof db.collection==='function'){db.collection('orders').doc(orderId).set(orderData).catch(e=>console.error('Firebase save failed:',e));if(disc){db.collection('coupons').doc(appliedCoupon.code).update({usedCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});}}}catch(e){console.error('Firebase unavailable:',e);}
   const num=String(typeof WHATSAPP_NUMBER!=='undefined'?WHATSAPP_NUMBER:'').replace(/\D/g,'');
   if(!num){alert('WhatsApp number is not configured in firebase-config.js');btn.disabled=false;btn.textContent='Send Order on WhatsApp';return;}
   const url=`https://wa.me/${num}?text=${encodeURIComponent(message)}`;
@@ -887,6 +953,7 @@ function goToTracking(){
 }
 
 function closeCartAndReset(){
+  appliedCoupon = null; setCouponMsg(''); const _ci=document.getElementById('couponInput'); if(_ci) _ci.value='';
   cart = [];
   updateCartCount();
   document.getElementById('successView').style.display = 'none';

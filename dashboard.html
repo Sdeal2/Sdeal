@@ -81,6 +81,23 @@
   .cancelled-tag{font-size:12px; color:var(--rose); font-weight:600;}
   .empty{color:var(--ink-soft); font-size:13.5px; text-align:center; padding:30px;}
   .loading{color:var(--ink-soft); font-size:13.5px; text-align:center; padding:20px;}
+
+  /* coupons */
+  .cp-form{background:#fff; border:1px solid var(--line); padding:16px 18px;}
+  .cp-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;}
+  .cp-grid .full{grid-column:1/-1;}
+  .cp-grid label{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:4px;}
+  .cp-grid input, .cp-grid select{width:100%; padding:10px 11px; border:1px solid var(--line); font-size:14px; background:#fff; font-family:inherit;}
+  .cp-grid input#cpCode{text-transform:uppercase;}
+  .cp-save{background:var(--ink); color:#fff; padding:11px 22px; font-weight:600; font-size:14px;}
+  .cp-note{font-size:12px; margin-top:8px; min-height:16px;} .cp-note.ok{color:var(--ok);} .cp-note.no{color:var(--rose);}
+  .cp-row{background:#fff; border:1px solid var(--line); padding:12px 16px; margin-top:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .cp-row.off{opacity:.6;}
+  .cp-code{font-weight:700; font-size:14px; letter-spacing:.03em;}
+  .cp-desc{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .cp-btns{display:flex; gap:6px; flex-shrink:0;}
+  .cp-btns button{padding:7px 12px; font-size:12px; font-weight:600; border:1px solid var(--indigo); color:var(--indigo); background:#fff;}
+  .cp-btns button.del{border-color:var(--rose); color:var(--rose);}
 </style>
 </head>
 <body>
@@ -116,6 +133,22 @@
         <a class="link-card" href="slider-form.html"><div class="ic">🖼️</div><div class="lbl">Home Slider</div></a>
         <a class="link-card" href="index.html"><div class="ic">🏬</div><div class="lbl">View Store</div></a>
       </div>
+    </section>
+
+    <section>
+      <h3>Coupon Codes</h3>
+      <div class="cp-form">
+        <div class="cp-grid">
+          <div class="full"><label>Coupon code (letters and numbers only)</label><input type="text" id="cpCode" placeholder="e.g. DIWALI10" maxlength="20" autocomplete="off"></div>
+          <div><label>Discount type</label><select id="cpType"><option value="percent">Percent (%)</option><option value="flat">Flat amount (₹)</option></select></div>
+          <div><label>Discount value</label><input type="number" id="cpValue" min="1" placeholder="e.g. 10"></div>
+          <div><label>Minimum order ₹ (optional)</label><input type="number" id="cpMin" min="0" placeholder="e.g. 500"></div>
+          <div><label>Valid until (optional)</label><input type="date" id="cpExpiry"></div>
+        </div>
+        <button class="cp-save" onclick="createCoupon()">Create coupon</button>
+        <div class="cp-note" id="cpNote"></div>
+      </div>
+      <div id="couponList"></div>
     </section>
 
     <div class="search-box">
@@ -157,6 +190,7 @@ function tryLogin(){
     loadStats();
     loadReturnRequests();
     loadRecentOrders();
+    loadCoupons();
   } else {
     document.getElementById('loginErr').style.display = 'block';
   }
@@ -170,7 +204,7 @@ function logout(){
 if(sessionStorage.getItem('smartd_admin') === 'true'){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminScreen').style.display = 'block';
-  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); });
+  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); });
 }
 
 /* ---------- Overview stats ---------- */
@@ -218,7 +252,7 @@ function renderOrderRow(order){
         <span class="order-row-status">${order.status}</span>
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
-      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
+      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
       <div class="order-row-items">${itemsSummary}</div>
       <div class="status-btns">${btns}${cancelBtn}</div>
     </div>`;
@@ -266,7 +300,7 @@ function renderReturnRow(order){
         <span class="order-row-status">${order.status}</span>
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
-      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
+      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
       <div class="order-row-items">${itemsSummary}</div>
       <div class="return-btns">
         <button class="accept-btn" onclick="decideReturn('${order.orderId}','Return Approved')">Accept return</button>
@@ -347,6 +381,58 @@ async function updateStatus(orderId, newStatus){
     console.error(e);
     alert('Could not update order status. Please try again.');
   }
+}
+
+/* ---------- Coupon codes ---------- */
+function cpNote(t, cls){ const n=document.getElementById('cpNote'); n.textContent=t||''; n.className='cp-note '+(cls||''); }
+function cpDesc(c){
+  const off = c.type==='flat' ? '₹'+c.value+' off' : c.value+'% off';
+  return off + (c.minOrder ? ' · min order ₹'+c.minOrder : '') + (c.expiry ? ' · till '+c.expiry : '') + ' · used '+(c.usedCount||0)+' times';
+}
+async function createCoupon(){
+  const code = document.getElementById('cpCode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const type = document.getElementById('cpType').value;
+  const value = Number(document.getElementById('cpValue').value);
+  const minOrder = Number(document.getElementById('cpMin').value) || 0;
+  const expiry = document.getElementById('cpExpiry').value || '';
+  if(code.length < 3){ cpNote('Coupon code must be at least 3 letters or numbers','no'); return; }
+  if(!(value > 0)){ cpNote('Enter a discount value','no'); return; }
+  if(type === 'percent' && value > 100){ cpNote('Percent cannot be more than 100','no'); return; }
+  try{
+    const ref = db.collection('coupons').doc(code);
+    const ex = await ref.get();
+    if(ex.exists && !confirm('Coupon ' + code + ' already exists. Replace it?')) return;
+    await ref.set({ code, type, value, minOrder, expiry, active:true, usedCount: ex.exists ? (ex.data().usedCount||0) : 0, createdAt: new Date().toISOString() });
+    cpNote('Coupon ' + code + ' created','ok');
+    ['cpCode','cpValue','cpMin','cpExpiry'].forEach(id => document.getElementById(id).value='');
+    loadCoupons();
+  }catch(e){ console.error(e); cpNote('Could not save the coupon. Check your Firebase setup.','no'); }
+}
+async function loadCoupons(){
+  const box = document.getElementById('couponList');
+  try{
+    const snap = await db.collection('coupons').get();
+    if(snap.empty){ box.innerHTML = '<div class="empty">No coupons yet.</div>'; return; }
+    let list = []; snap.forEach(d => list.push(d.data()));
+    list.sort((a,b) => String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+    box.innerHTML = list.map(c => `
+      <div class="cp-row ${c.active===false?'off':''}">
+        <div><div class="cp-code">${c.code}${c.active===false?' (off)':''}</div><div class="cp-desc">${cpDesc(c)}</div></div>
+        <div class="cp-btns">
+          <button onclick="toggleCoupon('${c.code}', ${c.active===false})">${c.active===false?'Turn on':'Turn off'}</button>
+          <button class="del" onclick="deleteCoupon('${c.code}')">Delete</button>
+        </div>
+      </div>`).join('');
+  }catch(e){ console.error(e); box.innerHTML = '<div class="empty">Could not load coupons.</div>'; }
+}
+async function toggleCoupon(code, turnOn){
+  try{ await db.collection('coupons').doc(code).update({ active: turnOn }); loadCoupons(); }
+  catch(e){ console.error(e); alert('Could not update this coupon.'); }
+}
+async function deleteCoupon(code){
+  if(!confirm('Delete coupon ' + code + '?')) return;
+  try{ await db.collection('coupons').doc(code).delete(); loadCoupons(); }
+  catch(e){ console.error(e); alert('Could not delete this coupon.'); }
 }
 </script>
 </body>
