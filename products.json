@@ -416,5 +416,34 @@
       "#1FED45",
       "#6DF386"
     ]
+  },
+  {
+    "id": 26,
+    "name": "12 Meter LED String Lights – 30 Warm White Bulbs for Indoor & Outdoor Decoration",
+    "category": "Electric",
+    "description": "Brighten up your home and outdoor spaces with these beautiful 12-meter LED string lights featuring 30 warm white bulbs. Perfect for creating a cozy, festive, and elegant atmosphere, these decorative lights are ideal for balconies, gardens, bedrooms, living rooms, walls, patios, parties, weddings, festivals, and special occasions.\nKey Features:\n✨ 12 Meter Length: Decorate large spaces with ease.\n💡 30 LED Bulbs: Beautiful warm white illumination.\n🏡 Indoor & Outdoor Decoration: Suitable for various decorative settings.\n🎉 Multi-Purpose Use: Perfect for Diwali, Christmas, weddings, birthdays, and parties.\n🌟 Elegant Ambience: Creates a warm, cozy, and attractive atmosphere.\n🎁 Easy Decoration: Ideal for walls, balconies, plants, railings, and more.\nMake every occasion special with these stunning decorative LED string lights!",
+    "price": 149,
+    "mrp": 249,
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p26-common-1.jpg",
+    "images": [
+      "images/p26-common-1.jpg",
+      "images/p26-common-2.jpg",
+      "images/p26-common-3.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Yellow",
+        "code": "#FFFF00",
+        "images": []
+      }
+    ],
+    "tag": "Sale",
+    "swatch": [
+      "#FFFF00",
+      "#FFFF59"
+    ]
   }
 ]
