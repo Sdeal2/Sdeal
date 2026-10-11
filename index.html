@@ -541,6 +541,11 @@
   .home-slide::before{ display:none; }
   .slider-arrow{ display:none; }
   .slider-dots{ bottom:8px; }
+
+  /* the cart's bottom bar must only show while the cart page is open */
+  #cartDrawer:not(.open) .cart-bar{ display:none !important; }
+  #cartDrawer .cart-bar{ visibility:hidden; }
+  #cartDrawer.open .cart-bar{ visibility:visible; }
 </style>
 </head>
 <body>
@@ -1180,7 +1185,7 @@ loadStoreData();
   function update(){
     var inCheckout=co.style.display==='block', inSuccess=ok.style.display==='block';
     drawer.classList.toggle('full', inCheckout||inSuccess);
-    if(title) title.textContent = inCheckout ? 'Checkout' : inSuccess ? 'Order Placed' : 'Your Cart';
+    if(title) title.textContent = inCheckout ? 'Checkout' : inSuccess ? 'Order Placed' : 'My Cart';
     if(inCheckout||inSuccess) co.scrollTop=0;
   }
   var mo=new MutationObserver(update);
