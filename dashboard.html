@@ -270,6 +270,7 @@ function renderOrderRow(order){
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
       <div class="order-row-items">${itemsSummary}</div>
+      ${order.cancelledBy === 'customer' ? `<div class="order-row-meta" style="color:#b5495b;">Cancelled by customer${order.cancelReason ? ': ' + order.cancelReason : ''}${order.cancelNote ? ' · "' + order.cancelNote + '"' : ''}</div>` : ''}
       <div class="status-btns">${btns}${cancelBtn}</div>
     </div>`;
 }
@@ -318,6 +319,7 @@ function renderReturnRow(order){
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
       <div class="order-row-items">${itemsSummary}</div>
+      ${(order.returnReason || order.returnNote) ? `<div class="order-row-meta" style="color:#b8431a;">Return reason: ${order.returnReason || '—'}${order.returnNote ? ' · "' + order.returnNote + '"' : ''}</div>` : ''}
       <div class="return-btns">
         <button class="accept-btn" onclick="decideReturn('${order.orderId}','Return Approved')">Accept return</button>
         <button class="reject-btn" onclick="decideReturn('${order.orderId}','Return Rejected')">Reject return</button>

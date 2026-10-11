@@ -9,89 +9,187 @@
 <script src="firebase-config.js"></script>
 <style>
   :root{
-    --ivory:#FBF7EE; --ink:#1F2340; --ink-soft:#6b6a63; --indigo:#2E3B5B;
-    --marigold:#E2A33D; --rose:#B5495B; --line:#DDD5C4; --ok:#2F7D4F;
+    --bg:#FFFFFF; --ink:#1F2340; --ink-soft:#6b6a63; --brand:#e8561f; --line:#E6E3DA; --fill:#F4F3EF;
+    --ok:#1b8a3a; --rose:#B5495B;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--ivory);color:var(--ink);
+  body{margin:0;background:var(--bg);color:var(--ink);
     font-family:'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
-  h1,.logo{font-family:'Fraunces', Georgia, serif;}
-  header{position:sticky;top:0;z-index:10;background:var(--ivory);border-bottom:1px solid var(--line);padding:14px 16px;}
-  .back-row{display:flex;align-items:center;gap:10px;max-width:700px;margin:0 auto;}
-  .back-btn{width:38px;height:38px;flex-shrink:0;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;color:var(--ink);background:#fff;}
-  .logo{font-size:20px;font-weight:700;letter-spacing:.02em;}
-  .logo span{color:var(--marigold);}
-  main{max-width:700px;margin:0 auto;padding:18px 16px 40px;}
-  h2{font-size:17px;margin:0 0 6px;}
-  p.sub{font-size:13px;color:var(--ink-soft);margin:0 0 14px;}
+  header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:12px 14px;}
+  .back-row{display:flex;align-items:center;gap:10px;max-width:700px;margin:0 auto;font-weight:600;font-size:17px;}
+  .back-btn{width:36px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;}
+  main{max-width:700px;margin:0 auto;padding:16px 14px 40px;}
+  p.sub{font-size:13px;color:var(--ink-soft);margin:0 0 12px;}
   .row{display:flex;gap:8px;}
-  input[type=tel]{flex:1;padding:12px 14px;border:1px solid var(--line);background:#fff;font:inherit;font-size:15px;color:var(--ink);}
-  input[type=tel]:focus{outline:2px solid var(--marigold);outline-offset:-1px;}
-  button.go{padding:0 20px;border:0;background:var(--indigo);color:#fff;font:inherit;font-weight:600;font-size:15px;cursor:pointer;}
+  input[type=tel]{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:15px;color:var(--ink);}
+  input[type=tel]:focus{outline:2px solid var(--brand);outline-offset:-1px;}
+  button.go{padding:0 22px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:inherit;font-weight:600;font-size:15px;cursor:pointer;}
   button.go:disabled{opacity:.5;}
-  .msg{margin-top:14px;font-size:14px;color:var(--ink-soft);}
+  .msg{margin-top:12px;font-size:14px;color:var(--ink-soft);}
   .msg.fail{color:var(--rose);}
-  .order{background:#fff;border:1px solid var(--line);padding:14px;margin-top:14px;cursor:pointer;}
-  .order-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px;}
+
+  .order{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px;background:#fff;}
+  .order-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
   .order-id{font-weight:700;font-size:15px;}
   .order-date{font-size:12px;color:var(--ink-soft);}
-  .order-status{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border:1px solid var(--ok);color:var(--ok);margin-bottom:8px;}
-  .order-items{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:6px;}
-  .order-total{font-weight:700;font-size:15px;}
-  .track-link{font-size:13px;color:var(--indigo);text-decoration:underline;}
+  .chip{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:12px;margin:8px 0 4px;background:#e5f5ea;color:var(--ok);}
+  .chip.warn{background:#fdeee7;color:#b8431a;} .chip.bad{background:#fbe9ec;color:var(--rose);}
+  .it{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #f3f2ee;}
+  .it:last-of-type{border-bottom:none;}
+  .it-img{width:56px;height:56px;border-radius:8px;background:#eee;flex:none;object-fit:cover;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:20px;}
+  .it-info{flex:1;min-width:0;}
+  .it-name{font-size:13.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .it-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .it-price{font-size:13.5px;font-weight:600;white-space:nowrap;}
+  .order-total{display:flex;justify-content:space-between;font-weight:700;font-size:15px;padding:10px 0 4px;border-top:1px dashed var(--line);margin-top:4px;}
+  .note-line{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45;}
+  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .btns button,.btns a{flex:1 1 auto;text-align:center;text-decoration:none;padding:10px 12px;border:1px solid var(--line);background:#fff;border-radius:10px;font:inherit;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;}
+  .btns .pri{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .btns .dng{color:var(--rose);border-color:#e8c6cc;}
+
+  /* bottom sheet */
+  .shade{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:50;}
+  .shade.open{display:block;}
+  .sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:100%;max-width:560px;background:#fff;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));z-index:60;transition:transform .25s ease;max-height:90vh;overflow-y:auto;}
+  .sheet.open{transform:translate(-50%,0);}
+  .sheet h3{margin:0 0 4px;font-size:18px;}
+  .sheet .sd{font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;}
+  .reasons{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .reasons button{border:1px solid var(--line);background:#fff;border-radius:18px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink);}
+  .reasons button.on{border-color:var(--brand);background:#fdeee7;color:#b8431a;font-weight:600;}
+  .sheet textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;resize:vertical;color:var(--ink);}
+  .sheet textarea:focus{outline:2px solid var(--brand);outline-offset:-1px;}
+  .sheet .sbtns{display:flex;gap:8px;margin-top:12px;}
+  .sheet .sbtns button{flex:1;padding:13px;border-radius:10px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);}
+  .sheet .sbtns .ok{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .sheet .sbtns button:disabled{opacity:.5;}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;font-size:13px;padding:9px 16px;border-radius:20px;opacity:0;transition:.25s;pointer-events:none;z-index:80;}
+  .toast.on{opacity:1;}
 </style>
 </head>
 <body>
 <header>
   <div class="back-row">
     <a class="back-btn" href="index.html" aria-label="Back to home">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
-    <div class="logo">SMART DEAL<span>.</span></div>
+    My Orders
   </div>
 </header>
 
 <main>
-  <h2>My Orders</h2>
   <p class="sub">Enter the mobile number you used while ordering to see all your past orders.</p>
   <div class="row">
-    <input type="tel" id="phone" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" autofocus>
+    <input type="tel" id="phone" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10">
     <button class="go" id="go" type="button">Show</button>
   </div>
   <div class="msg" id="msg"></div>
   <div id="list"></div>
 </main>
 
+<div class="shade" id="shade" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <h3 id="shTitle"></h3>
+  <div class="sd" id="shDesc"></div>
+  <div class="reasons" id="shReasons"></div>
+  <textarea id="shNote" placeholder="Write anything you want to tell us (optional)"></textarea>
+  <div class="sbtns"><button onclick="closeSheet()">Back</button><button class="ok" id="shOk" onclick="submitSheet()">Submit</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
 <script>
 const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function fmtDate(iso){
   try{ return new Date(iso).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}); }
   catch(_){ return ''; }
 }
 function setMsg(text, fail){ $("msg").textContent = text || ''; $("msg").className = 'msg' + (fail ? ' fail' : ''); }
+function toast(t){ const e = $("toast"); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2200); }
+
+let ORDERS = {}, PRODS = [], lastDigits = '';
+const RETURN_DAYS = 7;
+const RETURN_REASONS = ['Wrong size / fit','Damaged or defective','Not as shown','Wrong item received','Changed my mind'];
+const CANCEL_REASONS = ['Ordered by mistake','Found a better price','Delivery is taking long','Want to change the order','Other'];
+
+/* products.json is only used to show photos for older orders */
+fetch('products.json?ts=' + Date.now()).then(r => r.ok ? r.json() : []).then(p => { PRODS = Array.isArray(p) ? p : []; if(lastDigits) render(); }).catch(() => {});
+function photoOf(item){
+  if(item.img) return item.img;
+  const p = PRODS.find(x => (item.id != null && x.id === item.id)) || PRODS.find(x => String(x.name||'').trim().toLowerCase() === String(item.name||'').trim().toLowerCase());
+  if(!p) return '';
+  return p.img || (Array.isArray(p.images) && p.images[0]) || '';
+}
+
+function statusChip(o){
+  const st = o.status || 'Order Placed';
+  const cls = (st === 'Cancelled' || st === 'Return Rejected') ? 'bad' : (st === 'Return Requested' ? 'warn' : '');
+  return `<span class="chip ${cls}">${esc(st)}</span>`;
+}
+function helpLink(o){
+  const num = String(typeof WHATSAPP_NUMBER !== 'undefined' ? WHATSAPP_NUMBER : '').replace(/\D/g, '');
+  if(!num) return '';
+  return `<a href="https://wa.me/${num}?text=${encodeURIComponent('Hi, I need help with my order ' + o.orderId)}" target="_blank" rel="noopener">Help</a>`;
+}
+function returnOpen(o){
+  if(o.status !== 'Delivered') return false;
+  const t = new Date(o.statusUpdatedAt || o.createdAt || 0).getTime();
+  return !t || (Date.now() - t) <= RETURN_DAYS * 86400000;
+}
+
+function render(){
+  const list = Object.values(ORDERS).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  $("list").innerHTML = list.map(o => {
+    const id = esc(o.orderId), st = o.status || 'Order Placed';
+    const items = (o.items || []).map(i => {
+      const img = photoOf(i);
+      const meta = [i.color ? 'Color: ' + i.color : '', i.size ? 'Size: ' + i.size : '', 'Qty ' + i.qty].filter(Boolean).join(' · ');
+      return `<div class="it">
+        ${img ? `<img class="it-img" src="${esc(img)}" alt="" onerror="this.outerHTML='<div class=\\'it-img\\' style=\\'background:#e8561f\\'>${esc(String(i.name||'?').charAt(0))}</div>'">`
+              : `<div class="it-img" style="background:#e8561f">${esc(String(i.name||'?').charAt(0))}</div>`}
+        <div class="it-info"><div class="it-name">${esc(i.name)}</div><div class="it-meta">${esc(meta)}</div></div>
+        ${i.price != null ? `<div class="it-price">₹${esc(i.price * i.qty)}</div>` : ''}
+      </div>`;
+    }).join('');
+    let notes = '';
+    if(st === 'Return Requested') notes = `<div class="note-line">Your return request has been sent. We will update you soon.${o.returnReason ? '<br>Reason: ' + esc(o.returnReason) : ''}</div>`;
+    else if(st === 'Return Approved') notes = `<div class="note-line">Your return has been approved.</div>`;
+    else if(st === 'Return Rejected') notes = `<div class="note-line">Sorry, your return request was not approved. Tap Help to talk to us.</div>`;
+    else if(st === 'Delivered' && !returnOpen(o)) notes = `<div class="note-line">The ${RETURN_DAYS}-day return window for this order is over.</div>`;
+    const btns = [
+      `<a class="pri" href="track.html?id=${encodeURIComponent(o.orderId)}">Track order</a>`,
+      returnOpen(o) ? `<button onclick="openSheet('return','${id}')">Return</button>` : '',
+      st === 'Order Placed' ? `<button class="dng" onclick="openSheet('cancel','${id}')">Cancel order</button>` : '',
+      helpLink(o)
+    ].join('');
+    return `<div class="order">
+      <div class="order-top"><span class="order-id">${id}</span><span class="order-date">${fmtDate(o.createdAt)}</span></div>
+      ${statusChip(o)}
+      ${items}
+      <div class="order-total"><span>Total</span><span>₹${esc(o.total ?? '')}</span></div>
+      ${notes}
+      <div class="btns">${btns}</div>
+    </div>`;
+  }).join('');
+}
 
 async function search(){
   const raw = $("phone").value.trim();
   const digits = raw.replace(/\D/g, '').slice(-10);
   if(digits.length !== 10){ setMsg('Please enter a valid 10-digit mobile number.', true); return; }
   if(typeof db === 'undefined'){ setMsg('Order lookup is not set up yet. Please contact the store.', true); return; }
+  try{ localStorage.setItem('smartDealCustomerPhone', digits); }catch(e){}
 
   $("go").disabled = true; $("list").innerHTML = ''; setMsg('Looking up your orders…');
   try{
     const snap = await db.collection('orders').where('phone', '==', digits).get();
-    let orders = snap.docs.map(d => d.data());
-    orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    if(!orders.length){ setMsg('No orders found for this number yet.'); return; }
-    setMsg(orders.length + ' order' + (orders.length === 1 ? '' : 's') + ' found.');
-    $("list").innerHTML = orders.map(o => {
-      const items = (o.items || []).map(i => `${i.name} (x${i.qty})`).join(', ');
-      return `<div class="order" onclick="location.href='track.html?id=${encodeURIComponent(o.orderId)}'">
-        <div class="order-top"><span class="order-id">${o.orderId}</span><span class="order-date">${fmtDate(o.createdAt)}</span></div>
-        <div class="order-status">${o.status || 'Order Placed'}</div>
-        <div class="order-items">${items}</div>
-        <div class="order-total">₹${o.total ?? ''} <span class="track-link">Track order →</span></div>
-      </div>`;
-    }).join('');
+    ORDERS = {}; snap.docs.forEach(d => { const o = d.data(); ORDERS[o.orderId] = o; });
+    lastDigits = digits;
+    const n = Object.keys(ORDERS).length;
+    if(!n){ setMsg('No orders found for this number yet.'); return; }
+    setMsg(n + ' order' + (n === 1 ? '' : 's') + ' found.');
+    render();
   }catch(e){
     console.error('Order lookup failed:', e);
     setMsg('Could not load your orders right now. Please try again in a moment.', true);
@@ -101,6 +199,44 @@ async function search(){
 }
 $("go").onclick = search;
 $("phone").addEventListener('keydown', e => { if(e.key === 'Enter') search(); });
+try{ const saved = localStorage.getItem('smartDealCustomerPhone'); if(saved) $("phone").value = saved; }catch(e){}
+
+/* ---------- Return / Cancel sheet ---------- */
+let sheetMode = '', sheetOrder = '', sheetReason = '';
+function openSheet(mode, orderId){
+  sheetMode = mode; sheetOrder = orderId; sheetReason = '';
+  const ret = mode === 'return';
+  $("shTitle").textContent = ret ? 'Return this order' : 'Cancel this order';
+  $("shDesc").textContent = (ret ? 'Tell us why you want to return order ' : 'Tell us why you want to cancel order ') + orderId;
+  $("shReasons").innerHTML = (ret ? RETURN_REASONS : CANCEL_REASONS).map((r, i) => `<button type="button" onclick="pickReason(${i})">${esc(r)}</button>`).join('');
+  $("shNote").value = '';
+  $("shOk").textContent = ret ? 'Send return request' : 'Cancel order';
+  $("shade").classList.add('open'); $("sheet").classList.add('open');
+}
+function pickReason(i){
+  const arr = sheetMode === 'return' ? RETURN_REASONS : CANCEL_REASONS;
+  sheetReason = arr[i];
+  [...$("shReasons").children].forEach((b, k) => b.classList.toggle('on', k === i));
+}
+function closeSheet(){ $("shade").classList.remove('open'); $("sheet").classList.remove('open'); }
+async function submitSheet(){
+  const note = $("shNote").value.trim();
+  if(!sheetReason && !note){ toast('Please pick a reason or write a few words'); return; }
+  const btn = $("shOk"); btn.disabled = true;
+  const now = new Date().toISOString();
+  const data = sheetMode === 'return'
+    ? { status: 'Return Requested', returnRequestedAt: now, returnReason: sheetReason, returnNote: note, statusUpdatedAt: now }
+    : { status: 'Cancelled', cancelledAt: now, cancelledBy: 'customer', cancelReason: sheetReason, cancelNote: note, statusUpdatedAt: now };
+  try{
+    await db.collection('orders').doc(sheetOrder).update(data);
+    Object.assign(ORDERS[sheetOrder], data);
+    closeSheet(); render();
+    toast(sheetMode === 'return' ? 'Return request sent' : 'Order cancelled');
+  }catch(e){
+    console.error(e); toast('Could not send. Please try again.');
+  }
+  btn.disabled = false;
+}
 </script>
 </body>
 </html>
