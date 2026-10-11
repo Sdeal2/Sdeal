@@ -534,6 +534,13 @@
   .ac-li div{ flex:1; } .ac-ar{ color:#aaa; font-size:20px; }
   .ac-info{ display:none; padding:10px 16px 14px; font-size:13px; line-height:1.5; color:#666; background:#fafaf7; border-bottom:1px solid #f1f1f1; }
   .ac-info.open{ display:block; }
+
+  /* ---------- Slider: image only (no text, no button, no dark overlay, no arrows) ---------- */
+  .home-slider{ background:#f1f0ea; }
+  .home-slide{ padding:0; display:block; background-color:#f1f0ea; }
+  .home-slide::before{ display:none; }
+  .slider-arrow{ display:none; }
+  .slider-dots{ bottom:8px; }
 </style>
 </head>
 <body>
@@ -565,8 +572,6 @@
 
 <section class="home-slider" id="home">
   <div class="home-slides" id="homeSlides"></div>
-  <button class="slider-arrow slider-prev" onclick="moveHomeSlider(-1)" aria-label="Previous">‹</button>
-  <button class="slider-arrow slider-next" onclick="moveHomeSlider(1)" aria-label="Next">›</button>
   <div class="slider-dots" id="sliderDots"></div>
 </section>
 
@@ -1099,13 +1104,16 @@ let HOME_SLIDES = [];
 let homeSlideIndex=0;
 function renderHomeSlider(){
  const wrap=document.getElementById('homeSlides'),dots=document.getElementById('sliderDots');
- wrap.innerHTML=HOME_SLIDES.map(s=>`<div class="home-slide" style="${s.image?`background-image:url('${s.image}')`:''}"><div class="home-slide-inner"><div class="home-slide-copy"><div class="hero-eyebrow">${s.eyebrow}</div><h1>${s.title}</h1><p>${s.text}</p><a href="#catalog" class="hero-cta">${s.button}</a></div></div></div>`).join('');
+ wrap.innerHTML=HOME_SLIDES.map(s=>`<div class="home-slide" style="${s.image?`background-image:url('${s.image}')`:''}"></div>`).join('');
  wrap.style.transform=`translateX(-${homeSlideIndex*100}%)`;
  dots.innerHTML=HOME_SLIDES.map((_,i)=>`<button class="slider-dot ${i===homeSlideIndex?'active':''}" onclick="goHomeSlider(${i})" aria-label="Slide ${i+1}"></button>`).join('');
 }
 function moveHomeSlider(step){homeSlideIndex=(homeSlideIndex+step+HOME_SLIDES.length)%HOME_SLIDES.length;renderHomeSlider();}
 function goHomeSlider(i){homeSlideIndex=i;renderHomeSlider();}
 setInterval(()=>moveHomeSlider(1),5000);
+(function(){const el=document.getElementById('homeSlides');let x0=null;
+ el.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;},{passive:true});
+ el.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>40)moveHomeSlider(dx<0?1:-1);},{passive:true});})();
 /* ---------- Product multi-image gallery ---------- */
 let galleryImages=[],galleryIndex=0;
 function getProductImages(p){return Array.isArray(p.images)&&p.images.length?p.images.filter(Boolean):(p.img?[p.img]:[]);}

@@ -4,95 +4,93 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — Smart Deal</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <style>
-  :root{
-    --bg:#FAF7F1; --ink:#201C18; --ink-soft:#5C564C;
-    --indigo:#2E3B5B; --indigo-dark:#212A42;
-    --marigold:#E2A33D; --rose:#B5495B; --line:#E4DCCB;
-  }
+  :root{ --bg:#FFFFFF; --ink:#1F2340; --ink-soft:#6b6a63; --brand:#e8561f; --line:#E6E3DA; --fill:#F4F3EF; --ok:#1b8a3a; --rose:#B5495B; }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{background:var(--bg); color:var(--ink); font-family:'Work Sans',sans-serif; line-height:1.5;}
-  h1,h2,h3{font-family:'Fraunces',serif; font-weight:600;}
+  body{background:var(--bg); color:var(--ink); font-family:'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; line-height:1.5;}
   a{color:inherit;}
   button{font-family:inherit; cursor:pointer; border:none;}
+  header{position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--line); padding:12px 14px;}
+  .hrow{display:flex; align-items:center; gap:10px; max-width:560px; margin:0 auto; font-weight:600; font-size:17px;}
+  .back-btn{width:36px; height:36px; display:flex; align-items:center; justify-content:center; color:var(--ink); text-decoration:none;}
+  main{max-width:560px; margin:0 auto; padding:16px 14px 70px;}
 
-  header{border-bottom:1px solid var(--line); padding:16px 20px;}
-  .logo{font-family:'Fraunces',serif; font-weight:700; font-size:22px; max-width:600px; margin:0 auto;}
-  .logo span{color:var(--marigold);}
-
-  main{max-width:520px; margin:0 auto; padding:40px 20px 80px;}
-
-  .lookup-box{background:#fff; border:1px solid var(--line); padding:22px; margin-bottom:24px;}
+  .lookup-box{border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px;}
   .lookup-box label{font-size:13px; font-weight:600; display:block; margin-bottom:8px;}
   .lookup-row{display:flex; gap:8px;}
-  .lookup-row input{
-    flex:1; padding:11px 12px; border:1px solid var(--line);
-    font-family:inherit; font-size:14px;
-  }
-  .lookup-row button{
-    background:var(--ink); color:#fff; padding:11px 20px;
-    font-weight:600; font-size:14px;
-  }
+  .lookup-row input{flex:1; min-width:0; padding:12px 14px; border:1px solid var(--line); border-radius:10px; font-family:inherit; font-size:15px; color:var(--ink);}
+  .lookup-row input:focus{outline:2px solid var(--brand); outline-offset:-1px;}
+  .lookup-row button{background:var(--brand); color:#fff; padding:0 22px; border-radius:10px; font-weight:600; font-size:15px;}
 
   .state-msg{text-align:center; padding:50px 20px; color:var(--ink-soft); font-size:14px;}
-
-  .order-card{background:#fff; border:1px solid var(--line); padding:24px; margin-bottom:20px;}
+  .order-card{border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px;}
   .order-card-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;}
-  .order-id{font-size:12px; color:var(--ink-soft);}
+  .order-id{font-size:12px; color:var(--ink-soft); letter-spacing:.03em;}
   .order-total{font-size:18px; font-weight:700;}
   .order-name{font-size:15px; font-weight:600; margin-bottom:2px;}
-  .order-addr{font-size:12.5px; color:var(--ink-soft); margin-bottom:18px;}
+  .order-addr{font-size:12.5px; color:var(--ink-soft);}
 
-  .timeline{margin:26px 0;}
-  .step{display:flex; gap:14px; position:relative; padding-bottom:28px;}
+  .timeline{margin:22px 0 18px;}
+  .step{display:flex; gap:14px; position:relative; padding-bottom:26px;}
   .step:last-child{padding-bottom:0;}
-  .step-line{
-    position:absolute; left:11px; top:24px; bottom:0;
-    width:2px; background:var(--line);
-  }
-  .step.done .step-line{background:var(--indigo);}
-  .step-dot{
-    width:24px; height:24px; border-radius:50%;
-    border:2px solid var(--line);
-    background:#fff;
-    display:flex; align-items:center; justify-content:center;
-    flex-shrink:0; z-index:1;
-    font-size:12px;
-  }
-  .step.done .step-dot{background:var(--indigo); border-color:var(--indigo); color:#fff;}
-  .step.current .step-dot{background:var(--marigold); border-color:var(--marigold); color:var(--indigo-dark); font-weight:700;}
+  .step-line{position:absolute; left:11px; top:24px; bottom:0; width:2px; background:var(--line);}
+  .step.done .step-line{background:var(--ok);}
+  .step-dot{width:24px; height:24px; border-radius:50%; border:2px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; z-index:1; font-size:12px;}
+  .step.done .step-dot{background:var(--ok); border-color:var(--ok); color:#fff;}
+  .step.current .step-dot{background:var(--brand); border-color:var(--brand); color:#fff; font-weight:700;}
   .step-label{font-size:14px; font-weight:600; padding-top:1px;}
   .step-sub{font-size:12px; color:var(--ink-soft); margin-top:2px;}
   .step:not(.done):not(.current) .step-label{color:var(--ink-soft); font-weight:500;}
 
-  .items-list{border-top:1px solid var(--line); padding-top:16px; margin-top:4px;}
-  .item-row{display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--ink-soft);}
+  .items-list{border-top:1px solid var(--line); padding-top:6px; margin-top:4px;}
+  .it{display:flex; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid #f3f2ee;}
+  .it:last-child{border-bottom:none;}
+  .it-img{width:56px; height:56px; border-radius:8px; background:var(--brand); flex:none; object-fit:cover; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:20px;}
+  .it-info{flex:1; min-width:0;}
+  .it-name{font-size:13.5px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .it-meta{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .it-price{font-size:13.5px; font-weight:600; white-space:nowrap;}
+  .sum-line{display:flex; justify-content:space-between; font-size:13px; color:var(--ink-soft); padding:4px 0;}
+  .sum-line.g{color:var(--ok);}
 
-  .return-box{background:#fff; border:1px solid var(--line); padding:22px; text-align:center;}
-  .return-box h3{font-size:16px; margin-bottom:8px;}
-  .return-box p{font-size:13px; color:var(--ink-soft); margin-bottom:16px;}
-  .return-btn{
-    background:var(--rose); color:#fff; padding:13px 24px;
-    font-weight:600; font-size:14px; width:100%;
-  }
-  .return-btn:hover{background:#9A3E4D;}
+  .return-box{border:1px solid var(--line); border-radius:14px; padding:18px; text-align:center;}
+  .return-box h3{font-size:16px; margin-bottom:6px;}
+  .return-box p{font-size:13px; color:var(--ink-soft); margin-bottom:14px;}
+  .return-btn{background:var(--brand); color:#fff; padding:13px 24px; font-weight:600; font-size:14px; width:100%; border-radius:10px;}
+  .cancel-btn{background:#fff; color:var(--rose); padding:13px 24px; font-weight:600; font-size:14px; width:100%; border:1.5px solid var(--rose); border-radius:10px;}
   .return-closed{font-size:13px; color:var(--ink-soft);}
-  .return-done{font-size:13px; color:var(--indigo); font-weight:600;}
-  .cancel-btn{
-    background:#fff; color:var(--rose); padding:13px 24px;
-    font-weight:600; font-size:14px; width:100%; border:1.5px solid var(--rose);
-  }
-  .cancel-btn:hover{background:var(--rose); color:#fff;}
+  .return-done{font-size:13px; color:var(--ok); font-weight:600;}
+  .why{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+  .help-link{display:block; text-align:center; margin-top:12px; font-size:13.5px; font-weight:600; color:var(--brand); text-decoration:none;}
+
+  .shade{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:50;}
+  .shade.open{display:block;}
+  .sheet{position:fixed; left:50%; bottom:0; transform:translate(-50%,100%); width:100%; max-width:560px; background:#fff; border-radius:18px 18px 0 0; padding:18px 16px calc(18px + env(safe-area-inset-bottom)); z-index:60; transition:transform .25s ease; max-height:90vh; overflow-y:auto;}
+  .sheet.open{transform:translate(-50%,0);}
+  .sheet h3{margin-bottom:4px; font-size:18px;}
+  .sheet .sd{font-size:12.5px; color:var(--ink-soft); margin-bottom:12px;}
+  .reasons{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;}
+  .reasons button{border:1px solid var(--line); background:#fff; border-radius:18px; padding:8px 14px; font-size:13px; color:var(--ink);}
+  .reasons button.on{border-color:var(--brand); background:#fdeee7; color:#b8431a; font-weight:600;}
+  .sheet textarea{width:100%; min-height:84px; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-family:inherit; font-size:14px; resize:vertical; color:var(--ink);}
+  .sheet textarea:focus{outline:2px solid var(--brand); outline-offset:-1px;}
+  .sbtns{display:flex; gap:8px; margin-top:12px;}
+  .sbtns button{flex:1; padding:13px; border-radius:10px; font-weight:600; font-size:14px; border:1px solid var(--line); background:#fff; color:var(--ink);}
+  .sbtns .ok{background:var(--brand); border-color:var(--brand); color:#fff;}
+  .sbtns button:disabled{opacity:.5;}
+  .toast{position:fixed; left:50%; bottom:90px; transform:translateX(-50%); background:#222; color:#fff; font-size:13px; padding:9px 16px; border-radius:20px; opacity:0; transition:.25s; pointer-events:none; z-index:80;}
+  .toast.on{opacity:1;}
 </style>
 </head>
 <body>
 
-<header><div class="logo">SMART DEAL<span>.</span></div></header>
+<header><div class="hrow">
+  <a class="back-btn" href="my-orders.html" aria-label="Back to My Orders"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+  Track Order
+</div></header>
 
 <main>
   <div class="lookup-box">
@@ -102,18 +100,40 @@
       <button onclick="lookupOrder()">Track</button>
     </div>
   </div>
-
   <div id="resultArea"></div>
 </main>
 
+<div class="shade" id="shade" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <h3 id="shTitle"></h3>
+  <div class="sd" id="shDesc"></div>
+  <div class="reasons" id="shReasons"></div>
+  <textarea id="shNote" placeholder="Write anything you want to tell us (optional)"></textarea>
+  <div class="sbtns"><button onclick="closeSheet()">Back</button><button class="ok" id="shOk" onclick="submitSheet()">Submit</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
 <script>
 const RETURN_WINDOW_DAYS = 7;
+const RETURN_REASONS = ['Wrong size / fit','Damaged or defective','Not as shown','Wrong item received','Changed my mind'];
+const CANCEL_REASONS = ['Ordered by mistake','Found a better price','Delivery is taking long','Want to change the order','Other'];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const $ = id => document.getElementById(id);
+function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2200); }
 
 // pre-fill from URL if present: track.html?id=SD4F8K2
 const params = new URLSearchParams(window.location.search);
 const prefillId = params.get('id');
-if(prefillId){
-  document.getElementById('orderIdInput').value = prefillId;
+if(prefillId){ $('orderIdInput').value = prefillId; }
+
+/* products.json only used to show photos for older orders */
+let PRODS = [], currentOrder = null;
+fetch('products.json?ts=' + Date.now()).then(r => r.ok ? r.json() : []).then(p => { PRODS = Array.isArray(p) ? p : []; if(currentOrder) renderOrder(currentOrder); }).catch(() => {});
+function photoOf(item){
+  if(item.img) return item.img;
+  const p = PRODS.find(x => item.id != null && x.id === item.id) || PRODS.find(x => String(x.name||'').trim().toLowerCase() === String(item.name||'').trim().toLowerCase());
+  if(!p) return '';
+  return p.img || (Array.isArray(p.images) && p.images[0]) || '';
 }
 
 const RETURN_STATUSES = ["Return Requested","Return Approved","Return Rejected"];
@@ -127,50 +147,45 @@ function stepState(order, stepKey){
   if(stepIdx === currentIdx) return "current";
   return "";
 }
+function daysBetween(dateStr){ return Math.floor((new Date() - new Date(dateStr)) / 86400000); }
+function fmt(d){ try{ return new Date(d).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}); }catch(e){ return ''; } }
 
-function daysBetween(dateStr){
-  const then = new Date(dateStr);
-  const now = new Date();
-  return Math.floor((now - then) / (1000*60*60*24));
+function helpLink(order){
+  const num = String(typeof WHATSAPP_NUMBER !== 'undefined' ? WHATSAPP_NUMBER : '').replace(/\D/g, '');
+  if(!num) return '';
+  return `<a class="help-link" href="https://wa.me/${num}?text=${encodeURIComponent('Hi, I need help with my order ' + order.orderId)}" target="_blank" rel="noopener">Need help? Chat with us on WhatsApp</a>`;
 }
 
 function renderOrder(order){
+  currentOrder = order;
   const steps = [
-    {key:"Order Placed", label:"Order Placed", sub: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ""},
-    {key:"Shipped", label:"Shipped", sub: order.shippedAt ? new Date(order.shippedAt).toLocaleDateString() : ""},
-    {key:"Out for Delivery", label:"Out for Delivery", sub: order.outForDeliveryAt ? new Date(order.outForDeliveryAt).toLocaleDateString() : ""},
-    {key:"Delivered", label:"Delivered", sub: order.deliveredAt ? new Date(order.deliveredAt).toLocaleDateString() : ""}
+    {key:"Order Placed", label:"Order Placed", sub: order.createdAt ? fmt(order.createdAt) : ""},
+    {key:"Shipped", label:"Shipped", sub: order.shippedAt ? fmt(order.shippedAt) : ""},
+    {key:"Out for Delivery", label:"Out for Delivery", sub: order.outForDeliveryAt ? fmt(order.outForDeliveryAt) : ""},
+    {key:"Delivered", label:"Delivered", sub: order.deliveredAt ? fmt(order.deliveredAt) : ""}
   ];
-
   const timelineHtml = steps.map(s => {
     const state = stepState(order, s.key);
-    return `
-      <div class="step ${state}">
-        <div>
-          <div class="step-dot">${state==='done' ? '✓' : ''}</div>
-          <div class="step-line"></div>
-        </div>
-        <div>
-          <div class="step-label">${s.label}</div>
-          ${s.sub ? `<div class="step-sub">${s.sub}</div>` : ''}
-        </div>
-      </div>`;
+    return `<div class="step ${state}"><div><div class="step-dot">${state==='done' ? '✓' : ''}</div><div class="step-line"></div></div>
+      <div><div class="step-label">${s.label}</div>${s.sub ? `<div class="step-sub">${s.sub}</div>` : ''}</div></div>`;
   }).join('');
 
-  const itemsHtml = order.items.map(i =>
-    `<div class="item-row"><span>${i.name} (${i.size}) x${i.qty}</span><span>₹${i.price*i.qty}</span></div>`
-  ).join('');
+  const itemsHtml = (order.items || []).map(i => {
+    const img = photoOf(i), letter = esc(String(i.name || '?').charAt(0));
+    const meta = [i.color ? 'Color: ' + i.color : '', i.size ? 'Size: ' + i.size : '', 'Qty ' + i.qty].filter(Boolean).join(' · ');
+    return `<div class="it">
+      ${img ? `<img class="it-img" src="${esc(img)}" alt="" onerror="this.outerHTML='<div class=\\'it-img\\'>${letter}</div>'">` : `<div class="it-img">${letter}</div>`}
+      <div class="it-info"><div class="it-name">${esc(i.name)}</div><div class="it-meta">${esc(meta)}</div></div>
+      <div class="it-price">₹${i.price * i.qty}</div></div>`;
+  }).join('');
+  const discHtml = order.discount ? `<div class="sum-line g"><span>Coupon ${esc(order.coupon || '')}</span><span>- ₹${order.discount}</span></div>` : '';
 
   let returnHtml = '';
   if(order.status === "Order Placed"){
-    returnHtml = `
-      <div class="return-box">
-        <h3>Need to cancel?</h3>
-        <p>You can cancel this order any time before it ships.</p>
-        <button class="cancel-btn" onclick="cancelOrder('${order.orderId}')">Cancel Order</button>
-      </div>`;
+    returnHtml = `<div class="return-box"><h3>Need to cancel?</h3><p>You can cancel this order any time before it ships.</p>
+      <button class="cancel-btn" onclick="openSheet('cancel')">Cancel Order</button></div>`;
   } else if(order.status === "Cancelled"){
-    returnHtml = `<div class="return-box"><div class="return-closed">This order was cancelled.</div></div>`;
+    returnHtml = `<div class="return-box"><div class="return-closed">This order was cancelled.</div>${order.cancelReason ? `<div class="why">Reason: ${esc(order.cancelReason)}</div>` : ''}</div>`;
   } else if(order.status === "Delivered" || RETURN_STATUSES.includes(order.status)){
     const daysSince = order.deliveredAt ? daysBetween(order.deliveredAt) : 0;
     if(order.status === "Return Approved"){
@@ -178,81 +193,79 @@ function renderOrder(order){
     } else if(order.status === "Return Rejected"){
       returnHtml = `<div class="return-box"><div class="return-closed">Your return request was not approved. Please contact the store if you have questions.</div></div>`;
     } else if(order.status === "Return Requested" || order.returnRequestedAt){
-      returnHtml = `<div class="return-box"><div class="return-done">Return request received — we'll update you soon.</div></div>`;
+      returnHtml = `<div class="return-box"><div class="return-done">Return request received — we'll update you soon.</div>${order.returnReason ? `<div class="why">Reason: ${esc(order.returnReason)}</div>` : ''}</div>`;
     } else if(daysSince <= RETURN_WINDOW_DAYS){
-      returnHtml = `
-        <div class="return-box">
-          <h3>Not happy with your order?</h3>
-          <p>You can request a return within ${RETURN_WINDOW_DAYS} days of delivery. ${RETURN_WINDOW_DAYS - daysSince} day(s) left.</p>
-          <button class="return-btn" onclick="requestReturn('${order.orderId}')">Request Return</button>
-        </div>`;
+      returnHtml = `<div class="return-box"><h3>Not happy with your order?</h3>
+        <p>You can request a return within ${RETURN_WINDOW_DAYS} days of delivery. ${RETURN_WINDOW_DAYS - daysSince} day(s) left.</p>
+        <button class="return-btn" onclick="openSheet('return')">Request Return</button></div>`;
     } else {
       returnHtml = `<div class="return-box"><div class="return-closed">Return window has closed for this order.</div></div>`;
     }
   }
 
-  document.getElementById('resultArea').innerHTML = `
+  $('resultArea').innerHTML = `
     <div class="order-card">
-      <div class="order-card-head">
-        <span class="order-id">ORDER ${order.orderId}</span>
-        <span class="order-total">₹${order.total}</span>
-      </div>
-      <div class="order-name">${order.name}</div>
-      <div class="order-addr">${order.address}, ${order.city} - ${order.pincode}</div>
-
+      <div class="order-card-head"><span class="order-id">ORDER ${esc(order.orderId)}</span><span class="order-total">₹${order.total}</span></div>
+      <div class="order-name">${esc(order.name)}</div>
+      <div class="order-addr">${esc(order.address)}, ${esc(order.city)}${order.state ? ', ' + esc(order.state) : ''} - ${esc(order.pincode)}</div>
       <div class="timeline">${timelineHtml}</div>
-
-      <div class="items-list">${itemsHtml}</div>
+      <div class="items-list">${itemsHtml}${discHtml}</div>
     </div>
     ${returnHtml}
-  `;
+    ${helpLink(order)}`;
 }
 
 async function lookupOrder(){
-  const id = document.getElementById('orderIdInput').value.trim().toUpperCase();
+  const id = $('orderIdInput').value.trim().toUpperCase();
   if(!id){ return; }
-  document.getElementById('resultArea').innerHTML = '<div class="state-msg">Looking up your order...</div>';
+  $('resultArea').innerHTML = '<div class="state-msg">Looking up your order...</div>';
   try{
     const doc = await db.collection('orders').doc(id).get();
     if(!doc.exists){
-      document.getElementById('resultArea').innerHTML = '<div class="state-msg">No order found with this ID. Please check and try again.</div>';
+      $('resultArea').innerHTML = '<div class="state-msg">No order found with this ID. Please check and try again.</div>';
       return;
     }
     renderOrder(doc.data());
   }catch(e){
     console.error(e);
-    document.getElementById('resultArea').innerHTML = '<div class="state-msg">Could not load order right now. Please try again in a moment.</div>';
+    $('resultArea').innerHTML = '<div class="state-msg">Could not load order right now. Please try again in a moment.</div>';
   }
 }
 
-async function cancelOrder(orderId){
-  if(!confirm('Cancel this order? This cannot be undone.')) return;
-  try{
-    await db.collection('orders').doc(orderId).update({
-      status: "Cancelled",
-      cancelledAt: new Date().toISOString(),
-      statusUpdatedAt: new Date().toISOString()
-    });
-  }catch(e){
-    console.error('Could not cancel order:', e);
-    alert('Could not cancel your order right now. Please try again in a moment.');
-    return;
-  }
-  lookupOrder();
+/* ---------- Return / Cancel sheet (reason + write-in box) ---------- */
+let sheetMode = '', sheetReason = '';
+function openSheet(mode){
+  sheetMode = mode; sheetReason = '';
+  const ret = mode === 'return', id = currentOrder.orderId;
+  $('shTitle').textContent = ret ? 'Return this order' : 'Cancel this order';
+  $('shDesc').textContent = (ret ? 'Tell us why you want to return order ' : 'Tell us why you want to cancel order ') + id;
+  $('shReasons').innerHTML = (ret ? RETURN_REASONS : CANCEL_REASONS).map((r, i) => `<button type="button" onclick="pickReason(${i})">${esc(r)}</button>`).join('');
+  $('shNote').value = '';
+  $('shOk').textContent = ret ? 'Send return request' : 'Cancel order';
+  $('shade').classList.add('open'); $('sheet').classList.add('open');
 }
-
-async function requestReturn(orderId){
+function pickReason(i){
+  sheetReason = (sheetMode === 'return' ? RETURN_REASONS : CANCEL_REASONS)[i];
+  [...$('shReasons').children].forEach((b, k) => b.classList.toggle('on', k === i));
+}
+function closeSheet(){ $('shade').classList.remove('open'); $('sheet').classList.remove('open'); }
+async function submitSheet(){
+  const note = $('shNote').value.trim();
+  if(!sheetReason && !note){ toast('Please pick a reason or write a few words'); return; }
+  const btn = $('shOk'); btn.disabled = true;
+  const now = new Date().toISOString();
+  const data = sheetMode === 'return'
+    ? { status: 'Return Requested', returnRequestedAt: now, returnReason: sheetReason, returnNote: note, statusUpdatedAt: now }
+    : { status: 'Cancelled', cancelledAt: now, cancelledBy: 'customer', cancelReason: sheetReason, cancelNote: note, statusUpdatedAt: now };
   try{
-    await db.collection('orders').doc(orderId).update({
-      returnRequestedAt: new Date().toISOString(),
-      status: "Return Requested"
-    });
+    await db.collection('orders').doc(currentOrder.orderId).update(data);
+    closeSheet();
+    toast(sheetMode === 'return' ? 'Return request sent' : 'Order cancelled');
+    lookupOrder();
   }catch(e){
-    console.error('Could not update return status:', e);
-    alert('Could not send your return request right now. Please try again in a moment.');
-    return;
+    console.error(e); toast('Could not send. Please try again.');
   }
-  lookupOrder();
+  btn.disabled = false;
 }
 
 if(prefillId){ lookupOrder(); }
