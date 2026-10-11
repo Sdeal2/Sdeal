@@ -427,4 +427,23 @@ async function submitReview(){
   }
 }
 
-</script></body></html>
+</script>
+<script>
+/* Visitor counter: counts each device once per day, as "search" (came from Google/Bing etc.) or "link" (WhatsApp, social media, direct link, other sites) */
+(function trackVisit(){
+  try{
+    if(typeof db === 'undefined' || !db || !window.firebase) return;
+    const d = new Date();
+    const day = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if(localStorage.getItem('smartDealVisitDay') === day) return;
+    localStorage.setItem('smartDealVisitDay', day);
+    const ref = document.referrer || '';
+    const host = ((ref.match(/^https?:\/\/([^\/?#]+)/i) || [])[1] || '').toLowerCase();
+    const utm = new URLSearchParams(location.search).get('utm_medium') || '';
+    const fromSearch = host !== location.hostname && (/(^|\.)(google|bing|yahoo|duckduckgo|ecosia|baidu|yandex|qwant|brave)\./i.test(host) || /googlequicksearchbox/i.test(ref) || /^(organic|search)$/i.test(utm));
+    const inc = n => firebase.firestore.FieldValue.increment(n);
+    db.collection('visits').doc(day).set({ date: day, total: inc(1), search: inc(fromSearch ? 1 : 0), link: inc(fromSearch ? 0 : 1) }, { merge: true }).catch(() => {});
+  }catch(e){}
+})();
+</script>
+</body></html>

@@ -98,6 +98,11 @@
   .cp-btns{display:flex; gap:6px; flex-shrink:0;}
   .cp-btns button{padding:7px 12px; font-size:12px; font-weight:600; border:1px solid var(--indigo); color:var(--indigo); background:#fff;}
   .cp-btns button.del{border-color:var(--rose); color:var(--rose);}
+
+  .vis-grid{grid-template-columns:repeat(3,1fr);}
+  .stat-card .vs{font-size:11.5px; color:var(--ink-soft); margin-top:6px; line-height:1.5;}
+  .stat-card .vs b{color:var(--ink);}
+  .vis-note{font-size:11.5px; color:var(--ink-soft); margin-top:8px;}
 </style>
 </head>
 <body>
@@ -133,6 +138,16 @@
         <a class="link-card" href="slider-form.html"><div class="ic">🖼️</div><div class="lbl">Home Slider</div></a>
         <a class="link-card" href="index.html"><div class="ic">🏬</div><div class="lbl">View Store</div></a>
       </div>
+    </section>
+
+    <section>
+      <h3>Visitors</h3>
+      <div class="stats-grid vis-grid" id="visGrid">
+        <div class="stat-card"><div class="num">…</div><div class="lbl">Today</div><div class="vs"></div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">Last 7 days</div><div class="vs"></div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">All time</div><div class="vs"></div></div>
+      </div>
+      <div class="vis-note">Each customer is counted once per day. "Link" = WhatsApp, social media, direct link or other sites. "Search" = came from Google, Bing etc.</div>
     </section>
 
     <section>
@@ -191,6 +206,7 @@ function tryLogin(){
     loadReturnRequests();
     loadRecentOrders();
     loadCoupons();
+    loadVisitors();
   } else {
     document.getElementById('loginErr').style.display = 'block';
   }
@@ -204,7 +220,7 @@ function logout(){
 if(sessionStorage.getItem('smartd_admin') === 'true'){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminScreen').style.display = 'block';
-  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); });
+  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); loadVisitors(); });
 }
 
 /* ---------- Overview stats ---------- */
@@ -433,6 +449,28 @@ async function deleteCoupon(code){
   if(!confirm('Delete coupon ' + code + '?')) return;
   try{ await db.collection('coupons').doc(code).delete(); loadCoupons(); }
   catch(e){ console.error(e); alert('Could not delete this coupon.'); }
+}
+
+/* ---------- Visitors ---------- */
+async function loadVisitors(){
+  const cards = document.querySelectorAll('#visGrid .stat-card');
+  try{
+    const snap = await db.collection('visits').get();
+    const rows = []; snap.forEach(d => rows.push(d.data()));
+    const fmt = x => { const p=n=>String(n).padStart(2,'0'); return x.getFullYear()+'-'+p(x.getMonth()+1)+'-'+p(x.getDate()); };
+    const now = new Date(), today = fmt(now);
+    const from7 = new Date(now); from7.setDate(from7.getDate()-6);
+    const sum = list => list.reduce((a,r)=>({t:a.t+(r.total||0), l:a.l+(r.link||0), s:a.s+(r.search||0)}), {t:0,l:0,s:0});
+    const parts = [
+      sum(rows.filter(r => r.date === today)),
+      sum(rows.filter(r => r.date >= fmt(from7) && r.date <= today)),
+      sum(rows)
+    ];
+    parts.forEach((p,i) => {
+      cards[i].querySelector('.num').textContent = p.t;
+      cards[i].querySelector('.vs').innerHTML = 'Link: <b>' + p.l + '</b><br>Search: <b>' + p.s + '</b>';
+    });
+  }catch(e){ console.error(e); cards.forEach(c => c.querySelector('.num').textContent = '–'); }
 }
 </script>
 </body>
