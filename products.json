@@ -475,5 +475,40 @@
       "#FF00C8",
       "#FF59DB"
     ]
+  },
+  {
+    "id": 29,
+    "name": "New Design Blouse Cotton Embroidery",
+    "category": "Others",
+    "description": "Enhance your traditional ethnic look with this beautiful pink blouse featuring elegant yellow parrot embroidery and delicate floral designs on the back. The blouse showcases a stylish round neckline, comfortable three-quarter sleeves, and small golden motifs throughout. Paired with a purple saree, it creates a vibrant and graceful traditional look, perfect for festivals, weddings, parties, and special occasions. 💖🌸",
+    "price": 299,
+    "mrp": 399,
+    "sizes": [
+      "30",
+      "32",
+      "34",
+      "36",
+      "38",
+      "40",
+      "42"
+    ],
+    "img": "images/p29-common-1.jpg",
+    "images": [
+      "images/p29-common-1.jpg",
+      "images/p29-common-2.jpg",
+      "images/p29-common-3.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Pink",
+        "code": "#FF00BB",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#FF00BB",
+      "#FF59D3"
+    ]
   }
 ]
