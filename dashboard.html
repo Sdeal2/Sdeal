@@ -40,7 +40,7 @@
 
   /* stats */
   .stats-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
-  @media(min-width:500px){.stats-grid{grid-template-columns:repeat(4,1fr);}}
+  @media(min-width:500px){.stats-grid{grid-template-columns:repeat(4,1fr);} #statsGrid{grid-template-columns:repeat(3,1fr);}}
   .stat-card{background:#fff; border:1px solid var(--line); padding:14px 12px;}
   .stat-card .num{font-family:'Fraunces',serif; font-weight:700; font-size:22px; line-height:1.2;}
   .stat-card .lbl{font-size:12px; color:var(--ink-soft); margin-top:3px;}
@@ -103,6 +103,15 @@
   .stat-card .vs{font-size:11.5px; color:var(--ink-soft); margin-top:6px; line-height:1.5;}
   .stat-card .vs b{color:var(--ink);}
   .vis-note{font-size:11.5px; color:var(--ink-soft); margin-top:8px;}
+
+  /* order items with photos + status dropdown */
+  .oi-list{margin-bottom:12px;}
+  .oi{display:flex; gap:10px; align-items:center; padding:6px 0;}
+  .oi-img{width:44px; height:44px; flex:none; object-fit:cover; background:var(--indigo); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:16px;}
+  .oi-info{flex:1; min-width:0;}
+  .oi-name{font-size:13px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .oi-meta{font-size:11.5px; color:var(--ink-soft); margin-top:1px;}
+  .status-select{width:100%; max-width:280px; padding:10px 12px; font-size:13.5px; font-weight:600; font-family:inherit; border:1px solid var(--indigo); color:var(--indigo); background:#fff; border-radius:0; cursor:pointer;}
 </style>
 </head>
 <body>
@@ -127,6 +136,8 @@
         <div class="stat-card"><div class="num">…</div><div class="lbl">Total sales</div></div>
         <div class="stat-card"><div class="num">…</div><div class="lbl">Pending delivery</div></div>
         <div class="stat-card accent"><div class="num">…</div><div class="lbl">Return requests</div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">Delivered</div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">Cancelled</div></div>
       </div>
     </section>
 
@@ -246,10 +257,47 @@ async function loadStats(){
     setStat(1, '₹' + totalSales.toLocaleString('en-IN'));
     setStat(2, pending);
     setStat(3, returns);
+    setStat(4, orders.filter(o => o.status === "Delivered").length);
+    setStat(5, orders.filter(o => o.status === "Cancelled").length);
   }catch(e){
     console.error(e);
-    ['Total orders','Total sales','Pending delivery','Return requests'].forEach((lbl, i) => setStat(i, '—', lbl));
+    ['Total orders','Total sales','Pending delivery','Return requests','Delivered','Cancelled'].forEach((lbl, i) => setStat(i, '—', lbl));
   }
+}
+
+/* ---------- product photos for order items ---------- */
+let PRODS = [];
+const escH = x => String(x ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function photoOf(item){
+  if(item.img) return item.img;
+  const p = PRODS.find(x => item.id != null && x.id === item.id) || PRODS.find(x => String(x.name||'').trim().toLowerCase() === String(item.name||'').trim().toLowerCase());
+  return p ? (p.img || (Array.isArray(p.images) && p.images[0]) || '') : '';
+}
+function itemsHtml(order){
+  return '<div class="oi-list">' + (order.items || []).map(i => {
+    const img = photoOf(i), letter = escH(String(i.name || '?').charAt(0));
+    const meta = [i.color ? 'Color: ' + i.color : '', i.size ? 'Size: ' + i.size : '', 'Qty ' + i.qty].filter(Boolean).join(' · ');
+    return `<div class="oi">${img ? `<img class="oi-img" src="${escH(img)}" alt="">` : `<div class="oi-img" data-n="${escH(i.name)}" data-id="${escH(i.id ?? '')}">${letter}</div>`}
+      <div class="oi-info"><div class="oi-name">${escH(i.name)}</div><div class="oi-meta">${escH(meta)}</div></div></div>`;
+  }).join('') + '</div>';
+}
+fetch('products.json?ts=' + Date.now()).then(r => r.ok ? r.json() : []).then(p => {
+  PRODS = Array.isArray(p) ? p : [];
+  document.querySelectorAll('div.oi-img[data-n]').forEach(el => {
+    const url = photoOf({ name: el.dataset.n, id: el.dataset.id === '' ? null : (isNaN(el.dataset.id) ? el.dataset.id : Number(el.dataset.id)) });
+    if(url){ const im = document.createElement('img'); im.className = 'oi-img'; im.src = url; im.alt = ''; el.replaceWith(im); }
+  });
+}).catch(() => {});
+
+function statusSelect(order, isFinal){
+  const opts = STATUS_STEPS.map(st => `<option value="${st}">${order.status === st ? '✓ ' : ''}${st}</option>`).join('');
+  const cancelOpt = (order.status === "Delivered" || isFinal) ? '' : '<option value="__cancel">Cancel order</option>';
+  return `<select class="status-select" onchange="onStatusPick(this,'${order.orderId}')"><option value="" selected disabled>Change status ▾</option>${opts}${cancelOpt}</select>`;
+}
+function onStatusPick(sel, orderId){
+  const v = sel.value; sel.value = '';
+  if(!v) return;
+  if(v === '__cancel') cancelOrderAdmin(orderId); else updateStatus(orderId, v);
 }
 
 function renderOrderRow(order){
@@ -269,9 +317,9 @@ function renderOrderRow(order){
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
-      <div class="order-row-items">${itemsSummary}</div>
+      ${itemsHtml(order)}
       ${order.cancelledBy === 'customer' ? `<div class="order-row-meta" style="color:#b5495b;">Cancelled by customer${order.cancelReason ? ': ' + order.cancelReason : ''}${order.cancelNote ? ' · "' + order.cancelNote + '"' : ''}</div>` : ''}
-      <div class="status-btns">${btns}${cancelBtn}</div>
+      <div>${statusSelect(order, isFinal)}</div>
     </div>`;
 }
 
@@ -318,7 +366,7 @@ function renderReturnRow(order){
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
-      <div class="order-row-items">${itemsSummary}</div>
+      ${itemsHtml(order)}
       ${(order.returnReason || order.returnNote) ? `<div class="order-row-meta" style="color:#b8431a;">Return reason: ${order.returnReason || '—'}${order.returnNote ? ' · "' + order.returnNote + '"' : ''}</div>` : ''}
       <div class="return-btns">
         <button class="accept-btn" onclick="decideReturn('${order.orderId}','Return Approved')">Accept return</button>
