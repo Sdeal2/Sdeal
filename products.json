@@ -510,5 +510,34 @@
       "#FF00BB",
       "#FF59D3"
     ]
+  },
+  {
+    "id": 30,
+    "name": "🙏 श्री कृष्ण गोविंद मंत्र | Vasudevaya Govindaya Mahadev Mantra",
+    "category": "Others",
+    "description": "Experience divine peace and spiritual positivity with this beautiful devotional wall hanging featuring sacred Hindu mantras. Decorated with marigold flowers, a traditional clay wall, and a glowing brass diya, this devotional artwork creates a serene and auspicious atmosphere. The sacred chants, including “ॐ कृष्णाय वासुदेवाय,” “हरे परमात्मने,” and “प्रणतः क्लेशनाशाय गोविंदाय नमो नमः,” express devotion to Lord Krishna. 🦚🪔\nPerfect for your home temple, पूजा घर, meditation space, or festive decoration. Bring devotion, positivity, and a divine touch to your surroundings. 🙏🌼",
+    "price": 99,
+    "mrp": 199,
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p30-common-1.jpg",
+    "images": [
+      "images/p30-common-1.jpg",
+      "images/p30-common-2.jpg",
+      "images/p30-common-3.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Black",
+        "code": "#000000",
+        "images": []
+      }
+    ],
+    "tag": "Sale",
+    "swatch": [
+      "#000000",
+      "#595959"
+    ]
   }
 ]
