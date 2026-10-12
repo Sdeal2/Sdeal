@@ -112,6 +112,19 @@
   .oi-name{font-size:13px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
   .oi-meta{font-size:11.5px; color:var(--ink-soft); margin-top:1px;}
   .status-select{width:100%; max-width:280px; padding:10px 12px; font-size:13.5px; font-weight:600; font-family:inherit; border:1px solid var(--indigo); color:var(--indigo); background:#fff; border-radius:0; cursor:pointer;}
+
+  /* resellers + payouts */
+  .rs-form{background:#fff; border:1px solid var(--line); padding:16px 18px;}
+  .rs-form .cp-grid input{text-transform:none;}
+  .rs-row{background:#fff; border:1px solid var(--line); padding:12px 16px; margin-top:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .rs-row.off{opacity:.6;}
+  .rs-id{font-weight:700; font-size:14px; letter-spacing:.04em;}
+  .rs-desc{font-size:12px; color:var(--ink-soft); margin-top:2px; line-height:1.5;}
+  .po-sum{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:10px;}
+  .po-h{font-size:13px; font-weight:700; margin:16px 0 4px;}
+  .po-row{background:#fff; border:1px solid var(--line); padding:12px 16px; margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .po-amt{font-weight:700; font-size:16px; color:var(--ok);}
+  .po-btn{padding:8px 14px; font-size:12.5px; font-weight:600; border:1px solid var(--ok); color:var(--ok); background:#fff; white-space:nowrap; cursor:pointer;}
 </style>
 </head>
 <body>
@@ -177,6 +190,26 @@
       <div id="couponList"></div>
     </section>
 
+    <section>
+      <h3>Resellers</h3>
+      <div class="rs-form">
+        <div class="cp-grid">
+          <div class="full"><label>Reseller name</label><input type="text" id="rsName" placeholder="e.g. Rahul Kumar"></div>
+          <div><label>Mobile number</label><input type="tel" id="rsPhone" maxlength="10" placeholder="10-digit number"></div>
+          <div><label>UPI ID (to pay profit)</label><input type="text" id="rsUpi" placeholder="e.g. rahul@upi"></div>
+        </div>
+        <button class="cp-save" onclick="createReseller()">Create Reseller ID</button>
+        <div class="cp-note" id="rsNote"></div>
+      </div>
+      <div id="resellerList"></div>
+    </section>
+
+    <section>
+      <h3>Reseller payouts</h3>
+      <div class="po-sum" id="poSum"></div>
+      <div id="payoutList"></div>
+    </section>
+
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="Search by Order ID (e.g. SD4F8K2)">
       <button onclick="searchOrder()">Find</button>
@@ -217,7 +250,7 @@ function tryLogin(){
     loadReturnRequests();
     loadRecentOrders();
     loadCoupons();
-    loadVisitors();
+    loadVisitors(); loadResellers(); loadPayouts();
   } else {
     document.getElementById('loginErr').style.display = 'block';
   }
@@ -231,7 +264,7 @@ function logout(){
 if(sessionStorage.getItem('smartd_admin') === 'true'){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminScreen').style.display = 'block';
-  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); loadVisitors(); });
+  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); loadVisitors(); loadResellers(); loadPayouts(); });
 }
 
 /* ---------- Overview stats ---------- */
@@ -249,7 +282,7 @@ async function loadStats(){
 
     const totalOrders = orders.length;
     const excludedFromSales = new Set(["Return Approved", "Cancelled"]);
-    const totalSales = orders.reduce((sum, o) => sum + (excludedFromSales.has(o.status) ? 0 : (Number(o.total) || 0)), 0);
+    const totalSales = orders.reduce((sum, o) => sum + (excludedFromSales.has(o.status) ? 0 : (Number(o.resale ? o.costTotal : o.total) || 0)), 0);
     const pending = orders.filter(o => STATUS_STEPS.includes(o.status) && o.status !== "Delivered").length;
     const returns = orders.filter(o => o.status === "Return Requested").length;
 
@@ -317,6 +350,7 @@ function renderOrderRow(order){
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
+      ${order.resale ? `<div class="order-row-meta" style="color:#6b4fa0;">Reseller: ${escH(order.resellerName||'')} (${escH(order.resellerId)}) · Customer pays ₹${order.total} · We get ₹${order.costTotal} · Reseller profit ₹${order.resellerProfit}${order.payoutPaid ? ' · Paid' : ''}</div>` : ''}
       ${itemsHtml(order)}
       ${order.cancelledBy === 'customer' ? `<div class="order-row-meta" style="color:#b5495b;">Cancelled by customer${order.cancelReason ? ': ' + order.cancelReason : ''}${order.cancelNote ? ' · "' + order.cancelNote + '"' : ''}</div>` : ''}
       <div>${statusSelect(order, isFinal)}</div>
@@ -366,6 +400,7 @@ function renderReturnRow(order){
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
+      ${order.resale ? `<div class="order-row-meta" style="color:#6b4fa0;">Reseller: ${escH(order.resellerName||'')} (${escH(order.resellerId)}) · Customer pays ₹${order.total} · We get ₹${order.costTotal} · Reseller profit ₹${order.resellerProfit}${order.payoutPaid ? ' · Paid' : ''}</div>` : ''}
       ${itemsHtml(order)}
       ${(order.returnReason || order.returnNote) ? `<div class="order-row-meta" style="color:#b8431a;">Return reason: ${order.returnReason || '—'}${order.returnNote ? ' · "' + order.returnNote + '"' : ''}</div>` : ''}
       <div class="return-btns">
@@ -441,7 +476,7 @@ async function updateStatus(orderId, newStatus){
     const patch = { status: newStatus, statusUpdatedAt: new Date().toISOString() };
     if(timestampField) patch[timestampField] = new Date().toISOString();
     await db.collection('orders').doc(orderId).update(patch);
-    loadStats();
+    loadStats(); loadPayouts();
     if(document.getElementById('searchInput').value.trim()){ searchOrder(); } else { loadRecentOrders(); }
   }catch(e){
     console.error(e);
@@ -521,6 +556,91 @@ async function loadVisitors(){
       cards[i].querySelector('.vs').innerHTML = 'Link: <b>' + p.l + '</b><br>Search: <b>' + p.s + '</b>';
     });
   }catch(e){ console.error(e); cards.forEach(c => c.querySelector('.num').textContent = '–'); }
+}
+
+/* ---------- Resellers ---------- */
+function rsNote(t, cls){ const n=document.getElementById('rsNote'); n.textContent=t||''; n.className='cp-note '+(cls||''); }
+async function createReseller(){
+  const name = document.getElementById('rsName').value.trim();
+  const phone = document.getElementById('rsPhone').value.replace(/\D/g,'').slice(-10);
+  const upi = document.getElementById('rsUpi').value.trim();
+  if(!name){ rsNote('Enter the reseller name','no'); return; }
+  if(phone.length !== 10){ rsNote('Enter a valid 10-digit mobile number','no'); return; }
+  try{
+    let id = '', tries = 0;
+    while(tries++ < 8){
+      const cand = 'SDR' + String(Math.floor(10000 + Math.random()*90000));
+      const ex = await db.collection('resellers').doc(cand).get();
+      if(!ex.exists){ id = cand; break; }
+    }
+    if(!id){ rsNote('Could not make a new ID. Please try again.','no'); return; }
+    await db.collection('resellers').doc(id).set({ id, name, phone, upi, active:true, createdAt:new Date().toISOString() });
+    rsNote('Reseller ID created: ' + id + ' (give this ID to ' + name + ')','ok');
+    ['rsName','rsPhone','rsUpi'].forEach(x => document.getElementById(x).value='');
+    loadResellers();
+  }catch(e){ console.error(e); rsNote('Could not save. Check your Firebase setup.','no'); }
+}
+async function loadResellers(){
+  const box = document.getElementById('resellerList');
+  try{
+    const snap = await db.collection('resellers').get();
+    if(snap.empty){ box.innerHTML = '<div class="empty">No resellers yet.</div>'; return; }
+    let list = []; snap.forEach(d => list.push(d.data()));
+    list.sort((a,b) => String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+    box.innerHTML = list.map(r => `
+      <div class="rs-row ${r.active===false?'off':''}">
+        <div><div class="rs-id">${escH(r.id)}${r.active===false?' (off)':''}</div>
+        <div class="rs-desc">${escH(r.name)} · ${escH(r.phone)}${r.upi ? ' · ' + escH(r.upi) : ''}</div></div>
+        <div class="cp-btns">
+          <button onclick="toggleResellerAcc('${r.id}', ${r.active===false})">${r.active===false?'Turn on':'Turn off'}</button>
+          <button class="del" onclick="deleteReseller('${r.id}')">Delete</button>
+        </div>
+      </div>`).join('');
+  }catch(e){ console.error(e); box.innerHTML = '<div class="empty">Could not load resellers.</div>'; }
+}
+async function toggleResellerAcc(id, turnOn){
+  try{ await db.collection('resellers').doc(id).update({ active: turnOn }); loadResellers(); }
+  catch(e){ console.error(e); alert('Could not update this reseller.'); }
+}
+async function deleteReseller(id){
+  if(!confirm('Delete reseller ' + id + '? Their old orders stay, but this ID will stop working.')) return;
+  try{ await db.collection('resellers').doc(id).delete(); loadResellers(); }
+  catch(e){ console.error(e); alert('Could not delete this reseller.'); }
+}
+
+/* ---------- Reseller payouts (profit is paid after the 7-day return window) ---------- */
+async function loadPayouts(){
+  const box = document.getElementById('payoutList'), sum = document.getElementById('poSum');
+  try{
+    const snap = await db.collection('orders').where('resale','==',true).get();
+    let orders = []; snap.forEach(d => orders.push(d.data()));
+    const now = Date.now(), WIN = 7*86400000;
+    const ready = [], waiting = []; let paidTotal = 0;
+    orders.forEach(o => {
+      const profit = Number(o.resellerProfit) || 0;
+      if(o.payoutPaid){ paidTotal += profit; return; }
+      if(o.status !== 'Delivered' || !profit) return;
+      const due = new Date(o.deliveredAt || o.statusUpdatedAt || 0).getTime() + WIN;
+      (due <= now ? ready : waiting).push({ o, profit, due });
+    });
+    const readyTotal = ready.reduce((a,x)=>a+x.profit,0), waitTotal = waiting.reduce((a,x)=>a+x.profit,0);
+    sum.innerHTML = `
+      <div class="stat-card accent"><div class="num">₹${readyTotal}</div><div class="lbl">Ready to pay</div></div>
+      <div class="stat-card"><div class="num">₹${waitTotal}</div><div class="lbl">Waiting (return period)</div></div>
+      <div class="stat-card"><div class="num">₹${paidTotal}</div><div class="lbl">Paid so far</div></div>
+      <div class="stat-card"><div class="num">${orders.length}</div><div class="lbl">Reselling orders</div></div>`;
+    const row = (x, isReady) => `<div class="po-row"><div><div class="rs-id">${escH(x.o.resellerName || '—')} · ${escH(x.o.resellerId)}</div>
+        <div class="rs-desc">Order ${escH(x.o.orderId)} · ${isReady ? 'Delivered, 7 days over' : 'Pay on ' + new Date(x.due).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}<br>${escH(x.o.resellerPhone || '')}</div></div>
+        <div style="text-align:right"><div class="po-amt">₹${x.profit}</div>${isReady ? `<button class="po-btn" onclick="markPaid('${x.o.orderId}')">Mark paid</button>` : ''}</div></div>`;
+    ready.sort((a,b)=>String(a.o.resellerId).localeCompare(String(b.o.resellerId)));
+    box.innerHTML = (ready.length ? '<div class="po-h">Ready to pay</div>' + ready.map(x=>row(x,true)).join('') : '<div class="empty">Nothing to pay right now.</div>') +
+      (waiting.length ? '<div class="po-h">Waiting for the 7-day return period</div>' + waiting.map(x=>row(x,false)).join('') : '');
+  }catch(e){ console.error(e); box.innerHTML = '<div class="empty">Could not load payouts.</div>'; }
+}
+async function markPaid(orderId){
+  if(!confirm('Mark the profit of order ' + orderId + ' as paid?')) return;
+  try{ await db.collection('orders').doc(orderId).update({ payoutPaid:true, payoutPaidAt:new Date().toISOString() }); loadPayouts(); }
+  catch(e){ console.error(e); alert('Could not update. Please try again.'); }
 }
 </script>
 </body>

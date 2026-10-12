@@ -176,7 +176,7 @@ function renderOrder(order){
     return `<div class="it">
       ${img ? `<img class="it-img" src="${esc(img)}" alt="" onerror="this.outerHTML='<div class=\\'it-img\\'>${letter}</div>'">` : `<div class="it-img">${letter}</div>`}
       <div class="it-info"><div class="it-name">${esc(i.name)}</div><div class="it-meta">${esc(meta)}</div></div>
-      <div class="it-price">₹${i.price * i.qty}</div></div>`;
+      <div class="it-price">₹${(i.resalePrice ?? i.price) * i.qty}</div></div>`;
   }).join('');
   const discHtml = order.discount ? `<div class="sum-line g"><span>Coupon ${esc(order.coupon || '')}</span><span>- ₹${order.discount}</span></div>` : '';
 

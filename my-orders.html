@@ -134,7 +134,7 @@ function helpLink(o){
 }
 function returnOpen(o){
   if(o.status !== 'Delivered') return false;
-  const t = new Date(o.statusUpdatedAt || o.createdAt || 0).getTime();
+  const t = new Date(o.deliveredAt || o.statusUpdatedAt || o.createdAt || 0).getTime();
   return !t || (Date.now() - t) <= RETURN_DAYS * 86400000;
 }
 
@@ -149,7 +149,7 @@ function render(){
         ${img ? `<img class="it-img" src="${esc(img)}" alt="" onerror="this.outerHTML='<div class=\\'it-img\\' style=\\'background:#e8561f\\'>${esc(String(i.name||'?').charAt(0))}</div>'">`
               : `<div class="it-img" style="background:#e8561f">${esc(String(i.name||'?').charAt(0))}</div>`}
         <div class="it-info"><div class="it-name">${esc(i.name)}</div><div class="it-meta">${esc(meta)}</div></div>
-        ${i.price != null ? `<div class="it-price">₹${esc(i.price * i.qty)}</div>` : ''}
+        ${i.price != null ? `<div class="it-price">₹${esc((i.resalePrice ?? i.price) * i.qty)}</div>` : ''}
       </div>`;
     }).join('');
     let notes = '';

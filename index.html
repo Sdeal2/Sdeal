@@ -546,6 +546,17 @@
   #cartDrawer:not(.open) .cart-bar{ display:none !important; }
   #cartDrawer .cart-bar{ visibility:hidden; }
   #cartDrawer.open .cart-bar{ visibility:visible; }
+
+  /* ---------- Reselling ---------- */
+  .rs-toggle{ display:flex !important; align-items:center; gap:10px; font-size:14px; font-weight:600; cursor:pointer; padding:12px 14px; border:1px dashed var(--sd-brand,#e8561f); border-radius:10px; background:#fdf3ee; margin-bottom:0 !important; }
+  .rs-toggle input{ width:20px; height:20px; accent-color:var(--sd-brand,#e8561f); flex:none; }
+  #resellFields{ margin-top:12px; }
+  .rs-item{ display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid #f1f1f1; }
+  .rs-item .rs-n{ flex:1; min-width:0; font-size:12.5px; line-height:1.3; }
+  .rs-item .rs-n small{ display:block; color:#888; font-size:11px; margin-top:2px; }
+  .rs-item input{ width:96px; flex:none; padding:9px 8px; text-align:right; }
+  .rs-sum{ margin-top:10px; padding:10px 12px; background:#f4f3ef; border-radius:10px; font-size:13px; line-height:1.6; }
+  .rs-sum b{ font-weight:700; } .rs-sum .g{ color:#1b8a3a; font-weight:700; }
 </style>
 </head>
 <body>
@@ -708,7 +719,17 @@
         <input type="text" id="custPincode" placeholder="6-digit pincode">
       </div>
 
-      <div class="form-group">
+      <div class="form-group" id="resellBox">
+        <label class="rs-toggle"><input type="checkbox" id="resellChk" onchange="toggleResell()"><span>I am reselling this order</span></label>
+        <div id="resellFields" style="display:none;">
+          <div class="cp-row"><input type="text" id="resellerId" placeholder="Your Reseller ID" autocapitalize="characters" autocomplete="off" oninput="resellerEdited()"><button type="button" id="resellerBtn" onclick="verifyReseller()">Verify</button></div>
+          <div class="cp-msg" id="resellerMsg"></div>
+          <div id="resellPrices"></div>
+          <div class="rs-sum" id="resellSum"></div>
+        </div>
+      </div>
+
+      <div class="form-group" id="couponBox">
         <label>Coupon code</label>
         <div class="cp-row">
           <input type="text" id="couponInput" placeholder="Enter coupon code" autocapitalize="characters" autocomplete="off">
@@ -986,13 +1007,66 @@ function couponDiscount(sub){
   const d = appliedCoupon.type === 'percent' ? Math.round(sub * appliedCoupon.value / 100) : appliedCoupon.value;
   return Math.max(0, Math.min(d, sub));
 }
+let resellOn = false, reseller = null, resalePrice = {};
+const rkey = i => `${i.id}|${i.size||''}|${i.color||''}`;
+function resaleUnit(i){ const p = Number(resalePrice[rkey(i)]); return p >= i.price ? p : i.price; }
+function payTotals(){
+  const cost = cartSubtotal();
+  if(resellOn){
+    const resale = cart.reduce((a, i) => a + resaleUnit(i) * i.qty, 0);
+    return { sub: cost, disc: 0, total: resale, cost, profit: resale - cost };
+  }
+  const disc = couponDiscount(cost);
+  return { sub: cost, disc, total: cost - disc, cost, profit: 0 };
+}
 function renderCheckoutSummary(){
-  const sub = cartSubtotal(), disc = couponDiscount(sub), total = sub - disc;
-  if(appliedCoupon && !disc){ appliedCoupon = null; setCouponMsg('This coupon no longer applies to your cart', 'no'); }
+  const T = payTotals(), sub = T.sub, disc = T.disc, total = T.total;
+  if(!resellOn && appliedCoupon && !disc){ appliedCoupon = null; setCouponMsg('This coupon no longer applies to your cart', 'no'); }
   document.getElementById('orderSummaryMini').innerHTML =
-    cart.map(i => `<div class="sum-row">${i.img ? `<img class="sum-img" src="${i.img}" alt="">` : `<span class="sum-img sum-ph">${String(i.name||'?').charAt(0)}</span>`}<div class="sum-info"><span class="sum-name">${i.name}</span><span class="sum-meta">${i.size ? 'Size ' + i.size + ' · ' : ''}Qty ${i.qty}</span></div><span class="sum-price">₹${i.price * i.qty}</span></div>`).join('') +
+    cart.map(i => `<div class="sum-row">${i.img ? `<img class="sum-img" src="${i.img}" alt="">` : `<span class="sum-img sum-ph">${String(i.name||'?').charAt(0)}</span>`}<div class="sum-info"><span class="sum-name">${i.name}</span><span class="sum-meta">${i.size ? 'Size ' + i.size + ' · ' : ''}Qty ${i.qty}</span></div><span class="sum-price">₹${(resellOn ? resaleUnit(i) : i.price) * i.qty}</span></div>`).join('') +
     (disc ? `<div style="border-top:1px solid var(--line); margin-top:6px; padding-top:8px; color:#1b8a3a;"><span>Coupon (${appliedCoupon.code})</span><span>- ₹${disc}</span></div>` : '') +
-    `<div style="font-weight:700; border-top:1px solid var(--line); margin-top:6px; padding-top:8px;"><span>Total</span><span>₹${total}</span></div>`;
+    `<div style="font-weight:700; border-top:1px solid var(--line); margin-top:6px; padding-top:8px;"><span>${resellOn ? 'Customer pays' : 'Total'}</span><span>₹${total}</span></div>`;
+  const rs = document.getElementById('resellSum');
+  if(rs) rs.innerHTML = resellOn ? `Customer pays (COD): <b>₹${T.total}</b><br>You pay Smart Deal: <b>₹${T.cost}</b><br>Your profit: <span class="g">₹${T.profit}</span><br><span style="color:#888;font-size:11.5px;">Profit is paid after the 7-day return period, if the order is not returned.</span>` : '';
+}
+function renderResellPrices(){
+  const box = document.getElementById('resellPrices');
+  box.innerHTML = cart.map((i, idx) => `<div class="rs-item"><div class="rs-n">${i.name}<small>Our price ₹${i.price} · Qty ${i.qty}</small></div>
+    <input type="number" inputmode="numeric" min="${i.price}" placeholder="Sell at ₹" value="${resalePrice[rkey(i)] || ''}" oninput="setResalePrice(${idx}, this.value)"></div>`).join('');
+}
+function setResalePrice(idx, v){ resalePrice[rkey(cart[idx])] = v; renderCheckoutSummary(); }
+function toggleResell(){
+  resellOn = document.getElementById('resellChk').checked;
+  document.getElementById('resellFields').style.display = resellOn ? 'block' : 'none';
+  document.getElementById('couponBox').style.display = resellOn ? 'none' : 'block';
+  if(resellOn){
+    appliedCoupon = null; setCouponMsg(''); document.getElementById('couponInput').value = '';
+    try{ const sv = localStorage.getItem('smartDealResellerId'); if(sv && !document.getElementById('resellerId').value) document.getElementById('resellerId').value = sv; }catch(e){}
+    renderResellPrices();
+  }
+  renderCheckoutSummary();
+}
+function resellerEdited(){ reseller = null; const m = document.getElementById('resellerMsg'); m.textContent = ''; m.className = 'cp-msg'; }
+async function verifyReseller(){
+  const input = document.getElementById('resellerId'), btn = document.getElementById('resellerBtn'), m = document.getElementById('resellerMsg');
+  const id = input.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if(!id){ m.textContent = 'Enter your Reseller ID'; m.className = 'cp-msg no'; return; }
+  if(typeof db === 'undefined' || !db){ m.textContent = 'Could not check right now. Please try again.'; m.className = 'cp-msg no'; return; }
+  btn.disabled = true; btn.textContent = '...';
+  try{
+    const doc = await db.collection('resellers').doc(id).get();
+    const r = doc.exists ? doc.data() : null;
+    if(!r || r.active === false){ reseller = null; m.textContent = 'This Reseller ID is not valid'; m.className = 'cp-msg no'; }
+    else{ reseller = { id, name: r.name || '', phone: r.phone || '' }; m.textContent = 'Reseller ID verified ✓'; m.className = 'cp-msg ok'; try{ localStorage.setItem('smartDealResellerId', id); }catch(e){} }
+  }catch(e){ console.error(e); reseller = null; m.textContent = 'Could not check right now. Please try again.'; m.className = 'cp-msg no'; }
+  btn.disabled = false; btn.textContent = 'Verify';
+}
+function resetResell(){
+  resellOn = false; reseller = null; resalePrice = {};
+  const c = document.getElementById('resellChk'); if(c) c.checked = false;
+  const f = document.getElementById('resellFields'); if(f) f.style.display = 'none';
+  const cb = document.getElementById('couponBox'); if(cb) cb.style.display = 'block';
+  const m = document.getElementById('resellerMsg'); if(m){ m.textContent = ''; m.className = 'cp-msg'; }
 }
 function setCouponMsg(t, cls){ const m=document.getElementById('couponMsg'); if(m){ m.textContent=t||''; m.className='cp-msg '+(cls||''); } }
 
@@ -1022,6 +1096,7 @@ function goToCheckout(){
   if(cart.length === 0) return;
   document.getElementById('cartView').style.display = 'none';
   document.getElementById('checkoutView').style.display = 'block';
+  if(resellOn) renderResellPrices();
   renderCheckoutSummary();
 }
 
@@ -1043,13 +1118,20 @@ function placeOrderOnWhatsApp(){
   if(!name||!phone||!address||!city||!state||!pincode){alert('Please fill in all details');return;}
   try{ localStorage.setItem(NAME_KEY, name.slice(0,40)); localStorage.setItem('smartDealCustomerPhone', String(phone).replace(/\D/g,'').slice(-10)); }catch(e){}
   if(!/^\d{10}$/.test(phone)){alert('Please enter a valid 10-digit mobile number');return;}
+  const T=payTotals();
+  if(resellOn){
+    if(!reseller){alert('Please enter and verify your Reseller ID first');return;}
+    const bad=cart.find(i=>!(Number(resalePrice[rkey(i)])>=i.price));
+    if(bad){alert('Please enter your selling price (at least ₹'+bad.price+') for: '+bad.name);return;}
+  }
   const btn=document.getElementById('placeOrderBtn');btn.textContent='Opening WhatsApp...';btn.disabled=true;
-  const sub=cartSubtotal(),disc=couponDiscount(sub),total=sub-disc,orderId=generateOrderId();
+  const sub=T.sub,disc=T.disc,total=T.total,orderId=generateOrderId();
   const trackUrl=window.location.href.replace(/index\.html.*$/,'')+`track.html?id=${orderId}`;
-  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({id:i.id,name:i.name,size:i.size,color:i.color||'',qty:i.qty,price:i.price,img:i.img||''})),total,...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString()};
+  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({id:i.id,name:i.name,size:i.size,color:i.color||'',qty:i.qty,price:i.price,img:i.img||'',...(resellOn?{resalePrice:Number(resalePrice[rkey(i)])}:{})})),total,...(resellOn?{resale:true,resellerId:reseller.id,resellerName:reseller.name||'',resellerPhone:reseller.phone||'',costTotal:T.cost,resellerProfit:T.profit}:{}),...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString()};
   let message=`*New Order*\n\n*Order ID:* ${orderId}\n*Name:* ${name}\n*Mobile:* ${phone}\n*Address:* ${address}, ${city}, ${state} - ${pincode}\n\n*Products:*\n`;
-  cart.forEach(item=>message+=`- ${item.name} | Color: ${item.color || 'Default'} | Size: ${item.size} | Qty: ${item.qty} | ₹${item.price*item.qty}\n`);
+  cart.forEach(item=>message+=`- ${item.name} | Color: ${item.color || 'Default'} | Size: ${item.size} | Qty: ${item.qty} | ₹${(resellOn?Number(resalePrice[rkey(item)]):item.price)*item.qty}\n`);
   message+=(disc?`\n*Coupon:* ${appliedCoupon.code} (- ₹${disc})`:'')+`\n*Total Amount: ₹${total}*\n*Payment: Cash on Delivery*\n*Track order:* ${trackUrl}`;
+  if(resellOn){message+=`\n\n*RESELLER:* ${reseller.id}${reseller.name?' ('+reseller.name+')':''}\n*Pay to Smart Deal:* ₹${T.cost}\n*Reseller profit:* ₹${T.profit}`;}
   try{if(typeof db!=='undefined'&&db&&typeof db.collection==='function'){db.collection('orders').doc(orderId).set(orderData).catch(e=>console.error('Firebase save failed:',e));if(disc){db.collection('coupons').doc(appliedCoupon.code).update({usedCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});}}}catch(e){console.error('Firebase unavailable:',e);}
   const num=String(typeof WHATSAPP_NUMBER!=='undefined'?WHATSAPP_NUMBER:'').replace(/\D/g,'');
   if(!num){alert('WhatsApp number is not configured in firebase-config.js');btn.disabled=false;btn.textContent='Send Order on WhatsApp';return;}
@@ -1067,7 +1149,7 @@ function goToTracking(){
 }
 
 function closeCartAndReset(){
-  appliedCoupon = null; setCouponMsg(''); const _ci=document.getElementById('couponInput'); if(_ci) _ci.value='';
+  appliedCoupon = null; setCouponMsg(''); const _ci=document.getElementById('couponInput'); if(_ci) _ci.value=''; resetResell();
   if(buyBackup){ restoreCartAfterBuyNow(true); } else { cart = []; }
   updateCartCount();
   document.getElementById('successView').style.display = 'none';
