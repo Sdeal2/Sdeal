@@ -445,5 +445,35 @@
       "#FFFF00",
       "#FFFF59"
     ]
+  },
+  {
+    "id": 28,
+    "name": "12 Meter Pink LED Curtain String Lights – Decorative Fairy Lights for Indoor & Outdoor Use",
+    "category": "Electric",
+    "description": "Transform your home into a magical and beautiful space with these stunning Pink LED String Lights. Designed to create a vibrant and cozy atmosphere, these decorative lights are perfect for bedrooms, living rooms, curtains, balconies, gardens, parties, weddings, and festive celebrations.\nThe beautiful pink glow adds charm and elegance to any space, making it ideal for everyday decoration and special occasions.\n✨ Key Features:\nBeautiful Pink Glow: Creates a vibrant, attractive, and magical atmosphere.\nDecorative Lighting: Perfect for bedrooms, curtains, walls, balconies, and living rooms.\nIndoor & Outdoor Use: Suitable for decorating different spaces.\nEnergy Efficient: LED lighting designed for efficient power consumption.\nEasy Installation: Convenient for decorating your home and event spaces.\nMultiple Occasions: Ideal for birthdays, weddings, parties, festivals, and romantic decorations.\n🏡 Perfect For:\nBedroom decoration, curtain decoration, home interiors, balconies, garden parties, wedding decorations, festive celebrations, and special events.\nLight up your world with beautiful pink LED lights and create unforgettable magical moments! 💖",
+    "price": 149,
+    "mrp": 249,
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p28-common-1.jpg",
+    "images": [
+      "images/p28-common-1.jpg",
+      "images/p28-common-2.jpg",
+      "images/p28-common-3.jpg",
+      "images/p28-common-4.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Pink",
+        "code": "#FF00C8",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#FF00C8",
+      "#FF59DB"
+    ]
   }
 ]
