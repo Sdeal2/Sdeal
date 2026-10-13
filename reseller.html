@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reseller Orders – SMART DEAL</title>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+  :root{ --bg:#FFFFFF; --ink:#1F2340; --ink-soft:#6b6a63; --brand:#e8561f; --line:#E6E3DA; --fill:#F4F3EF; --ok:#1b8a3a; --rose:#B5495B; --warn:#b8431a; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+  header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:12px 14px;}
+  .back-row{display:flex;align-items:center;gap:10px;max-width:700px;margin:0 auto;font-weight:600;font-size:17px;}
+  .back-btn{width:36px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;}
+  main{max-width:700px;margin:0 auto;padding:16px 14px 50px;}
+  p.sub{font-size:13px;color:var(--ink-soft);margin:0 0 12px;}
+  .row{display:flex;gap:8px;}
+  input[type=text]{flex:1;min-width:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:15px;color:var(--ink);text-transform:uppercase;}
+  input[type=text]:focus{outline:2px solid var(--brand);outline-offset:-1px;}
+  button.go{padding:0 22px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:inherit;font-weight:600;font-size:15px;cursor:pointer;}
+  button.go:disabled{opacity:.5;}
+  .msg{margin-top:12px;font-size:14px;color:var(--ink-soft);} .msg.fail{color:var(--rose);}
+  .hello{margin:16px 0 4px;font-size:18px;font-weight:700;}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 4px;}
+  .card{background:var(--fill);border-radius:12px;padding:12px 10px;text-align:center;}
+  .card b{display:block;font-size:18px;}
+  .card span{font-size:11px;color:var(--ink-soft);}
+  .card.g b{color:var(--ok);}
+  .order{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px;}
+  .order-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+  .order-id{font-weight:700;font-size:15px;} .order-date{font-size:12px;color:var(--ink-soft);}
+  .cust{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .chip{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:12px;margin:8px 0 4px;background:#e5f5ea;color:var(--ok);}
+  .chip.warn{background:#fdeee7;color:var(--warn);} .chip.bad{background:#fbe9ec;color:var(--rose);} .chip.blue{background:#e8eff7;color:#2f5f93;}
+  .it{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid #f3f2ee;}
+  .it:last-of-type{border-bottom:none;}
+  .it-img{width:50px;height:50px;border-radius:8px;background:var(--brand);flex:none;object-fit:cover;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:18px;}
+  .it-info{flex:1;min-width:0;} .it-name{font-size:13px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .it-meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px;} .it-price{font-size:13px;font-weight:600;white-space:nowrap;}
+  .money{background:var(--fill);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;}
+  .money div{display:flex;justify-content:space-between;padding:2px 0;}
+  .money .pf{font-weight:700;font-size:14.5px;border-top:1px dashed #cfcdc4;margin-top:4px;padding-top:6px;color:var(--ok);}
+  .pay{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.5;background:#fdf3ee;color:var(--warn);}
+  .pay.ok{background:#e5f5ea;color:var(--ok);} .pay.bad{background:#fbe9ec;color:var(--rose);} .pay.blue{background:#e8eff7;color:#2f5f93;}
+  .pay b{font-weight:700;}
+  .tk{display:block;margin-top:10px;text-align:center;text-decoration:none;padding:10px;border:1px solid var(--line);border-radius:10px;font-weight:600;font-size:13px;color:var(--ink);}
+</style>
+</head>
+<body>
+<header>
+  <div class="back-row">
+    <a class="back-btn" href="index.html" aria-label="Back to home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+    Reseller Orders
+  </div>
+</header>
+<main>
+  <p class="sub">Enter your Reseller ID to see all your reselling orders, return period and profit.</p>
+  <div class="row">
+    <input type="text" id="rid" placeholder="Your Reseller ID" autocomplete="off" autocapitalize="characters">
+    <button class="go" id="go" type="button">Show</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <div id="out"></div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const WIN = 7, DAY = 86400000;
+let PRODS = [], ORDERS = [], RES = null;
+function setMsg(t, fail){ $('msg').textContent = t || ''; $('msg').className = 'msg' + (fail ? ' fail' : ''); }
+const fd = t => new Date(t).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+
+/* products.json only used to show photos for older orders */
+fetch('products.json?ts=' + Date.now()).then(r => r.ok ? r.json() : []).then(p => { PRODS = Array.isArray(p) ? p : []; if(RES) render(); }).catch(() => {});
+function photoOf(i){
+  if(i.img) return i.img;
+  const p = PRODS.find(x => i.id != null && x.id === i.id) || PRODS.find(x => String(x.name||'').trim().toLowerCase() === String(i.name||'').trim().toLowerCase());
+  return p ? (p.img || (Array.isArray(p.images) && p.images[0]) || '') : '';
+}
+
+/* what is the profit situation of one order? */
+function profitState(o){
+  const profit = Number(o.resellerProfit) || 0, st = o.status || 'Order Placed';
+  if(o.payoutPaid) return { kind:'ok', text: `<b>Paid ✓</b> — ₹${profit} was paid to you${o.payoutPaidAt ? ' on ' + fd(o.payoutPaidAt) : ''}.`, bucket:'paid' };
+  if(st === 'Cancelled') return { kind:'bad', text:'Order cancelled — no profit on this order.', bucket:'none' };
+  if(st === 'Return Approved') return { kind:'bad', text:'Order returned — no profit on this order.', bucket:'none' };
+  if(st === 'Return Requested') return { kind:'warn', text:`Customer asked for a return. Your profit of <b>₹${profit}</b> is on hold until it is decided.`, bucket:'hold' };
+  if(st === 'Delivered' || st === 'Return Rejected'){
+    const base = new Date(o.deliveredAt || o.statusUpdatedAt || o.createdAt || 0).getTime();
+    const due = base + WIN * DAY, left = Math.ceil((due - Date.now()) / DAY);
+    if(left > 0) return { kind:'warn', text:`Return period: <b>${left} day${left === 1 ? '' : 's'} left</b> (ends ${fd(due)}).<br>If there is no return, you will get <b>₹${profit}</b> after ${fd(due)}.`, bucket:'upcoming' };
+    return { kind:'blue', text:`Return period is over. Your profit of <b>₹${profit}</b> is ready and will be paid to you soon.`, bucket:'upcoming' };
+  }
+  return { kind:'warn', text:`Your profit will be <b>₹${profit}</b>. It is paid ${WIN} days after delivery, if the order is not returned.`, bucket:'upcoming' };
+}
+function chipClass(st){ return (st === 'Cancelled' || st === 'Return Rejected' || st === 'Return Approved') ? 'bad' : (st === 'Return Requested' ? 'warn' : ''); }
+
+function render(){
+  const list = ORDERS.slice().sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  const sums = { paid:0, upcoming:0 };
+  list.forEach(o => { const s = profitState(o), p = Number(o.resellerProfit) || 0; if(s.bucket === 'paid') sums.paid += p; else if(s.bucket === 'upcoming' || s.bucket === 'hold') sums.upcoming += p; });
+  $('out').innerHTML = `<div class="hello">Hello, ${esc((RES.name || '').split(' ')[0] || 'Reseller')}! 👋</div>
+    <div class="cards"><div class="card"><b>${list.length}</b><span>Orders</span></div><div class="card g"><b>₹${sums.paid}</b><span>Paid to you</span></div><div class="card"><b>₹${sums.upcoming}</b><span>Coming to you</span></div></div>` +
+  list.map(o => {
+    const ps = profitState(o), st = o.status || 'Order Placed';
+    const items = (o.items || []).map(i => {
+      const img = photoOf(i), l = esc(String(i.name || '?').charAt(0));
+      const meta = [i.color ? 'Color: ' + i.color : '', i.size ? 'Size: ' + i.size : '', 'Qty ' + i.qty].filter(Boolean).join(' · ');
+      return `<div class="it">${img ? `<img class="it-img" src="${esc(img)}" alt="" onerror="this.outerHTML='<div class=\\'it-img\\'>${l}</div>'">` : `<div class="it-img">${l}</div>`}
+        <div class="it-info"><div class="it-name">${esc(i.name)}</div><div class="it-meta">${esc(meta)}</div></div>
+        <div class="it-price">₹${esc((i.resalePrice ?? i.price) * i.qty)}</div></div>`;
+    }).join('');
+    return `<div class="order">
+      <div class="order-top"><span class="order-id">${esc(o.orderId)}</span><span class="order-date">${fd(o.createdAt)}</span></div>
+      <div class="cust">${esc(o.name)} · ${esc(o.city || '')}${o.state ? ', ' + esc(o.state) : ''}</div>
+      <span class="chip ${chipClass(st)}">${esc(st)}</span>
+      ${items}
+      <div class="money">
+        <div><span>Customer pays</span><span>₹${esc(o.total)}</span></div>
+        <div><span>You pay Smart Deal</span><span>₹${esc(o.costTotal)}</span></div>
+        <div class="pf"><span>Your profit</span><span>₹${esc(o.resellerProfit)}</span></div>
+      </div>
+      <div class="pay ${ps.kind}">${ps.text}</div>
+      <a class="tk" href="track.html?id=${encodeURIComponent(o.orderId)}">Track this order</a>
+    </div>`;
+  }).join('');
+}
+
+async function show(){
+  const id = $('rid').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if(!id){ setMsg('Please enter your Reseller ID.', true); return; }
+  if(typeof db === 'undefined'){ setMsg('Not set up yet. Please contact the store.', true); return; }
+  $('go').disabled = true; $('out').innerHTML = ''; setMsg('Loading…');
+  try{
+    const r = await db.collection('resellers').doc(id).get();
+    if(!r.exists || r.data().active === false){ RES = null; setMsg('This Reseller ID is not valid.', true); return; }
+    RES = r.data();
+    try{ localStorage.setItem('smartDealResellerId', id); }catch(e){}
+    const snap = await db.collection('orders').where('resellerId', '==', id).get();
+    ORDERS = snap.docs.map(d => d.data());
+    setMsg(ORDERS.length ? '' : 'No reselling orders yet.');
+    render();
+  }catch(e){
+    console.error(e); setMsg('Could not load right now. Please try again in a moment.', true);
+  }finally{ $('go').disabled = false; }
+}
+$('go').onclick = show;
+$('rid').addEventListener('keydown', e => { if(e.key === 'Enter') show(); });
+try{ const sv = localStorage.getItem('smartDealResellerId'); if(sv) $('rid').value = sv; }catch(e){}
+</script>
+</body>
+</html>

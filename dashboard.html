@@ -619,7 +619,7 @@ async function loadPayouts(){
     orders.forEach(o => {
       const profit = Number(o.resellerProfit) || 0;
       if(o.payoutPaid){ paidTotal += profit; return; }
-      if(o.status !== 'Delivered' || !profit) return;
+      if((o.status !== 'Delivered' && o.status !== 'Return Rejected') || !profit) return;
       const due = new Date(o.deliveredAt || o.statusUpdatedAt || 0).getTime() + WIN;
       (due <= now ? ready : waiting).push({ o, profit, due });
     });
