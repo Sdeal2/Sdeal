@@ -147,6 +147,18 @@
   .cost-row .cn small{display:block; color:var(--ink-soft); font-size:11px; margin-top:1px;}
   .cost-row input, .cost-extra input{width:96px; flex:none; padding:9px 8px; border:1px solid var(--line); font-size:14px; text-align:right; font-family:inherit;}
   .cost-extra{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:4px 0 12px; font-size:13px; border-bottom:2px solid var(--line); margin-bottom:4px;}
+
+  .cost-dd{border:1px solid var(--indigo); margin:4px 0 0;}
+  .cost-dd summary{list-style:none; cursor:pointer; padding:12px 14px; font-size:14px; font-weight:600; color:var(--indigo); display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .cost-dd summary::-webkit-details-marker{display:none;}
+  .cost-dd summary i{font-style:normal; transition:transform .2s;}
+  .cost-dd[open] summary i{transform:rotate(180deg);}
+  .cost-dd[open] summary{border-bottom:1px solid var(--line);}
+  .cost-dd #costList{padding:0 12px; max-height:60vh; overflow-y:auto;}
+  .cp-save.done{background:var(--ok) !important;}
+  .dash-toast{position:fixed; left:50%; bottom:80px; transform:translateX(-50%) translateY(20px); background:#222; color:#fff; font-size:14px; font-weight:600; padding:12px 20px; border-radius:24px; opacity:0; transition:.25s; pointer-events:none; z-index:200; max-width:90vw; text-align:center;}
+  .dash-toast.on{opacity:1; transform:translateX(-50%) translateY(0);}
+  .dash-toast.ok{background:var(--ok);} .dash-toast.no{background:var(--rose);}
 </style>
 </head>
 <body>
@@ -213,8 +225,11 @@
       <h3>Product costs</h3>
       <div class="cost-form">
         <div class="cost-extra"><span>Extra cost per order ₹<br><small style="color:var(--ink-soft)">packing, courier etc. (optional)</small></span><input type="number" id="extraCost" min="0" placeholder="0"></div>
-        <div id="costList"><div class="empty">Loading products…</div></div>
-        <button class="cp-save" style="margin-top:12px" onclick="saveCosts()">Save costs</button>
+        <details class="cost-dd" id="costDD">
+          <summary><span id="costSum">Select product to set cost price</span><i>▾</i></summary>
+          <div id="costList"><div class="empty">Loading products…</div></div>
+        </details>
+        <button class="cp-save" id="costSaveBtn" style="margin-top:12px" onclick="saveCosts()">Save costs</button>
         <div class="cp-note" id="costNote"></div>
       </div>
     </section>
@@ -771,20 +786,43 @@ function renderCostList(){
     const c = COSTS[String(p.id)];
     return `<div class="cost-row">${img ? `<img class="oi-img" src="${escH(img)}" alt="">` : `<div class="oi-img">${escH(String(p.name||'?').charAt(0))}</div>`}
       <div class="cn">${escH(p.name)}<small>Selling price ₹${escH(p.price)}</small></div>
-      <input type="number" min="0" inputmode="numeric" placeholder="Cost ₹" data-pid="${escH(p.id)}" value="${c == null ? '' : escH(c)}"></div>`;
+      <input type="number" min="0" inputmode="numeric" placeholder="Cost ₹" data-pid="${escH(p.id)}" value="${c == null ? '' : escH(c)}" oninput="updateCostCount()"></div>`;
   }).join('');
+  updateCostCount();
+}
+function updateCostCount(){
+  const all = document.querySelectorAll('#costList input[data-pid]'); let done = 0;
+  all.forEach(i => { if(i.value.trim() !== '') done++; });
+  document.getElementById('costSum').textContent = all.length ? `Product cost prices: ${done} of ${all.length} set` : 'Select product to set cost price';
+}
+let _dashToastT;
+function dashToast(t, cls){
+  let e = document.getElementById('dashToast');
+  if(!e){ e = document.createElement('div'); e.id = 'dashToast'; document.body.appendChild(e); }
+  e.className = 'dash-toast on ' + (cls || ''); e.textContent = t;
+  clearTimeout(_dashToastT); _dashToastT = setTimeout(() => e.classList.remove('on'), 2600);
 }
 async function saveCosts(){
   const costs = {};
   document.querySelectorAll('#costList input[data-pid]').forEach(inp => { if(inp.value.trim() !== '' && Number(inp.value) >= 0) costs[inp.dataset.pid] = Number(inp.value); });
   const extra = Number(document.getElementById('extraCost').value) || 0;
-  const n = document.getElementById('costNote');
+  const n = document.getElementById('costNote'), btn = document.getElementById('costSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
   try{
     await db.collection('settings').doc('profit').set({ costs, extra, updatedAt: new Date().toISOString() });
     COSTS = costs; EXTRA = extra; COSTS_READY = true;
-    n.textContent = 'Saved'; n.className = 'cp-note ok';
+    n.textContent = 'Saved successfully (' + Object.keys(costs).length + ' product costs)'; n.className = 'cp-note ok';
+    btn.textContent = 'Saved ✓'; btn.classList.add('done');
+    dashToast('Costs saved successfully ✓', 'ok');
+    setTimeout(() => { btn.textContent = 'Save costs'; btn.classList.remove('done'); }, 2500);
     renderProfit();
-  }catch(e){ console.error(e); n.textContent = 'Could not save. Check your Firebase setup.'; n.className = 'cp-note no'; }
+  }catch(e){
+    console.error(e);
+    n.textContent = 'Could not save. Check your Firebase setup.'; n.className = 'cp-note no';
+    btn.textContent = 'Save costs';
+    dashToast('Could not save. Please try again.', 'no');
+  }
+  btn.disabled = false;
 }
 </script>
 </body>
