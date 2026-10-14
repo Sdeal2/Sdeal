@@ -570,5 +570,35 @@
       "#FFFFFF",
       "#FFFFFF"
     ]
+  },
+  {
+    "id": 32,
+    "name": "Multicolor LED String Lights – Decorative Lights for Home & Festivals",
+    "category": "Electric",
+    "description": "Brighten up your celebrations with beautiful Multicolor LED String Lights! ✨ These colorful decorative lights create a vibrant and festive atmosphere for your home and special occasions.\n🌟 Key Features:\n🌈 Beautiful Multicolor LED Lights\n⚡ Low Voltage Output (30V–32V)\n🏠 Perfect for Home & Room Decoration\n🎉 Ideal for Festivals, Parties & Celebrations\n✨ Flexible Wire for Easy Decoration\n💡 Bright and Attractive Lighting\nMake Every Celebration Special! 🎊\n🛍️ Shop now at Smart Deal and add a colorful glow to your celebrations!",
+    "price": 170,
+    "mrp": 240,
+    "sizes": [
+      "12m"
+    ],
+    "img": "images/p32-common-1.jpg",
+    "images": [
+      "images/p32-common-1.jpg",
+      "images/p32-common-2.jpg",
+      "images/p32-common-3.jpg",
+      "images/p32-common-4.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Multiple colour",
+        "code": "#FFFFFF",
+        "images": []
+      }
+    ],
+    "tag": "Sale",
+    "swatch": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ]
   }
 ]
