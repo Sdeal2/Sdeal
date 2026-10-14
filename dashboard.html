@@ -125,6 +125,28 @@
   .po-row{background:#fff; border:1px solid var(--line); padding:12px 16px; margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:10px;}
   .po-amt{font-weight:700; font-size:16px; color:var(--ok);}
   .po-btn{padding:8px 14px; font-size:12.5px; font-weight:600; border:1px solid var(--ok); color:var(--ok); background:#fff; white-space:nowrap; cursor:pointer;}
+
+  /* profit */
+  .pf-grid{grid-template-columns:repeat(2,1fr) !important;}
+  .pf-grid .stat-card .vs{font-size:11.5px; color:var(--ink-soft); margin-top:4px;}
+  .pf-note{font-size:11.5px; color:var(--ink-soft); margin:8px 0 0; line-height:1.5;}
+  .pf-box{background:#fff; border:1px solid var(--line); padding:14px 16px; margin-top:10px;}
+  .pf-h{font-size:13px; font-weight:700; margin-bottom:8px;}
+  .pf-bar{display:flex; align-items:center; gap:8px; padding:4px 0; font-size:12px;}
+  .pf-bar .d{width:50px; color:var(--ink-soft); flex:none;}
+  .pf-bar .tr{flex:1; height:12px; background:#f1f0ea; position:relative;}
+  .pf-bar .fl{height:100%; background:var(--ok);} .pf-bar .fl.neg{background:var(--rose);}
+  .pf-bar .v{width:74px; text-align:right; font-weight:600; flex:none;}
+  .pf-top{display:flex; justify-content:space-between; gap:10px; padding:6px 0; font-size:13px; border-bottom:1px solid #f3f2ee;}
+  .pf-top:last-child{border-bottom:none;} .pf-top span:first-child{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .neg-t{color:var(--rose);} .pos-t{color:var(--ok);}
+  .cost-form{background:#fff; border:1px solid var(--line); padding:14px 16px;}
+  .cost-row{display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid #f3f2ee;}
+  .cost-row .oi-img{width:40px; height:40px;}
+  .cost-row .cn{flex:1; min-width:0; font-size:13px; line-height:1.3;}
+  .cost-row .cn small{display:block; color:var(--ink-soft); font-size:11px; margin-top:1px;}
+  .cost-row input, .cost-extra input{width:96px; flex:none; padding:9px 8px; border:1px solid var(--line); font-size:14px; text-align:right; font-family:inherit;}
+  .cost-extra{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:4px 0 12px; font-size:13px; border-bottom:2px solid var(--line); margin-bottom:4px;}
 </style>
 </head>
 <body>
@@ -165,6 +187,19 @@
     </section>
 
     <section>
+      <h3>Profit</h3>
+      <div class="stats-grid pf-grid" id="pfGrid">
+        <div class="stat-card"><div class="num">…</div><div class="lbl">Today</div><div class="vs"></div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">Last 7 days</div><div class="vs"></div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">This month</div><div class="vs"></div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">All time</div><div class="vs"></div></div>
+      </div>
+      <div class="pf-note" id="pfNote"></div>
+      <div class="pf-box"><div class="pf-h">Daily profit, last 7 days</div><div id="pfBars"></div></div>
+      <div class="pf-box"><div class="pf-h">Top products by profit</div><div id="pfTop"></div></div>
+    </section>
+
+    <section>
       <h3>Visitors</h3>
       <div class="stats-grid vis-grid" id="visGrid">
         <div class="stat-card"><div class="num">…</div><div class="lbl">Today</div><div class="vs"></div></div>
@@ -172,6 +207,16 @@
         <div class="stat-card"><div class="num">…</div><div class="lbl">All time</div><div class="vs"></div></div>
       </div>
       <div class="vis-note">Each customer is counted once per day. "Link" = WhatsApp, social media, direct link or other sites. "Search" = came from Google, Bing etc.</div>
+    </section>
+
+    <section>
+      <h3>Product costs</h3>
+      <div class="cost-form">
+        <div class="cost-extra"><span>Extra cost per order ₹<br><small style="color:var(--ink-soft)">packing, courier etc. (optional)</small></span><input type="number" id="extraCost" min="0" placeholder="0"></div>
+        <div id="costList"><div class="empty">Loading products…</div></div>
+        <button class="cp-save" style="margin-top:12px" onclick="saveCosts()">Save costs</button>
+        <div class="cp-note" id="costNote"></div>
+      </div>
     </section>
 
     <section>
@@ -250,7 +295,7 @@ function tryLogin(){
     loadReturnRequests();
     loadRecentOrders();
     loadCoupons();
-    loadVisitors(); loadResellers(); loadPayouts();
+    loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings();
   } else {
     document.getElementById('loginErr').style.display = 'block';
   }
@@ -264,7 +309,7 @@ function logout(){
 if(sessionStorage.getItem('smartd_admin') === 'true'){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminScreen').style.display = 'block';
-  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); loadVisitors(); loadResellers(); loadPayouts(); });
+  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings(); });
 }
 
 /* ---------- Overview stats ---------- */
@@ -279,6 +324,8 @@ async function loadStats(){
     const snap = await db.collection('orders').get();
     let orders = [];
     snap.forEach(doc => orders.push(doc.data()));
+    ALL_ORDERS = orders; ALL_BY_ID = {}; orders.forEach(o => { ALL_BY_ID[o.orderId] = o; });
+    if(typeof renderProfit === 'function') renderProfit();
 
     const totalOrders = orders.length;
     const excludedFromSales = new Set(["Return Approved", "Cancelled"]);
@@ -350,6 +397,7 @@ function renderOrderRow(order){
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
+      <div class="order-row-meta op" data-o="${order.orderId}">${profitLine(order)}</div>
       ${order.resale ? `<div class="order-row-meta" style="color:#6b4fa0;">Reseller: ${escH(order.resellerName||'')} (${escH(order.resellerId)}) · Customer pays ₹${order.total} · We get ₹${order.costTotal} · Reseller profit ₹${order.resellerProfit}${order.payoutPaid ? ' · Paid' : ''}</div>` : ''}
       ${itemsHtml(order)}
       ${order.cancelledBy === 'customer' ? `<div class="order-row-meta" style="color:#b5495b;">Cancelled by customer${order.cancelReason ? ': ' + order.cancelReason : ''}${order.cancelNote ? ' · "' + order.cancelNote + '"' : ''}</div>` : ''}
@@ -641,6 +689,102 @@ async function markPaid(orderId){
   if(!confirm('Mark the profit of order ' + orderId + ' as paid?')) return;
   try{ await db.collection('orders').doc(orderId).update({ payoutPaid:true, payoutPaidAt:new Date().toISOString() }); loadPayouts(); }
   catch(e){ console.error(e); alert('Could not update. Please try again.'); }
+}
+
+/* ---------- Profit ---------- */
+let COSTS = {}, EXTRA = 0, COSTS_READY = false, ALL_ORDERS = null, ALL_BY_ID = {};
+const PROFIT_STATUSES = new Set(['Delivered', 'Return Rejected']);
+const rup = n => (n < 0 ? '-₹' : '₹') + Math.abs(Math.round(n)).toLocaleString('en-IN');
+function costOf(item){
+  let c = COSTS[String(item.id)];
+  if(c == null){
+    const p = PRODS.find(x => String(x.name||'').trim().toLowerCase() === String(item.name||'').trim().toLowerCase());
+    if(p) c = COSTS[String(p.id)];
+  }
+  return (c == null || c === '') ? null : Number(c);
+}
+function orderProfit(o){
+  let profit = 0, missing = false;
+  (o.items || []).forEach(i => {
+    const c = costOf(i);
+    if(c == null){ missing = true; return; }
+    profit += (Number(i.price) - c) * Number(i.qty);
+  });
+  profit -= (Number(o.discount) || 0) + EXTRA;
+  return { profit, missing };
+}
+function profitLine(o){
+  if(!COSTS_READY || o.status === 'Cancelled' || o.status === 'Return Approved') return '';
+  const r = orderProfit(o);
+  return `${o.status === 'Delivered' ? 'Profit' : 'Expected profit'}: <b class="${r.profit < 0 ? 'neg-t' : 'pos-t'}">${rup(r.profit)}</b>${r.missing ? ' · set cost price of some products' : ''}`;
+}
+function fillOrderProfits(){
+  document.querySelectorAll('.op[data-o]').forEach(el => { const o = ALL_BY_ID[el.dataset.o]; if(o) el.innerHTML = profitLine(o); });
+}
+const dayKey = d => { d = new Date(d); const p = n => String(n).padStart(2,'0'); return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()); };
+function renderProfit(){
+  if(!COSTS_READY || !ALL_ORDERS) return;
+  const now = new Date(), today = dayKey(now), month = today.slice(0,7);
+  const days = []; for(let k = 6; k >= 0; k--){ const d = new Date(now); d.setDate(d.getDate() - k); days.push(dayKey(d)); }
+  const byDay = {}, top = {}; let tToday = 0, nToday = 0, t7 = 0, n7 = 0, tMonth = 0, nMonth = 0, tAll = 0, nAll = 0, missingOrders = 0;
+  ALL_ORDERS.forEach(o => {
+    if(!PROFIT_STATUSES.has(o.status)) return;
+    const r = orderProfit(o); if(r.missing) missingOrders++;
+    const k = dayKey(o.deliveredAt || o.statusUpdatedAt || o.createdAt || now);
+    byDay[k] = (byDay[k] || 0) + r.profit;
+    tAll += r.profit; nAll++;
+    if(k === today){ tToday += r.profit; nToday++; }
+    if(days.includes(k)){ t7 += r.profit; n7++; }
+    if(k.slice(0,7) === month){ tMonth += r.profit; nMonth++; }
+    (o.items || []).forEach(i => { const c = costOf(i); if(c == null) return; top[i.name] = (top[i.name] || 0) + (Number(i.price) - c) * Number(i.qty); });
+  });
+  const cards = document.querySelectorAll('#pfGrid .stat-card');
+  [[tToday, nToday], [t7, n7], [tMonth, nMonth], [tAll, nAll]].forEach((v, i) => {
+    cards[i].querySelector('.num').textContent = rup(v[0]);
+    cards[i].querySelector('.vs').textContent = v[1] + ' delivered order' + (v[1] === 1 ? '' : 's');
+  });
+  document.getElementById('pfNote').innerHTML = 'Profit is counted on the day an order is delivered. Cancelled and returned orders are not counted. Coupon discounts' + (EXTRA ? ' and the extra cost per order' : '') + ' are subtracted.' + (missingOrders ? `<br><b style="color:var(--rose)">${missingOrders} order(s) have products without a cost price. Set them in “Product costs” for correct profit.</b>` : '');
+  const max = Math.max(1, ...days.map(k => Math.abs(byDay[k] || 0)));
+  document.getElementById('pfBars').innerHTML = days.map(k => { const v = byDay[k] || 0, dt = new Date(k + 'T00:00:00');
+    return `<div class="pf-bar"><span class="d">${dt.toLocaleDateString('en-IN', {weekday:'short', day:'numeric'})}</span><div class="tr"><div class="fl ${v < 0 ? 'neg' : ''}" style="width:${Math.round(Math.abs(v) / max * 100)}%"></div></div><span class="v ${v < 0 ? 'neg-t' : ''}">${rup(v)}</span></div>`; }).join('');
+  const tl = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  document.getElementById('pfTop').innerHTML = tl.length ? tl.map(([n, v]) => `<div class="pf-top"><span>${escH(n)}</span><b class="${v < 0 ? 'neg-t' : 'pos-t'}">${rup(v)}</b></div>`).join('') : '<div class="empty">No profit yet. Set cost prices below and deliver some orders.</div>';
+  fillOrderProfits();
+}
+
+async function loadCostSettings(){
+  try{
+    const doc = await db.collection('settings').doc('profit').get();
+    const d = doc.exists ? doc.data() : {};
+    COSTS = d.costs || {}; EXTRA = Number(d.extra) || 0;
+  }catch(e){ console.error(e); COSTS = {}; EXTRA = 0; }
+  COSTS_READY = true;
+  try{ if(!PRODS.length){ const r = await fetch('products.json?ts=' + Date.now()); if(r.ok){ const pj = await r.json(); PRODS = Array.isArray(pj) ? pj : []; } } }catch(e){}
+  renderCostList(); renderProfit();
+}
+function renderCostList(){
+  document.getElementById('extraCost').value = EXTRA || '';
+  const box = document.getElementById('costList');
+  if(!PRODS.length){ box.innerHTML = '<div class="empty">Could not load products.json.</div>'; return; }
+  box.innerHTML = PRODS.map(p => {
+    const img = p.img || (Array.isArray(p.images) && p.images[0]) || '';
+    const c = COSTS[String(p.id)];
+    return `<div class="cost-row">${img ? `<img class="oi-img" src="${escH(img)}" alt="">` : `<div class="oi-img">${escH(String(p.name||'?').charAt(0))}</div>`}
+      <div class="cn">${escH(p.name)}<small>Selling price ₹${escH(p.price)}</small></div>
+      <input type="number" min="0" inputmode="numeric" placeholder="Cost ₹" data-pid="${escH(p.id)}" value="${c == null ? '' : escH(c)}"></div>`;
+  }).join('');
+}
+async function saveCosts(){
+  const costs = {};
+  document.querySelectorAll('#costList input[data-pid]').forEach(inp => { if(inp.value.trim() !== '' && Number(inp.value) >= 0) costs[inp.dataset.pid] = Number(inp.value); });
+  const extra = Number(document.getElementById('extraCost').value) || 0;
+  const n = document.getElementById('costNote');
+  try{
+    await db.collection('settings').doc('profit').set({ costs, extra, updatedAt: new Date().toISOString() });
+    COSTS = costs; EXTRA = extra; COSTS_READY = true;
+    n.textContent = 'Saved'; n.className = 'cp-note ok';
+    renderProfit();
+  }catch(e){ console.error(e); n.textContent = 'Could not save. Check your Firebase setup.'; n.className = 'cp-note no'; }
 }
 </script>
 </body>
