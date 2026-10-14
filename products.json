@@ -539,5 +539,36 @@
       "#000000",
       "#595959"
     ]
+  },
+  {
+    "id": 31,
+    "name": "40 Meter Multicolor LED String Lights – Decorative Fairy Lights for Home, Garden & Festival Decoration",
+    "category": "Electric",
+    "description": "Brighten up your home and celebrations with these beautiful 40 Meter Multicolor LED String Lights! Featuring vibrant red, green, blue, yellow, and pink lights, these decorative fairy lights create a colorful and festive atmosphere for every special occasion.\nPerfect for decorating your home during Durga Puja, Diwali, Christmas, weddings, birthdays, and other celebrations. Use them to enhance the beauty of your balcony, garden, terrace, bedroom, windows, walls, and outdoor spaces.\n✨ Key Features:\n🌈 Multicolor LED Lights: Attractive and vibrant lighting effects.\n📏 40 Meter Length: Ideal for decorating larger spaces.\n🏠 Home Decoration: Perfect for walls, balconies, windows, and rooms.\n🎉 Festival Decoration: Great for Durga Puja, Diwali, Christmas, and parties.\n🌿 Indoor & Outdoor Decoration: Suitable for various decorative settings.\n💡 Energy-Efficient LED Technology: Designed for efficient power consumption.\n🔌 Plug & Play: Convenient plug-in operation.\n🎊 Perfect For:\nDurga Puja decorations, festive lighting, home decoration, garden lighting, balcony decoration, wedding functions, birthday parties, and special events.\nMake every celebration brighter and more colorful with Smart Deal! ✨",
+    "price": 285,
+    "mrp": 399,
+    "sizes": [
+      "40m"
+    ],
+    "img": "images/p31-common-1.jpg",
+    "images": [
+      "images/p31-common-1.jpg",
+      "images/p31-common-2.jpg",
+      "images/p31-common-3.jpg",
+      "images/p31-common-4.jpg",
+      "images/p31-common-5.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Multi colour",
+        "code": "#FFFFFF",
+        "images": []
+      }
+    ],
+    "tag": "Sale",
+    "swatch": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ]
   }
 ]
