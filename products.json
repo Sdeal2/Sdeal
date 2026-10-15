@@ -600,5 +600,39 @@
       "#FFFFFF",
       "#FFFFFF"
     ]
+  },
+  {
+    "id": 33,
+    "name": "Men’s Premium White Trousers – Elegant & Stylish Formal Wear | Smart Deal",
+    "category": "Others",
+    "description": "✨ Upgrade Your Style with Smart Deal! ✨\nGive your look a sophisticated touch with these stylish white trousers. Perfect for office wear, business meetings, parties, and special occasions. Pair them with your favourite shirt and formal shoes for a smart, elegant look. 👔\n✅ Elegant & Modern Design\n✅ Perfect for Formal & Casual Wear\n✅ Easy to Style with Different Outfits\n✅ Ideal for Office, Parties & Special Occasions",
+    "price": 420,
+    "mrp": 699,
+    "sizes": [
+      "Free Size",
+      "26",
+      "28",
+      "30",
+      "32",
+      "34"
+    ],
+    "img": "images/p33-common-1.jpg",
+    "images": [
+      "images/p33-common-1.jpg",
+      "images/p33-common-2.jpg",
+      "images/p33-common-3.jpg"
+    ],
+    "colors": [
+      {
+        "name": "White",
+        "code": "#FFFFFF",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ]
   }
 ]
