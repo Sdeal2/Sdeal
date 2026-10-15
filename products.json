@@ -634,5 +634,39 @@
       "#FFFFFF",
       "#FFFFFF"
     ]
+  },
+  {
+    "id": 35,
+    "name": "Men’s Premium Burgundy Shirt with White Trousers – Stylish & Elegant Look 👔✨",
+    "category": "Shirt",
+    "description": "Upgrade your style with this elegant burgundy shirt paired with classic white trousers! ❤️🤍 Perfect for parties, office wear, casual outings, and special occasions. Enjoy a smart, modern look with a timeless combination of colors.\n🛍️ Shop Your Favourite Fashion at Smart Deal!\n✨ Elegant & stylish design\n👔 Perfect for multiple occasions\n💯 A smart and sophisticated look\n👉 Explore more fashion and lifestyle products at Smart Deal!",
+    "price": 379,
+    "mrp": 499,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "img": "images/p35-common-1.jpg",
+    "images": [
+      "images/p35-common-1.jpg",
+      "images/p35-common-2.jpg",
+      "images/p35-common-3.jpg",
+      "images/p35-common-4.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Red",
+        "code": "#A84A4A",
+        "images": []
+      }
+    ],
+    "tag": "Sale",
+    "swatch": [
+      "#A84A4A",
+      "#C68989"
+    ]
   }
 ]
