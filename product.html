@@ -110,6 +110,19 @@ svg{display:block}
 .desc-text.open{display:block;overflow:visible}
 </style>
 <style>
+/* Price compare sticker */
+.cmp{margin:16px 0 4px;border:1.5px solid var(--line);border-radius:14px;padding:10px;background:#fff}
+.cmp-t{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.cmp-g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmp-c{position:relative;display:flex;align-items:center;gap:8px;min-width:0;border:1px solid var(--line);border-radius:10px;padding:6px}
+.cmp-c.us{background:#eef8f1;border-color:var(--green);border-width:1.5px}
+.cmp-lg{flex:none;width:clamp(56px,17vw,76px);height:30px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cmp-lg svg{width:100%;height:100%;display:block}
+.cmp-lg img{max-height:28px;max-width:100%;width:auto;height:auto;display:block}
+.cmp-p{font-size:clamp(12.5px,3.6vw,15px);font-weight:700;white-space:nowrap}
+.cmp-c.us .cmp-p{color:var(--green)}
+.cmp-best{position:absolute;top:-8px;right:8px;font-size:9px;font-weight:800;background:var(--green);color:#fff;border-radius:6px;padding:1px 6px}
+.cmp-save{margin-top:8px;font-size:12px;font-weight:700;color:var(--green);text-align:center}
 /* Trust strip */
 .trust-strip{display:flex; gap:0; margin:14px 0; border:1px solid #eee; border-radius:8px; overflow:hidden}
 .trust-item{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 6px; text-align:center; border-right:1px solid #eee; font-size:11.5px; color:#444; font-weight:600}
@@ -206,6 +219,24 @@ function updateRatingChip(){
   el.innerHTML='<span>'+avg.toFixed(1)+'</span><span class="star">★</span><span class="sep">|</span><span class="cnt">'+reviews.length+'</span>';
 }
 
+/* ---------- Price compare (prices come from product.compare, set in admin) ---------- */
+const SD_LOGO_SRC='logo.png'; /* Smart Deal ka asli logo file */
+const CMP_LOGOS={
+flipkart:'<svg viewBox="0 0 80 28"><text x="33" y="19" text-anchor="middle" font-size="14.5" font-weight="800" font-style="italic" font-family="Arial,sans-serif" fill="#2874f0">Flipkart</text><path d="M63 10.5a3.5 3.5 0 0 1 7 0" stroke="#2874f0" stroke-width="1.5" fill="none"/><rect x="60" y="10" width="13" height="12" rx="2" fill="#ffe11b"/><text x="66.5" y="20" text-anchor="middle" font-size="10" font-weight="800" font-style="italic" font-family="Arial,sans-serif" fill="#2874f0">f</text></svg>',
+amazon:'<svg viewBox="0 0 80 28"><text x="40" y="17" text-anchor="middle" font-size="17" font-weight="700" font-family="Arial,sans-serif" fill="#111">amazon</text><path d="M17 20.5q23 7 46 0" stroke="#f90" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M58.5 17.5l5 2.8-5.5 1.6" stroke="#f90" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+meesho:'<svg viewBox="0 0 80 28"><text x="40" y="20" text-anchor="middle" font-size="19" font-weight="800" font-family="Trebuchet MS,Verdana,Arial,sans-serif" letter-spacing="-.5" fill="#9f2089">meesho</text></svg>'};
+const SD_FALLBACK='<svg viewBox="0 0 80 28"><rect x="26" y="0" width="28" height="28" rx="7" fill="#e8561f"/><path d="M33 10h14l-1.5 11h-11z" fill="#fff"/><path d="M36.5 12.5a3.5 3.5 0 0 1 7 0" stroke="#e8561f" stroke-width="1.6" fill="none"/></svg>';
+function sdLogoFallback(img){img.parentNode.innerHTML=SD_FALLBACK}
+function compareHtml(){
+  const c=product.compare||{};
+  const ks=['flipkart','amazon','meesho'].filter(k=>Number(c[k])>0);
+  if(!ks.length)return '';
+  const sd=Number(product.price),vals=ks.map(k=>Number(c[k]));
+  const best=sd<Math.min(...vals);
+  const cells=ks.map(k=>`<div class="cmp-c"><div class="cmp-lg">${CMP_LOGOS[k]}</div><div class="cmp-p">${rupee(c[k])}</div></div>`).join('');
+  return `<div class="cmp"><div class="cmp-t">Compare prices</div><div class="cmp-g">${cells}<div class="cmp-c us">${best?'<span class="cmp-best">BEST</span>':''}<div class="cmp-lg"><img src="${SD_LOGO_SRC}" alt="Smart Deal" onerror="sdLogoFallback(this)"></div><div class="cmp-p">${rupee(sd)}</div></div></div>${best?`<div class="cmp-save">You save up to ₹${Math.max(...vals)-sd}</div>`:''}</div>`;
+}
+
 function render(){
   images=getImages();if(idx>=images.length)idx=0;
   const off=pct(product.price,product.mrp);
@@ -235,6 +266,7 @@ function render(){
     <h4>Color</h4><div class="row">${getColors().length?getColors().map((c,i)=>`<button class="color ${selectedColor?.name===c.name?'active':''}" title="${esc(c.name)}" style="background:${esc(c.code||'#ddd')}" onclick="chooseColor(${i})"></button>`).join(''):'<span class="msg">Default color</span>'}</div>${selectedColor?`<div class="msg">Selected: ${esc(selectedColor.name)}</div>`:''}
     <h4>Size</h4><div class="row">${(product.sizes||[]).map((s,i)=>`<button class="pill ${selectedSize===s?'active':''}" onclick="selectedSize='${esc(s)}';render()">${esc(s)}</button>`).join('')}</div>
     <h4>Quantity</h4><div class="row"><button class="pill" onclick="qty=Math.max(1,qty-1);render()">−</button><span style="padding:10px">${qty}</span><button class="pill" onclick="qty++;render()">+</button></div>
+    ${compareHtml()}
   </section>
 
   <div class="section ${delOpen?'':'collapsed'}" id="delSec">

@@ -63,8 +63,8 @@
 </head>
 <body>
 <header>
-  <h1>SMART DEAL – Add Product</h1>
-  <p>Fill the form and tap "Add to store". Photos and product details are saved for you.</p>
+  <h1 id="pageTitle">SMART DEAL – Add Product</h1>
+  <p id="pageSub">Fill the form and tap "Add to store". Photos and product details are saved for you.</p>
 </header>
 
 <main>
@@ -130,10 +130,20 @@
   </div>
   <div class="off" id="off"></div>
 
+  <div class="field">
+    <label>Price on other sites <span class="hint">(optional, shown on the product page)</span></label>
+    <div class="row">
+      <div class="field"><label for="cmpFk">Flipkart (₹)</label><input type="number" id="cmpFk" inputmode="numeric" min="0" placeholder="699"></div>
+      <div class="field"><label for="cmpAz">Amazon (₹)</label><input type="number" id="cmpAz" inputmode="numeric" min="0" placeholder="749"></div>
+      <div class="field"><label for="cmpMs">Meesho (₹)</label><input type="number" id="cmpMs" inputmode="numeric" min="0" placeholder="649"></div>
+    </div>
+  </div>
+
   <details>
     <summary>Extra photos (optional)</summary>
     <p class="sub">Shown when a color has no photos of its own.</p>
     <input type="file" id="commonFiles" accept="image/*" multiple>
+    <div class="pstat sub" id="commonStat"></div>
     <input type="text" id="imgs" placeholder="Or file names already in the images folder: shirt1.jpg" autocomplete="off">
   </details>
 
@@ -142,6 +152,7 @@
 
   <div class="btns">
     <button class="btn primary" id="publish" type="button">Add to store</button>
+    <a class="btn ghost" id="cancelEdit" href="delete-product.html" style="display:none; text-align:center; text-decoration:none;">Cancel edit</a>
   </div>
   <div class="btns">
     <button class="btn ghost" id="copy" type="button">Copy code instead</button>
@@ -162,6 +173,7 @@ const $ = id => document.getElementById(id);
 const BASE_SIZES = ["S","M","L","XL","XXL","Free Size"];
 const selected = new Set();
 let running = false;
+let editMode = false, editingId = null;
 
 /* ---------- helpers ---------- */
 function lighten(hex, amt){
@@ -214,11 +226,44 @@ function addColorRow(){
     </div>
     <div class="sub">Photos of this color</div>
     <input type="file" class="cfiles" accept="image/*" multiple>
+    <div class="pstat sub"></div>
     <input type="text" class="cimgs" placeholder="Or file names already uploaded: navy1.jpg" autocomplete="off">`;
   d.querySelector(".rm").onclick = () => { d.remove(); update(); };
+  const fi = d.querySelector(".cfiles");
+  fi.addEventListener("change", () => cachePhotos(fi, d.querySelector(".pstat")));
   $("colorList").appendChild(d);
   update();
+  return d;
 }
+const stripImg = path => String(path || "").replace(/^images\//, "");
+
+/* Copy chosen photos into memory right away, so Android cannot take access back later */
+let pendingReads = Promise.resolve();
+function cachePhotos(input, statEl){
+  const files = [...input.files];
+  input._cache = [];
+  if(!files.length){ statEl.textContent = ""; statEl.style.color = ""; update(); return; }
+  statEl.style.color = ""; statEl.textContent = "Reading photo…";
+  pendingReads = pendingReads.then(async () => {
+    const ok = [], bad = [];
+    for(const f of files){
+      try{
+        const buf = await f.arrayBuffer();
+        ok.push(new File([buf], f.name, {type: f.type || "image/jpeg"}));
+      }catch(_){ bad.push(f.name); }
+    }
+    input._cache = ok;
+    if(bad.length){
+      statEl.style.color = "var(--bad)";
+      statEl.textContent = "Could not read " + bad.join(", ") + ". Tap Choose files, then pick it from Files / Browse (Downloads or Gallery folder), not from Photos or Recent.";
+    }else{
+      statEl.style.color = "var(--ok)";
+      statEl.textContent = ok.length + (ok.length === 1 ? " photo ready" : " photos ready");
+    }
+    update();
+  });
+}
+$("commonFiles").addEventListener("change", () => cachePhotos($("commonFiles"), $("commonStat")));
 
 function getSizes(){
   const custom = $("sizeCustom").value.split(",").map(s=>s.trim()).filter(Boolean);
@@ -226,6 +271,14 @@ function getSizes(){
 }
 
 /* ---------- build the product + list of photos to upload ---------- */
+function getCompare(){
+  const c = {};
+  [["flipkart","cmpFk"],["amazon","cmpAz"],["meesho","cmpMs"]].forEach(([k,id])=>{
+    const v = +$(id).value; if(v > 0) c[k] = v;
+  });
+  return Object.keys(c).length ? c : null;
+}
+
 function plan(){
   const id = +$("id").value || 0;
   const uploads = [];
@@ -239,12 +292,12 @@ function plan(){
     const name = r.querySelector(".cname").value.trim();
     if(!name) return null;
     const tag = (slug(name) || "color") + (i ? "-"+(i+1) : "");
-    const images = pathsFor(r.querySelector(".cfiles").files, tag)
+    const images = pathsFor(r.querySelector(".cfiles")._cache || [], tag)
       .concat(fixImgs(r.querySelector(".cimgs").value));
     return {name, code: r.querySelector(".cpick").value.toUpperCase(), images};
   }).filter(Boolean);
 
-  const common = pathsFor($("commonFiles").files, "common").concat(fixImgs($("imgs").value));
+  const common = pathsFor($("commonFiles")._cache || [], "common").concat(fixImgs($("imgs").value));
   const firstWithPhotos = colors.find(c => c.images.length);
   const main = (colors[0] && colors[0].images[0]) || common[0] || (firstWithPhotos ? firstWithPhotos.images[0] : "");
   const base = (colors[0] && colors[0].code) || "#2E3B5B";
@@ -256,6 +309,7 @@ function plan(){
     description: $("desc").value.trim(),
     price: +$("price").value,
     mrp: +$("mrp").value,
+    ...(getCompare() ? {compare: getCompare()} : {}),
     sizes: getSizes(),
     img: main,
     images: common,
@@ -276,6 +330,7 @@ function toText(obj){
     `  "description": ${JSON.stringify(obj.description)},`,
     `  "price": ${obj.price},`,
     `  "mrp": ${obj.mrp},`,
+    ...(obj.compare ? [`  "compare": ${JSON.stringify(obj.compare)},`] : []),
     `  "sizes": ${JSON.stringify(obj.sizes)},`,
     `  "img": ${JSON.stringify(obj.img)},`,
     `  "images": ${JSON.stringify(obj.images)},`,
@@ -310,7 +365,7 @@ function update(){
     ? "Fill the form above and the code will appear here." : ",\n" + toText(o);
 }
 
-["id","name","category","sizeCustom","desc","mrp","price","imgs","tag","commonFiles"]
+["id","name","category","sizeCustom","desc","mrp","price","imgs","tag","commonFiles","cmpFk","cmpAz","cmpMs"]
   .forEach(id => { $(id).addEventListener("input", update); $(id).addEventListener("change", update); });
 $("colorList").addEventListener("input", update);
 $("colorList").addEventListener("change", update);
@@ -392,47 +447,108 @@ async function compress(file){
   throw new Error("Could not open photo " + file.name + ". Please choose a different photo or a smaller one.");
 }
 
+async function loadForEdit(id){
+  setStatus("Loading product…");
+  try{
+    const d = await readProducts();
+    const p = d.list.find(x => String(x.id) === String(id));
+    if(!p){ setStatus("Product ID " + id + " was not found in your store.", "fail"); return; }
+    editMode = true; editingId = p.id;
+    $("pageTitle").textContent = "SMART DEAL – Edit Product";
+    $("pageSub").textContent = 'Update the details below and tap "Save changes".';
+    $("publish").textContent = "Save changes";
+    $("cancelEdit").style.display = "block";
+    $("id").value = p.id; $("id").disabled = true;
+    $("name").value = p.name || "";
+    $("category").value = p.category || "";
+    $("desc").value = p.description || "";
+    $("mrp").value = p.mrp ?? "";
+    $("price").value = p.price ?? "";
+    $("cmpFk").value = (p.compare && p.compare.flipkart) || "";
+    $("cmpAz").value = (p.compare && p.compare.amazon) || "";
+    $("cmpMs").value = (p.compare && p.compare.meesho) || "";
+    $("tag").value = p.tag || "";
+
+    selected.clear();
+    document.querySelectorAll(".chip").forEach(c => {
+      const match = (p.sizes || []).includes(c.textContent);
+      c.setAttribute("aria-pressed", match);
+      if(match) selected.add(c.textContent);
+    });
+    $("sizeCustom").value = (p.sizes || []).filter(s => !BASE_SIZES.includes(s)).join(", ");
+
+    $("colorList").innerHTML = "";
+    const colorsToLoad = (p.colors && p.colors.length) ? p.colors : [{name:"", code:"#2E3B5B", images:[]}];
+    colorsToLoad.forEach(c => {
+      const row = addColorRow();
+      row.querySelector(".cname").value = c.name || "";
+      row.querySelector(".cpick").value = c.code || "#2E3B5B";
+      row.querySelector(".cimgs").value = (c.images || []).map(stripImg).join(", ");
+    });
+    $("imgs").value = (p.images || []).map(stripImg).join(", ");
+
+    $("status").className = "status";
+    update();
+  }catch(e){
+    setStatus(e.message, "fail");
+  }
+}
+
 async function publish(){
   if(running) return;
+  await pendingReads;
   const errs = validate();
   if(errs.length){ $("errors").textContent = errs[0]; toast("Please complete the form"); return; }
   if(!getToken()){ $("setup").open = true; $("setup").scrollIntoView({behavior:"smooth"}); toast("Save your GitHub token first"); return; }
 
-  running = true; $("publish").disabled = true; setStatus("Checking your store…");
+  running = true; $("publish").disabled = true; setStatus(editMode ? "Checking your store…" : "Checking your store…");
   try{
     const {obj, uploads} = plan();
 
-    let data = await readProducts();
-    if(data.list.some(p => p.id === obj.id)){
-      const next = Math.max(0, ...data.list.map(p => +p.id || 0)) + 1;
-      throw new Error(`Product ID ${obj.id} is already used. Use ${next} instead.`);
+    if(!editMode){
+      const data0 = await readProducts();
+      if(data0.list.some(p => p.id === obj.id)){
+        const next = Math.max(0, ...data0.list.map(p => +p.id || 0)) + 1;
+        throw new Error(`Product ID ${obj.id} is already used. Use ${next} instead.`);
+      }
     }
 
     for(let i = 0; i < uploads.length; i++){
       setStatus(`Uploading photo ${i+1} of ${uploads.length}…`);
       const b64 = await compress(uploads[i].file);
-      const r = await putFile(uploads[i].path, b64, `Add photo ${uploads[i].path}`);
+      const r = await putFile(uploads[i].path, b64, `${editMode ? "Update" : "Add"} photo ${uploads[i].path}`);
       if(!r.ok) throw new Error("Photo upload failed (" + r.status + "). Please try again.");
     }
 
-    setStatus("Saving product…");
+    setStatus(editMode ? "Saving changes…" : "Saving product…");
     let saved = false;
     for(let attempt = 0; attempt < 3 && !saved; attempt++){
-      data = await readProducts();
-      if(data.list.some(p => p.id === obj.id)) throw new Error(`Product ID ${obj.id} is already used.`);
-      data.list.push(obj);
+      const data = await readProducts();
+      let list = data.list;
+      if(editMode){
+        const idx = list.findIndex(p => p.id === editingId);
+        if(idx < 0) throw new Error("This product no longer exists in the store.");
+        list = list.slice(); list[idx] = obj;
+      } else {
+        if(list.some(p => p.id === obj.id)) throw new Error(`Product ID ${obj.id} is already used.`);
+        list = list.slice(); list.push(obj);
+      }
       const res = await gh(DATA_FILE, "PUT", {
-        message: `Add product ${obj.id}: ${obj.name}`,
-        content: toB64Utf8(JSON.stringify(data.list, null, 2) + "\n"),
+        message: `${editMode ? "Edit" : "Add"} product ${obj.id}: ${obj.name}`,
+        content: toB64Utf8(JSON.stringify(list, null, 2) + "\n"),
         branch: BRANCH, sha: data.sha
       });
       if(res.ok) saved = true;
-      else if(res.status !== 409) throw new Error("Could not save product (" + res.status + ").");
+      else if(res.status !== 409) throw new Error("Could not save (" + res.status + ").");
     }
-    if(!saved) throw new Error("Store was busy. Please tap Add to store again.");
+    if(!saved) throw new Error("Store was busy. Please tap the button again.");
 
-    setStatus(`Done! "${obj.name}" is added. It will appear on the store in 1 to 2 minutes.`, "good");
-    resetForm(obj.id + 1, true);
+    if(editMode){
+      setStatus(`Done! Changes to "${obj.name}" are saved. It will update on the store in 1 to 2 minutes.`, "good");
+    } else {
+      setStatus(`Done! "${obj.name}" is added. It will appear on the store in 1 to 2 minutes.`, "good");
+      resetForm(obj.id + 1, true);
+    }
   }catch(err){
     setStatus(err.message || String(err), "fail");
   }finally{
@@ -457,8 +573,8 @@ $("copy").onclick = async () => {
 
 /* ---------- reset ---------- */
 function resetForm(nextId, keepStatus){
-  ["name","category","sizeCustom","desc","mrp","price","imgs"].forEach(id=>$(id).value="");
-  $("commonFiles").value = "";
+  ["name","category","sizeCustom","desc","mrp","price","imgs","cmpFk","cmpAz","cmpMs"].forEach(id=>$(id).value="");
+  $("commonFiles").value = ""; $("commonFiles")._cache = []; $("commonStat").textContent = "";
   $("id").value = nextId || ""; $("tag").value = "";
   $("colorList").innerHTML = ""; addColorRow();
   selected.clear();
@@ -480,10 +596,15 @@ $("saveToken").onclick = async () => {
   if(!t){ toast("Paste the token first"); return; }
   localStorage.setItem("sd_token", t); $("token").value = "";
   try{
-    const d = await readProducts();
-    if(!$("id").value){ $("id").value = Math.max(0, ...d.list.map(p => +p.id || 0)) + 1; update(); }
-    setStatus("Connected. Found " + d.list.length + " products.", "good");
-    showTokenState();
+    if(urlEditId){
+      await loadForEdit(urlEditId);
+      showTokenState();
+    } else {
+      const d = await readProducts();
+      if(!$("id").value){ $("id").value = Math.max(0, ...d.list.map(p => +p.id || 0)) + 1; update(); }
+      setStatus("Connected. Found " + d.list.length + " products.", "good");
+      showTokenState();
+    }
   }catch(e){
     localStorage.removeItem("sd_token"); showTokenState();
     setStatus(e.message, "fail");
@@ -491,13 +612,67 @@ $("saveToken").onclick = async () => {
 };
 $("clearToken").onclick = () => { localStorage.removeItem("sd_token"); showTokenState(); toast("Token removed"); };
 
+/* ---------- fill the form from a shared product link ---------- */
+async function prefillFromLink(){
+  const params = new URLSearchParams(location.search);
+  if(!params.has("name") && !params.has("price") && !params.has("img")) return;
+
+  setStatus("Filling the form from the link you shared…");
+  if(params.get("name")) $("name").value = params.get("name").slice(0, 120);
+  if(params.get("desc")) $("desc").value = params.get("desc").slice(0, 400);
+
+  const src = parseFloat(params.get("price"));
+  if(src && isFinite(src)){
+    const sell = Math.round(src * 3);
+    const mrp = Math.round(sell * 1.35 / 10) * 10;
+    $("price").value = sell;
+    $("mrp").value = mrp;
+  }
+
+  const imgUrl = params.get("img");
+  if(imgUrl){
+    const row = document.querySelector(".crow") || addColorRow();
+    row.querySelector(".cname").value = "Default";
+    const stat = row.querySelector(".pstat");
+    stat.style.color = ""; stat.textContent = "Fetching photo from the link…";
+    try{
+      const res = await fetch(imgUrl, {mode: "cors"});
+      if(!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      if(!blob.type.startsWith("image/")) throw new Error("not an image");
+      const name = (imgUrl.split("/").pop() || "photo").split("?")[0] || "photo.jpg";
+      row.querySelector(".cfiles")._cache = [new File([blob], name, {type: blob.type})];
+      stat.style.color = "var(--ok)";
+      stat.textContent = "Photo imported from the link";
+    }catch(_){
+      stat.style.color = "var(--bad)";
+      stat.innerHTML = 'Could not fetch this photo automatically (the site blocked it). ' +
+        '<a href="' + imgUrl.replace(/"/g,"%22") + '" target="_blank" rel="noopener">Open the photo</a>, save it to your phone, then use "Choose files" above.';
+    }
+  }
+
+  $("status").className = "status";
+  $("errors").textContent = "Check the name, photo and price, then fill the category and sizes.";
+  update();
+}
+
 /* ---------- start ---------- */
-addColorRow();
+const urlEditId = new URLSearchParams(location.search).get("id");
+if(!urlEditId){
+  prefillFromLink(); // adds a color row itself only when a photo link was shared
+  if(![...document.querySelectorAll(".crow")].length) addColorRow();
+}
 showTokenState();
 if(getToken()){
-  readProducts().then(d => {
-    if(!$("id").value){ $("id").value = Math.max(0, ...d.list.map(p => +p.id || 0)) + 1; update(); }
-  }).catch(e => setStatus(e.message, "fail"));
+  if(urlEditId){
+    loadForEdit(urlEditId);
+  } else {
+    readProducts().then(d => {
+      if(!$("id").value){ $("id").value = Math.max(0, ...d.list.map(p => +p.id || 0)) + 1; update(); }
+    }).catch(e => setStatus(e.message, "fail"));
+  }
+} else if(urlEditId){
+  setStatus("Connect to GitHub above to load this product for editing.", "fail");
 }
 </script>
 </body>
