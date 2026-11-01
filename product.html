@@ -110,6 +110,12 @@ svg{display:block}
 .desc-text.open{display:block;overflow:visible}
 </style>
 <style>
+/* Trust strip (Lowest Price / COD / Returns) */
+.ts{background:#f4f4f4;padding:7px 0 8px;border-bottom:1.5px solid #d4cfe4;margin-top:16px}
+.ts-in{background:#fff;display:flex;height:58px}
+.ts-i{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;font-size:11px;font-weight:500;color:#353340;line-height:1.2;white-space:nowrap}
+.ts-i+.ts-i::before{content:"";position:absolute;left:0;top:50%;height:34px;transform:translateY(-50%);border-left:1px solid #d4cfe4}
+.ts-i svg{width:28px;height:28px;display:block}
 /* Price compare sticker */
 .cmp{margin:16px 0 4px;border:1.5px solid var(--line);border-radius:14px;padding:10px;background:#fff}
 .cmp-t{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px}
@@ -284,7 +290,11 @@ function render(){
     </div>
   </div>
 
-  <div class="chips"><div class="chip"><span class="chip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></span>7-Day Return Policy</div><div class="chip"><span class="chip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></span>Cash on Delivery</div><div class="chip"><span class="chip-ic">🇮🇳</span>Made in India</div></div>
+  <div class="ts"><div class="ts-in">
+    <div class="ts-i"><svg viewBox="0 0 48 48"><path d="M17 15q-1-10 8-10" fill="none" stroke="#a0522d" stroke-width="2" stroke-linecap="round"/><g transform="rotate(-12 22 28)"><rect x="6" y="14" width="22" height="28" rx="3" fill="#1db98a"/><circle cx="14" cy="19" r="2" fill="#fff"/><text x="17" y="36" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="Arial">%</text></g><path d="M31 24l6-10q3-2 4 1l-1 7h6q3 0 2.5 3l-2 11q-1 3-4 3H31z" fill="#f3b283"/></svg>Lowest Price</div>
+    <div class="ts-i"><svg viewBox="0 0 48 48"><g transform="rotate(-8 22 28)"><rect x="5" y="19" width="30" height="19" rx="2.5" fill="#1db98a"/><circle cx="20" cy="28.5" r="6" fill="#fff"/><text x="20" y="32.2" text-anchor="middle" font-size="10" font-weight="700" fill="#14916d" font-family="Arial">₹</text></g><path d="M33 20l7-3 1.5 6.5-8 6.5z" fill="#f3b283"/><path d="M36 14l7-2.5 1 5.5-6.5 2z" fill="#a0522d"/></svg>Cash on Delivery</div>
+    <div class="ts-i"><svg viewBox="0 0 48 48"><polygon points="24,6 40,13 24,20 8,13" fill="#f2b07a"/><polygon points="8,13 24,20 24,38 8,31" fill="#e08a4a"/><polygon points="40,13 24,20 24,38 40,31" fill="#c9733a"/><path d="M40 29q0 11-14 11H15" fill="none" stroke="#1db98a" stroke-width="5" stroke-linecap="round"/><polygon points="5,40 16,32 16,48" fill="#1db98a"/></svg>7-day Returns</div>
+  </div></div>
 
   <div class="description"><h3>Description</h3><p class="desc-text ${descOpen?'open':''}" id="descText" onclick="toggleDesc()">${esc(formatDescription(product.description))||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.'}</p><button class="more" id="descMore" onclick="toggleDesc()">${descOpen?'less':'...more'}</button></div>
 
