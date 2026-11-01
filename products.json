@@ -668,5 +668,40 @@
       "#A84A4A",
       "#C68989"
     ]
+  },
+  {
+    "id": 36,
+    "name": "TWS AirBuds Black – Wireless Bluetooth Earbuds with Charging Case, Fast Charging & Up to 30 Hours Battery Backup",
+    "category": "Electric",
+    "description": "",
+    "price": 299,
+    "mrp": 999,
+    "compare": {
+      "flipkart": 499,
+      "amazon": 450,
+      "meesho": 340
+    },
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p36-common-1.jpg",
+    "images": [
+      "images/p36-common-1.jpg",
+      "images/p36-common-2.jpg",
+      "images/p36-common-3.jpg",
+      "images/p36-common-4.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Black",
+        "code": "#000000",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#000000",
+      "#595959"
+    ]
   }
 ]
