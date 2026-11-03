@@ -703,5 +703,40 @@
       "#000000",
       "#595959"
     ]
+  },
+  {
+    "id": 37,
+    "name": "TRUZEN Bluetooth 5.3 Wireless Neckband Earphones with Smart Dial, HD Sound & 48H Battery",
+    "category": "Electric",
+    "description": "Experience powerful HD sound with TRUZEN Wireless Neckband Earphones. Featuring Bluetooth 5.3, Smart Dial control, clear calls, magnetic earbuds, and up to 48 hours of playback. Enjoy fast charging, IP55 sweat & water resistance, and a lightweight design for all-day comfort. Perfect for music, work, travel, and workouts.",
+    "price": 599,
+    "mrp": 1999,
+    "compare": {
+      "flipkart": 750,
+      "amazon": 700,
+      "meesho": 610
+    },
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p37-common-1.jpg",
+    "images": [
+      "images/p37-common-1.jpg",
+      "images/p37-common-2.jpg",
+      "images/p37-common-3.jpg",
+      "images/p37-common-4.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Black",
+        "code": "#000000",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#000000",
+      "#595959"
+    ]
   }
 ]
