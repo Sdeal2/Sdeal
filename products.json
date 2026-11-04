@@ -738,5 +738,45 @@
       "#000000",
       "#595959"
     ]
+  },
+  {
+    "id": 38,
+    "name": "12V 20W Dual Color LED Projector Fog Lights for Bikes, Scooters & Cars | 6000K White & 4500K Yellow | 3 Light Modes | Waterproof",
+    "category": "Electric",
+    "description": "Upgrade your ride with powerful 12V 20W LED Projector Fog Lights. Featuring dual-color 6000K white and 4500K yellow lighting with 3 modes, these lights offer enhanced visibility in different driving conditions. Built with a durable aluminum body, waterproof design, and adjustable 90° mounting bracket. Ideal for bikes, scooters, and cars",
+    "price": 250,
+    "mrp": 999,
+    "compare": {
+      "flipkart": 399,
+      "amazon": 299,
+      "meesho": 260
+    },
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p38-common-1.jpg",
+    "images": [
+      "images/p38-common-1.jpg",
+      "images/p38-common-2.jpg",
+      "images/p38-common-3.jpg",
+      "images/p38-common-4.jpg"
+    ],
+    "colors": [
+      {
+        "name": "White",
+        "code": "#FFFFFF",
+        "images": []
+      },
+      {
+        "name": "Yellow",
+        "code": "#FFFF00",
+        "images": []
+      }
+    ],
+    "tag": "",
+    "swatch": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ]
   }
 ]
