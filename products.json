@@ -883,5 +883,42 @@
       "#FFFF00",
       "#FFFF59"
     ]
+  },
+  {
+    "id": 42,
+    "name": "Women’s Magenta Embroidered Kurta Set with Matching Pants | Elegant Ethnic Wear for Festive & Wedding Occasions",
+    "category": "Kurti",
+    "description": "Elevate your ethnic style with this beautiful Magenta Embroidered Kurta Set. Featuring intricate embroidery, elegant detailing, and a rich festive look, this outfit is perfect for festivals, weddings, family functions, and special occasions. Pair it with your favorite accessories for a graceful and stylish appearance.",
+    "price": 760,
+    "mrp": 1999,
+    "compare": {
+      "flipkart": 1334,
+      "amazon": 987,
+      "meesho": 816
+    },
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "img": "images/p42-common-1.jpg",
+    "images": [
+      "images/p42-common-1.jpg",
+      "images/p42-common-2.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Pink",
+        "code": "#EB3B6A",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#EB3B6A",
+      "#F2809E"
+    ]
   }
 ]
