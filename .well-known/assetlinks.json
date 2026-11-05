@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.smartdeal.app",
+      "sha256_cert_fingerprints": [
+        "F6:68:46:D0:E8:C3:16:05:97:91:4F:BE:CD:70:24:70:9D:51:B1:4D:F8:1A:D0:37:32:06:BE:8A:B9:CD:99:A5"
+      ]
+    }
+  }
+]
