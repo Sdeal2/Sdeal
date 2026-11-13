@@ -920,5 +920,39 @@
       "#EB3B6A",
       "#F2809E"
     ]
+  },
+  {
+    "id": 43,
+    "name": "Premium Golden Om Decorative Multi-Tier Diya Stand",
+    "category": "Electric",
+    "description": "Bring divine elegance to your पूजा décor with this beautifully crafted golden multi-tier diya stand featuring an elegant Om symbol. Its premium golden finish and traditional design make it perfect for Diwali, daily पूजा, festivals, temples, and home decoration. A stunning combination of spirituality and traditional craftsmanship, ideal for gifting and festive décor",
+    "price": 135,
+    "mrp": 499,
+    "compare": {
+      "flipkart": 181,
+      "amazon": 499,
+      "meesho": 199
+    },
+    "sizes": [
+      "Free Size"
+    ],
+    "img": "images/p43-common-1.jpg",
+    "images": [
+      "images/p43-common-1.jpg",
+      "images/p43-common-2.jpg",
+      "images/p43-common-3.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Light",
+        "code": "#A6992B",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#A6992B",
+      "#C5BD75"
+    ]
   }
 ]
