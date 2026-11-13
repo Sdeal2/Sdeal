@@ -19,6 +19,7 @@ if ('serviceWorker' in navigator) {
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
     --bg:#FFFFFF;
@@ -752,21 +753,27 @@ if ('serviceWorker' in navigator) {
 
       <div class="form-group">
         <label>Payment method</label>
-        <div class="pay-opt on"><span class="pay-rd"></span><div>Cash on Delivery<small>Pay when your order arrives</small></div></div>
-        <div class="pay-opt off"><span class="pay-rd"></span><div>Online Payment<small>UPI, Cards, Net Banking</small></div><span class="pay-soon">Coming soon</span></div>
+        <div class="pay-opt on" id="payCOD" onclick="setPay('COD')"><span class="pay-rd"></span><div>Cash on Delivery<small>Pay when your order arrives</small></div></div>
+        <div class="pay-opt" id="payUPI" onclick="setPay('UPI')" style="cursor:pointer;"><span class="pay-rd"></span><div>Pay with UPI<small>PhonePe, GPay, Paytm or any UPI app</small></div></div>
+        <div id="upiBox" style="display:none; margin-top:10px;">
+          <a id="upiBtn" class="place-order-btn" style="display:block; text-align:center; text-decoration:none; margin-bottom:10px;">Pay ₹<span id="upiAmt"></span> with UPI app</a>
+          <div id="upiQr" style="display:flex; justify-content:center; margin:8px 0;"></div>
+          <input type="text" id="utrInput" placeholder="UTR / Transaction ID (optional)" inputmode="numeric" maxlength="12">
+          <div class="cod-note" style="margin-top:6px;">After paying, enter the 12-digit UTR (shown as "Transaction ID" or "UPI Ref No." in your UPI app). If you don't have it, leave it empty and place the order — we will contact you.</div>
+        </div>
       </div>
 
-      <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrderOnWhatsApp()">
-        Send Order on WhatsApp
+      <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()">
+        Place Order
       </button>
-      <div class="cod-note" style="margin-top:10px;">WhatsApp will open with your order details already filled in — just hit send</div>
+      <div class="cod-note" style="margin-top:10px;" id="placeNote">Cash on Delivery — no advance payment required</div>
     </div>
   </div>
 
   <div id="successView" style="display:none; padding:40px 24px; text-align:center;">
     <div style="font-size:44px; margin-bottom:14px;">✓</div>
     <h3 style="font-size:21px; margin-bottom:8px;">Order Placed — Thank You!</h3>
-    <p style="font-size:13.5px; color:var(--ink-soft); margin-bottom:22px;">Your order details have been sent on WhatsApp. Save your Order ID to track your delivery.</p>
+    <p style="font-size:13.5px; color:var(--ink-soft); margin-bottom:22px;">Your order has been placed. Save your Order ID to track your delivery.<span id="successNote"></span></p>
     <div style="background:#fff; border:1px solid var(--line); padding:16px; margin-bottom:22px;">
       <div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">ORDER ID</div>
       <div style="font-size:20px; font-weight:700; letter-spacing:0.03em;" id="successOrderId">—</div>
@@ -1033,6 +1040,7 @@ function payTotals(){
 }
 function renderCheckoutSummary(){
   const T = payTotals(), sub = T.sub, disc = T.disc, total = T.total;
+  if(typeof refreshUPI === 'function') refreshUPI();
   if(!resellOn && appliedCoupon && !disc){ appliedCoupon = null; setCouponMsg('This coupon no longer applies to your cart', 'no'); }
   document.getElementById('orderSummaryMini').innerHTML =
     cart.map(i => `<div class="sum-row">${i.img ? `<img class="sum-img" src="${i.img}" alt="">` : `<span class="sum-img sum-ph">${String(i.name||'?').charAt(0)}</span>`}<div class="sum-info"><span class="sum-name">${i.name}</span><span class="sum-meta">${i.size ? 'Size ' + i.size + ' · ' : ''}Qty ${i.qty}</span></div><span class="sum-price">₹${(resellOn ? resaleUnit(i) : i.price) * i.qty}</span></div>`).join('') +
@@ -1125,7 +1133,31 @@ function generateOrderId(){
 
 let lastOrderId = null;
 
-function placeOrderOnWhatsApp(){
+/* ---- UPI payment (no gateway): set your own UPI ID below ---- */
+const UPI_ID = "7074526516@pthdfc";
+const UPI_NAME = "Smart Deal";
+let payMode = 'COD';
+let pendingOrderId = null;
+
+function setPay(m){
+  payMode = m;
+  document.getElementById('payCOD').classList.toggle('on', m==='COD');
+  document.getElementById('payUPI').classList.toggle('on', m==='UPI');
+  document.getElementById('upiBox').style.display = (m==='UPI') ? 'block' : 'none';
+  document.getElementById('placeNote').textContent = (m==='UPI') ? 'Pay first, then tap Place Order' : 'Cash on Delivery — no advance payment required';
+  if(m==='UPI'){ if(!pendingOrderId) pendingOrderId = generateOrderId(); refreshUPI(); }
+}
+function refreshUPI(){
+  if(payMode!=='UPI' || !pendingOrderId) return;
+  const amt = payTotals().total;
+  const link = 'upi://pay?pa='+encodeURIComponent(UPI_ID)+'&pn='+encodeURIComponent(UPI_NAME)+'&am='+amt+'&cu=INR&tn='+pendingOrderId;
+  document.getElementById('upiAmt').textContent = amt;
+  document.getElementById('upiBtn').href = link;
+  const q = document.getElementById('upiQr'); q.innerHTML = '';
+  if(window.QRCode){ try{ new QRCode(q, {text: link, width: 170, height: 170}); }catch(e){} }
+}
+
+async function placeOrder(){
   const name=document.getElementById('custName').value.trim(),phone=document.getElementById('custPhone').value.trim(),address=document.getElementById('custAddress').value.trim(),state=document.getElementById('custState').value.trim(),city=document.getElementById('custCity').value.trim(),pincode=document.getElementById('custPincode').value.trim();
   if(!name||!phone||!address||!city||!state||!pincode){alert('Please fill in all details');return;}
   try{ localStorage.setItem(NAME_KEY, name.slice(0,40)); localStorage.setItem('smartDealCustomerPhone', String(phone).replace(/\D/g,'').slice(-10)); }catch(e){}
@@ -1136,24 +1168,32 @@ function placeOrderOnWhatsApp(){
     const bad=cart.find(i=>!(Number(resalePrice[rkey(i)])>=i.price));
     if(bad){alert('Please enter your selling price (at least ₹'+bad.price+') for: '+bad.name);return;}
   }
-  const btn=document.getElementById('placeOrderBtn');btn.textContent='Opening WhatsApp...';btn.disabled=true;
-  const sub=T.sub,disc=T.disc,total=T.total,orderId=generateOrderId();
-  const trackUrl=window.location.href.replace(/index\.html.*$/,'')+`track.html?id=${orderId}`;
-  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({id:i.id,name:i.name,size:i.size,color:i.color||'',qty:i.qty,price:i.price,img:i.img||'',...(resellOn?{resalePrice:Number(resalePrice[rkey(i)])}:{})})),total,...(resellOn?{resale:true,resellerId:reseller.id,resellerName:reseller.name||'',resellerPhone:reseller.phone||'',costTotal:T.cost,resellerProfit:T.profit}:{}),...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString()};
-  let message=`*New Order*\n\n*Order ID:* ${orderId}\n*Name:* ${name}\n*Mobile:* ${phone}\n*Address:* ${address}, ${city}, ${state} - ${pincode}\n\n*Products:*\n`;
-  cart.forEach(item=>message+=`- ${item.name} | Color: ${item.color || 'Default'} | Size: ${item.size} | Qty: ${item.qty} | ₹${(resellOn?Number(resalePrice[rkey(item)]):item.price)*item.qty}\n`);
-  message+=(disc?`\n*Coupon:* ${appliedCoupon.code} (- ₹${disc})`:'')+`\n*Total Amount: ₹${total}*\n*Payment: Cash on Delivery*\n*Track order:* ${trackUrl}`;
-  if(resellOn){message+=`\n\n*RESELLER:* ${reseller.id}${reseller.name?' ('+reseller.name+')':''}\n*Pay to Smart Deal:* ₹${T.cost}\n*Reseller profit:* ₹${T.profit}`;}
-  try{if(typeof db!=='undefined'&&db&&typeof db.collection==='function'){db.collection('orders').doc(orderId).set(orderData).catch(e=>console.error('Firebase save failed:',e));if(disc){db.collection('coupons').doc(appliedCoupon.code).update({usedCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});}}}catch(e){console.error('Firebase unavailable:',e);}
-  const num=String(typeof WHATSAPP_NUMBER!=='undefined'?WHATSAPP_NUMBER:'').replace(/\D/g,'');
-  if(!num){alert('WhatsApp number is not configured in firebase-config.js');btn.disabled=false;btn.textContent='Send Order on WhatsApp';return;}
-  const url=`https://wa.me/${num}?text=${encodeURIComponent(message)}`;
-  const w=window.open(url,'_blank'); if(!w){window.location.href=url;return;}
+  const utr=(document.getElementById('utrInput').value||'').replace(/\D/g,'');
+  if(payMode==='UPI' && utr && utr.length!==12){alert('UTR must be 12 digits. Leave it empty if you do not have it.');return;}
+  const btn=document.getElementById('placeOrderBtn');btn.textContent='Placing order...';btn.disabled=true;
+  const sub=T.sub,disc=T.disc,total=T.total,orderId=pendingOrderId||generateOrderId();
+  const isUPI = payMode==='UPI';
+  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({id:i.id,name:i.name,size:i.size,color:i.color||'',qty:i.qty,price:i.price,img:i.img||'',...(resellOn?{resalePrice:Number(resalePrice[rkey(i)])}:{})})),total,payment:isUPI?'UPI':'Cash on Delivery',...(isUPI?{utr:utr,paymentStatus:utr?'UTR given - verify':'UTR not given - contact customer'}:{}),...(resellOn?{resale:true,resellerId:reseller.id,resellerName:reseller.name||'',resellerPhone:reseller.phone||'',costTotal:T.cost,resellerProfit:T.profit}:{}),...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString()};
+  try{
+    if(typeof db==='undefined'||!db||typeof db.collection!=='function') throw new Error('Firebase unavailable');
+    await Promise.race([
+      db.collection('orders').doc(orderId).set(orderData),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),15000))
+    ]);
+  }catch(e){
+    console.error('Order save failed:',e);
+    alert('Order could not be placed. Please check your internet and try again.');
+    btn.disabled=false;btn.textContent='Place Order';return;
+  }
+  if(disc){ try{ db.collection('coupons').doc(appliedCoupon.code).update({usedCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{}); }catch(e){} }
   lastOrderId=orderId;
   const history=JSON.parse(localStorage.getItem('smartDealOrderHistory')||'[]');
   history.unshift({...orderData, items:orderData.items.map(x=>({...x, color:cart.find(c=>c.name===x.name&&c.size===x.size)?.color||'Default'}))});
   localStorage.setItem('smartDealOrderHistory',JSON.stringify(history));
-  document.getElementById('successOrderId').textContent=orderId;document.getElementById('checkoutView').style.display='none';document.getElementById('successView').style.display='block';btn.textContent='Send Order on WhatsApp';btn.disabled=false;
+  document.getElementById('successNote').textContent = (isUPI && !utr) ? ' We will contact you to confirm your payment.' : '';
+  document.getElementById('successOrderId').textContent=orderId;document.getElementById('checkoutView').style.display='none';document.getElementById('successView').style.display='block';
+  btn.textContent='Place Order';btn.disabled=false;
+  pendingOrderId=null; document.getElementById('utrInput').value=''; setPay('COD');
 }
 
 function goToTracking(){

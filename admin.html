@@ -163,6 +163,7 @@ function renderOrderRow(order){
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
+      <div class="order-row-meta">Payment: ${order.payment||'Cash on Delivery'}${order.payment==='UPI' ? ' · UTR: '+(order.utr||'not given')+' · '+(order.paymentStatus||'') : ''}</div>
       <div class="order-row-items">${itemsSummary}</div>
       <div class="status-btns">${btns}${cancelBtn}</div>
     </div>`;
