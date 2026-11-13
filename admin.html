@@ -162,7 +162,7 @@ function renderOrderRow(order){
         <span class="order-row-status">${order.status}</span>
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
-      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
+      <div class="order-row-meta" style="line-height:1.6;">Phone: ${order.phone}<br>Address: ${order.address}<br>City: ${order.city}<br>State: ${order.state || '—'}<br>Pincode: ${order.pincode}</div>
       <div class="order-row-meta">Payment: ${order.payment||'Cash on Delivery'}${order.payment==='UPI' ? ' · UTR: '+(order.utr||'not given')+' · '+(order.paymentStatus||'') : ''}</div>
       <div class="order-row-items">${itemsSummary}</div>
       <div class="status-btns">${btns}${cancelBtn}</div>
@@ -210,7 +210,7 @@ function renderReturnRow(order){
         <span class="order-row-status">${order.status}</span>
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
-      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city} - ${order.pincode}</div>
+      <div class="order-row-meta" style="line-height:1.6;">Phone: ${order.phone}<br>Address: ${order.address}<br>City: ${order.city}<br>State: ${order.state || '—'}<br>Pincode: ${order.pincode}</div>
       <div class="order-row-items">${itemsSummary}</div>
       <div class="return-btns">
         <button class="accept-btn" onclick="decideReturn('${order.orderId}','Return Approved')">Accept return</button>

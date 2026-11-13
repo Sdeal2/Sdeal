@@ -238,5 +238,16 @@ async function submitSheet(){
   btn.disabled = false;
 }
 </script>
+<script>
+/* Back button: go to the previous screen instead of leaving the site */
+(function(){
+  history.pushState({sdb:1},'',location.href);
+  window.addEventListener('popstate',function(){
+    var sh=document.getElementById('sheet');
+    if(sh && sh.classList.contains('open')){ closeSheet(); history.pushState({sdb:1},'',location.href); return; }
+    location.replace('index.html');
+  });
+})();
+</script>
 </body>
 </html>

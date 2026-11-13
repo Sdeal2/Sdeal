@@ -411,7 +411,7 @@ function renderOrderRow(order){
         <span class="order-row-status">${order.status}</span>
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
-      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
+      <div class="order-row-meta" style="line-height:1.6;">Phone: ${order.phone}<br>Address: ${order.address}<br>City: ${order.city}<br>State: ${order.state || '—'}<br>Pincode: ${order.pincode}${order.coupon ? '<br>Coupon: ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
       <div class="order-row-meta" style="color:#1f6f43;">Payment: ${escH(order.payment||'Cash on Delivery')}${order.payment==='UPI' ? ' · UTR: '+escH(order.utr||'not given')+' · '+escH(order.paymentStatus||'') : ''}</div>
       <div class="order-row-meta op" data-o="${order.orderId}">${profitLine(order)}</div>
       ${order.resale ? `<div class="order-row-meta" style="color:#6b4fa0;">Reseller: ${escH(order.resellerName||'')} (${escH(order.resellerId)}) · Customer pays ₹${order.total} · We get ₹${order.costTotal} · Reseller profit ₹${order.resellerProfit}${order.payoutPaid ? ' · Paid' : ''}</div>` : ''}
@@ -463,7 +463,7 @@ function renderReturnRow(order){
         <span class="order-row-status">${order.status}</span>
       </div>
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
-      <div class="order-row-meta">${order.phone} · ${order.address}, ${order.city}${order.state ? ', ' + order.state : ''} - ${order.pincode}${order.coupon ? ' · Coupon ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
+      <div class="order-row-meta" style="line-height:1.6;">Phone: ${order.phone}<br>Address: ${order.address}<br>City: ${order.city}<br>State: ${order.state || '—'}<br>Pincode: ${order.pincode}${order.coupon ? '<br>Coupon: ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
       ${order.resale ? `<div class="order-row-meta" style="color:#6b4fa0;">Reseller: ${escH(order.resellerName||'')} (${escH(order.resellerId)}) · Customer pays ₹${order.total} · We get ₹${order.costTotal} · Reseller profit ₹${order.resellerProfit}${order.payoutPaid ? ' · Paid' : ''}</div>` : ''}
       ${itemsHtml(order)}
       ${(order.returnReason || order.returnNote) ? `<div class="order-row-meta" style="color:#b8431a;">Return reason: ${order.returnReason || '—'}${order.returnNote ? ' · "' + order.returnNote + '"' : ''}</div>` : ''}
