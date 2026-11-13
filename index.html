@@ -758,12 +758,12 @@ if ('serviceWorker' in navigator) {
         <div id="upiBox" style="display:none; margin-top:10px;">
           <a id="upiBtn" class="place-order-btn" style="display:block; text-align:center; text-decoration:none; margin-bottom:10px;">Pay with UPI app</a>
           <div style="font-weight:600; margin-bottom:4px;">Amount: ₹<span id="upiAmt"></span></div>
-          <div class="cod-note" style="text-align:left; margin-bottom:6px;">Tap the button above to pay in your UPI app. If it does not open or the payment fails, scan this QR from another phone, or save it and use "Scan &amp; Pay" in your UPI app and pick the saved image.</div>
+          <div class="cod-note" id="upiHelp" style="text-align:left; margin-bottom:6px;"></div>
           <div id="upiQr" style="display:flex; justify-content:center; margin:8px 0;"></div>
           <a id="upiSave" download="smart-deal-upi-qr.png" style="display:block; text-align:center; text-decoration:none; padding:11px; border:1px solid #bbb; border-radius:10px; color:inherit; font-size:14px; margin-bottom:8px;">Save QR to phone</a>
           <button type="button" id="upiCopy" onclick="copyUPI()" style="display:block; width:100%; padding:11px; border:1px solid #bbb; border-radius:10px; background:#fff; color:inherit; font-size:14px; margin-bottom:10px; cursor:pointer;">Copy UPI ID</button>
-          <input type="text" id="utrInput" placeholder="UTR / Transaction ID (optional)" inputmode="numeric" maxlength="12">
-          <div class="cod-note" style="margin-top:6px;">After paying, enter the 12-digit UTR (shown as "Transaction ID" or "UPI Ref No." in your UPI app). If you don't have it, leave it empty and place the order — we will contact you.</div>
+          <input type="text" id="utrInput" placeholder="UTR / Transaction ID (12 digits, required)" inputmode="numeric" maxlength="12">
+          <div class="cod-note" style="margin-top:6px;">After paying, enter the 12-digit UTR (shown as "Transaction ID" or "UPI Ref No." in your UPI app). Your order is placed only after you enter it. If you do not want to pay online, choose Cash on Delivery.</div>
         </div>
       </div>
 
@@ -1141,6 +1141,7 @@ let lastOrderId = null;
 const UPI_ID = "paytmqr281005050101kxjt6m1qmq1y@paytm";
 const UPI_PAYTMQR = "281005050101KXJT6M1QMQ1Y";   // from your Paytm Business QR
 const UPI_NAME = "Smart Deal";
+const UPI_ONE_TAP = false;   // true = show the "Pay with UPI app" button (UPI apps currently block it for this merchant ID)
 const UPI_MC = "";   // merchant category code from your Paytm Business QR (the "mc=" value). Leave empty if unknown.
 let payMode = 'COD';
 let pendingOrderId = null;
@@ -1159,6 +1160,10 @@ function refreshUPI(){
   const link = 'upi://pay?pa='+encodeURIComponent(UPI_ID)+'&pn='+encodeURIComponent(UPI_NAME)+'&am='+amt+'&cu=INR&tn='+pendingOrderId+(UPI_PAYTMQR?'&paytmqr='+UPI_PAYTMQR:'')+(UPI_MC?'&mc='+encodeURIComponent(UPI_MC)+'&tr='+pendingOrderId:'');
   document.getElementById('upiAmt').textContent = amt;
   document.getElementById('upiBtn').href = link;
+  document.getElementById('upiBtn').style.display = UPI_ONE_TAP ? 'block' : 'none';
+  document.getElementById('upiHelp').textContent = UPI_ONE_TAP
+    ? 'Tap the button above to pay in your UPI app. If it fails, scan this QR from another phone, or save it and use "Scan & Pay" in your UPI app and pick the saved image.'
+    : '1. Save the QR below (or scan it from another phone).  2. Open your UPI app, tap "Scan & Pay" and pick the saved QR image.  3. Pay the exact amount, then enter the UTR below.';
   document.getElementById('upiBtn').textContent = 'Pay ₹'+amt+' with UPI app';
   const q = document.getElementById('upiQr'); q.innerHTML = '';
   if(window.QRCode){ try{ new QRCode(q, {text: link, width: 170, height: 170}); }catch(e){} }
@@ -1187,7 +1192,7 @@ async function placeOrder(){
     if(bad){alert('Please enter your selling price (at least ₹'+bad.price+') for: '+bad.name);return;}
   }
   const utr=(document.getElementById('utrInput').value||'').replace(/\D/g,'');
-  if(payMode==='UPI' && utr && utr.length!==12){alert('UTR must be 12 digits. Leave it empty if you do not have it.');return;}
+  if(payMode==='UPI' && utr.length!==12){alert('Please pay first, then enter the 12-digit UTR / Transaction ID. Or choose Cash on Delivery.');return;}
   const btn=document.getElementById('placeOrderBtn');btn.textContent='Placing order...';btn.disabled=true;
   const sub=T.sub,disc=T.disc,total=T.total,orderId=pendingOrderId||generateOrderId();
   const isUPI = payMode==='UPI';
