@@ -386,6 +386,9 @@ if ('serviceWorker' in navigator) {
   }
   .place-order-btn:hover{background:#1FBE5B;}
 
+  .policy-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+  .policy-links a{display:inline-block;padding:10px 18px;border:1.5px solid var(--sd-brand,#e8561f);border-radius:999px;color:var(--sd-brand,#e8561f);background:#fff7f3;font-size:14px;font-weight:600;text-decoration:none;}
+  .policy-links a:active,.policy-links a:focus-visible{background:var(--sd-brand,#e8561f);color:#fff;outline:none;}
   footer{
     border-top:1px solid var(--line);
     padding:30px 20px; text-align:center;
@@ -644,8 +647,8 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <footer>
-  Cash on Delivery only — no advance payment required
-  <div style="margin-top:8px;font-size:12px;"><a href="privacy-policy.html" style="text-decoration:underline;">Privacy Policy</a> &nbsp;·&nbsp; <a href="terms.html" style="text-decoration:underline;">Terms &amp; Conditions</a></div>
+  Pay by UPI or Cash on Delivery
+  <div class="policy-links"><a href="privacy-policy.html">Privacy Policy</a><a href="terms.html">Terms &amp; Conditions</a></div>
 </footer>
 
 <!-- Product Modal -->
