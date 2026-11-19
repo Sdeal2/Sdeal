@@ -171,7 +171,7 @@ svg{display:block}
 .rev-lightbox img{max-width:100%; max-height:100%; border-radius:8px}
 </style>
 </head><body><div class="top"><a href="index.html">← Back to Shop</a></div><main class="wrap"><div id="app">Loading product...</div><div id="reviewsRoot"></div></main><script>
-let products=[],product=null,images=[],idx=0,selectedColor=null,selectedSize=null,qty=1;
+let products=[],product=null,images=[],idx=0,selectedColor=null,selectedSize=null,selectedVariant=null,qty=1;
 let pinVal='',pinMsg='',pinCls='',delOpen=true,titleOpen=false,descOpen=false;
 const params=new URLSearchParams(location.search);const id=Number(params.get('id'));
 function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
@@ -183,6 +183,11 @@ function formatDescription(text){
   return out.replace(/^\n+/,'').trim();
 }
 function getColors(){return Array.isArray(product.colors)?product.colors:[]}
+function getVariants(){return Array.isArray(product.variants)?product.variants.filter(v=>v&&v.name):[]}
+function cur(){return selectedVariant?{price:Number(selectedVariant.price),mrp:Number(selectedVariant.mrp)||0}:{price:Number(product.price),mrp:Number(product.mrp)||0}}
+function itemName(){return selectedVariant?product.name+' ('+selectedVariant.name+')':product.name}
+function chooseVariant(i){selectedVariant=getVariants()[i];render()}
+function swatchBg(c){const a=Array.isArray(c.codes)?c.codes.filter(Boolean):[];if(a.length>1){const n=a.length;return 'conic-gradient('+a.map((x,i)=>x+' '+(i*100/n)+'% '+((i+1)*100/n)+'%').join(',')+')'}return c.code||'#ddd'}
 function getImages(){if(selectedColor&&selectedColor.images?.length)return selectedColor.images;if(product.images?.length)return product.images;if(product.img)return [product.img];return []}
 function rupee(n){return '₹'+Number(n).toLocaleString('en-IN')}
 function pct(p,m){return m>p?Math.round((m-p)/m*100):0}
@@ -245,7 +250,7 @@ function compareHtml(){
 
 function render(){
   images=getImages();if(idx>=images.length)idx=0;
-  const off=pct(product.price,product.mrp);
+  const off=pct(cur().price,cur().mrp);
   const sim=similarList();
   document.getElementById('app').innerHTML=`
   <section class="gallery">
@@ -265,11 +270,12 @@ function render(){
 
     <div class="price-row">
       ${off?`<div class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M5 13l7 7 7-7"/></svg><span>${off}%</span></div>`:''}
-      ${product.mrp&&product.mrp>product.price?`<span class="mrp">₹${product.mrp}</span>`:''}
-      <span class="price">₹${product.price}</span>
+      ${cur().mrp&&cur().mrp>cur().price?`<span class="mrp">₹${cur().mrp}</span>`:''}
+      <span class="price">₹${cur().price}</span>
     </div>
 
-    <h4>Color</h4><div class="row">${getColors().length?getColors().map((c,i)=>`<button class="color ${selectedColor?.name===c.name?'active':''}" title="${esc(c.name)}" style="background:${esc(c.code||'#ddd')}" onclick="chooseColor(${i})"></button>`).join(''):'<span class="msg">Default color</span>'}</div>${selectedColor?`<div class="msg">Selected: ${esc(selectedColor.name)}</div>`:''}
+    <h4>Color</h4><div class="row">${getColors().length?getColors().map((c,i)=>`<button class="color ${selectedColor?.name===c.name?'active':''}" title="${esc(c.name)}" style="background:${esc(swatchBg(c))}" onclick="chooseColor(${i})"></button>`).join(''):'<span class="msg">Default color</span>'}</div>${selectedColor?`<div class="msg">Selected: ${esc(selectedColor.name)}</div>`:''}
+    ${getVariants().length?`<h4>Variant</h4><div class="row">${getVariants().map((v,i)=>`<button class="pill ${selectedVariant&&selectedVariant.name===v.name?'active':''}" onclick="chooseVariant(${i})">${esc(v.name)} · ₹${esc(v.price)}</button>`).join('')}</div>`:''}
     <h4>Size</h4><div class="row">${(product.sizes||[]).map((s,i)=>`<button class="pill ${selectedSize===s?'active':''}" onclick="selectedSize='${esc(s)}';render()">${esc(s)}</button>`).join('')}</div>
     <h4>Quantity</h4><div class="row"><button class="pill" onclick="qty=Math.max(1,qty-1);render()">−</button><span style="padding:10px">${qty}</span><button class="pill" onclick="qty++;render()">+</button></div>
     ${compareHtml()}
@@ -313,10 +319,10 @@ function render(){
 }
 function onSlide(el){const i=Math.round(el.scrollLeft/(el.clientWidth||1));if(i!==idx&&i>=0&&i<images.length){idx=i;const b=document.getElementById('bars');if(b)[...b.children].forEach((x,k)=>x.classList.toggle('on',k===i))}}
 function chooseColor(i){selectedColor=getColors()[i];idx=0;render()}function move(n){if(!images.length)return;idx=(idx+n+images.length)%images.length;render()}
-function addCart(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');const color=selectedColor?.name||'Default';let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color);if(e)e.qty+=qty;else cart.push({id:product.id,name:product.name,price:product.price,size:selectedSize||'',color,qty,img:(images[0]||product.img||'')});localStorage.setItem('smartDealCart',JSON.stringify(cart));alert('Added to cart');}
-function buyNow(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}const color=selectedColor?.name||'Default';let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color);if(e)e.qty+=qty;else cart.push({id:product.id,name:product.name,price:product.price,size:selectedSize||'',color,qty,img:(images[0]||product.img||''),swatch:product.swatch});localStorage.setItem('smartDealCart',JSON.stringify(cart));location.href='index.html?checkout=1'}
+function addCart(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');const color=selectedColor?.name||'Default';let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color&&(x.variant||'')===(selectedVariant?selectedVariant.name:''));if(e)e.qty+=qty;else cart.push({id:product.id,name:itemName(),variant:selectedVariant?selectedVariant.name:'',mrp:cur().mrp,price:cur().price,size:selectedSize||'',color,qty,img:(images[0]||product.img||'')});localStorage.setItem('smartDealCart',JSON.stringify(cart));alert('Added to cart');}
+function buyNow(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}const color=selectedColor?.name||'Default';let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color&&(x.variant||'')===(selectedVariant?selectedVariant.name:''));if(e)e.qty+=qty;else cart.push({id:product.id,name:itemName(),variant:selectedVariant?selectedVariant.name:'',mrp:cur().mrp,price:cur().price,size:selectedSize||'',color,qty,img:(images[0]||product.img||''),swatch:product.swatch});localStorage.setItem('smartDealCart',JSON.stringify(cart));location.href='index.html?checkout=1'}
 async function shareProduct(){const url=location.href;if(navigator.share){try{await navigator.share({title:product.name,text:'Check this product on Smart Deal',url})}catch(e){}}else{await navigator.clipboard?.writeText(url);alert('Product link copied');}}
-(async()=>{try{products=await (await fetch('products.json?ts='+Date.now())).json();product=products.find(p=>p.id===id);if(!product){document.getElementById('app').innerHTML='<h2>Product not found</h2>';return}selectedColor=getColors()[0]||null;selectedSize=(product.sizes||[])[0]||null;render();initReviews()}catch(e){document.getElementById('app').innerHTML='<h2>Could not load products.json</h2>'}})();
+(async()=>{try{products=await (await fetch('products.json?ts='+Date.now())).json();product=products.find(p=>p.id===id);if(!product){document.getElementById('app').innerHTML='<h2>Product not found</h2>';return}selectedColor=getColors()[0]||null;selectedVariant=getVariants()[0]||null;selectedSize=(product.sizes||[])[0]||null;render();initReviews()}catch(e){document.getElementById('app').innerHTML='<h2>Could not load products.json</h2>'}})();
 
 /* ---------- Reviews (no login needed) ---------- */
 let reviews=[], revRating=0, revPhotoFile=null, revBusy=false;

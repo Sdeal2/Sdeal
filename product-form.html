@@ -34,6 +34,15 @@
   .chip[aria-pressed=true]{background:var(--indigo);border-color:var(--indigo);color:#fff}
   .colorrow{display:flex;gap:10px;align-items:center;margin-bottom:8px}
   .colorrow input[type=color]{width:52px;height:46px;padding:2px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);flex:none}
+  .mixlbl{display:flex;gap:8px;align-items:center;font-size:14px;margin:4px 0 8px;cursor:pointer}
+  .mixlbl input{width:18px;height:18px;flex:none}
+  .mixpicks{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+  .mixpicks[hidden]{display:none}
+  .mixpicks input[type=color]{width:52px;height:46px;padding:2px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);flex:none}
+  .mixpicks button{border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;height:46px;padding:0 12px;font:inherit;font-size:14px;cursor:pointer}
+  .vrow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;margin-bottom:8px;align-items:center}
+  .vrow input{width:100%;min-width:0}
+  .vrow .rm{border:0;background:transparent;color:var(--bad);font:inherit;font-size:14px;cursor:pointer;padding:8px}
   .crow{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
   .crow .rm{flex:none;border:0;background:transparent;color:var(--bad);font:inherit;font-size:14px;cursor:pointer;padding:8px}
   .sub{font-size:13px;color:#6b6a63;margin:2px 0 4px}
@@ -111,6 +120,13 @@
     <label>Sizes <span class="hint">(tap to select)</span></label>
     <div class="chips" id="sizeChips"></div>
     <input type="text" id="sizeCustom" placeholder="Other sizes, separated by commas (e.g. 3XL, 42)" style="margin-top:10px">
+  </div>
+
+  <div class="field">
+    <label>Variants with different prices <span class="hint">(optional, e.g. 10W ₹250, 40W ₹320)</span></label>
+    <p class="sub">If you add variants, the lowest price is used as the product price and the MRP and price boxes below are ignored.</p>
+    <div id="variantList"></div>
+    <button type="button" class="btn ghost" id="addVariant" style="width:100%;margin-top:4px">+ Add variant</button>
   </div>
 
   <div class="field">
@@ -224,16 +240,60 @@ function addColorRow(){
       <input type="text" class="cname" placeholder="Color name, e.g. Navy Blue" autocomplete="off">
       <button type="button" class="rm">Remove</button>
     </div>
+    <label class="mixlbl"><input type="checkbox" class="mixon"> This is a mix of several colors in one product</label>
+    <div class="mixpicks" hidden></div>
     <div class="sub">Photos of this color</div>
     <input type="file" class="cfiles" accept="image/*" multiple>
     <div class="pstat sub"></div>
     <input type="text" class="cimgs" placeholder="Or file names already uploaded: navy1.jpg" autocomplete="off">`;
   d.querySelector(".rm").onclick = () => { d.remove(); update(); };
+  d.querySelector(".mixon").addEventListener("change", () => setMix(d, d.querySelector(".mixon").checked));
   const fi = d.querySelector(".cfiles");
   fi.addEventListener("change", () => cachePhotos(fi, d.querySelector(".pstat")));
   $("colorList").appendChild(d);
   update();
   return d;
+}
+const MIX_DEFAULT = ["#2E64D6", "#E6508C", "#F2C230"];
+function setMix(row, on, codes){
+  const box = row.querySelector(".mixpicks"), single = row.querySelector(".cpick"), nm = row.querySelector(".cname");
+  row.querySelector(".mixon").checked = on;
+  box.hidden = !on;
+  single.style.display = on ? "none" : "";
+  nm.placeholder = on ? "Name, e.g. Multicolor or Blue + Pink + Yellow" : "Color name, e.g. Navy Blue";
+  if(!on){ box.innerHTML = ""; update(); return; }
+  box.innerHTML = "";
+  (codes && codes.length > 1 ? codes : MIX_DEFAULT).slice(0, 4).forEach(c => addMixPick(box, c));
+  const add = document.createElement("button"); add.type = "button"; add.textContent = "+ Add";
+  const rm = document.createElement("button"); rm.type = "button"; rm.textContent = "− Remove";
+  add.onclick = () => { if(box.querySelectorAll("input").length < 4){ addMixPick(box, "#888888", add); update(); } };
+  rm.onclick = () => { const p = box.querySelectorAll("input"); if(p.length > 2){ p[p.length-1].remove(); update(); } };
+  box.appendChild(add); box.appendChild(rm);
+  update();
+}
+function addMixPick(box, val, before){
+  const i = document.createElement("input"); i.type = "color"; i.value = val; i.setAttribute("aria-label", "Mix color");
+  before ? box.insertBefore(i, before) : box.appendChild(i);
+}
+function addVariantRow(v){
+  const d = document.createElement("div");
+  d.className = "vrow";
+  d.innerHTML = `<input type="text" class="vname" placeholder="Name, e.g. 10W" autocomplete="off">
+    <input type="number" class="vprice" inputmode="numeric" min="0" placeholder="Price">
+    <input type="number" class="vmrp" inputmode="numeric" min="0" placeholder="MRP">
+    <button type="button" class="rm" aria-label="Remove variant">Remove</button>`;
+  if(v){ d.querySelector(".vname").value = v.name || ""; d.querySelector(".vprice").value = v.price || ""; d.querySelector(".vmrp").value = v.mrp || ""; }
+  d.querySelector(".rm").onclick = () => { d.remove(); update(); };
+  $("variantList").appendChild(d);
+  update();
+  return d;
+}
+function getVariantsList(){
+  return [...document.querySelectorAll(".vrow")].map(r => ({
+    name: r.querySelector(".vname").value.trim(),
+    price: +r.querySelector(".vprice").value,
+    mrp: +r.querySelector(".vmrp").value
+  })).filter(v => v.name && v.price);
 }
 const stripImg = path => String(path || "").replace(/^images\//, "");
 
@@ -294,7 +354,10 @@ function plan(){
     const tag = (slug(name) || "color") + (i ? "-"+(i+1) : "");
     const images = pathsFor(r.querySelector(".cfiles")._cache || [], tag)
       .concat(fixImgs(r.querySelector(".cimgs").value));
-    return {name, code: r.querySelector(".cpick").value.toUpperCase(), images};
+    const mixOn = r.querySelector(".mixon").checked;
+    const codes = mixOn ? [...r.querySelectorAll(".mixpicks input")].map(x => x.value.toUpperCase()) : [];
+    const code = codes.length > 1 ? codes[0] : r.querySelector(".cpick").value.toUpperCase();
+    return codes.length > 1 ? {name, code, codes, images} : {name, code, images};
   }).filter(Boolean);
 
   const common = pathsFor($("commonFiles")._cache || [], "common").concat(fixImgs($("imgs").value));
@@ -302,13 +365,16 @@ function plan(){
   const main = (colors[0] && colors[0].images[0]) || common[0] || (firstWithPhotos ? firstWithPhotos.images[0] : "");
   const base = (colors[0] && colors[0].code) || "#2E3B5B";
 
+  const variants = getVariantsList();
+  const lowestV = variants.length ? variants.reduce((a, b) => b.price < a.price ? b : a) : null;
   const obj = {
     id,
     name: $("name").value.trim(),
     category: $("category").value.trim(),
     description: $("desc").value.trim(),
-    price: +$("price").value,
-    mrp: +$("mrp").value,
+    price: variants.length ? lowestV.price : +$("price").value,
+    mrp: variants.length ? (lowestV.mrp || lowestV.price) : +$("mrp").value,
+    ...(variants.length ? {variants} : {}),
     ...(getCompare() ? {compare: getCompare()} : {}),
     sizes: getSizes(),
     img: main,
@@ -322,7 +388,7 @@ function plan(){
 
 function toText(obj){
   const colorLines = obj.colors.map(c =>
-    `    {"name": ${JSON.stringify(c.name)}, "code": ${JSON.stringify(c.code)}, "images": ${JSON.stringify(c.images)}}`).join(",\n");
+    `    {"name": ${JSON.stringify(c.name)}, "code": ${JSON.stringify(c.code)}, ${c.codes ? `"codes": ${JSON.stringify(c.codes)}, ` : ""}"images": ${JSON.stringify(c.images)}}`).join(",\n");
   return "{\n" + [
     `  "id": ${obj.id},`,
     `  "name": ${JSON.stringify(obj.name)},`,
@@ -330,6 +396,7 @@ function toText(obj){
     `  "description": ${JSON.stringify(obj.description)},`,
     `  "price": ${obj.price},`,
     `  "mrp": ${obj.mrp},`,
+    ...(obj.variants ? [`  "variants": ${JSON.stringify(obj.variants)},`] : []),
     ...(obj.compare ? [`  "compare": ${JSON.stringify(obj.compare)},`] : []),
     `  "sizes": ${JSON.stringify(obj.sizes)},`,
     `  "img": ${JSON.stringify(obj.img)},`,
@@ -350,6 +417,8 @@ function validate(){
   if(!o.mrp) e.push("Enter the MRP.");
   if(!o.price) e.push("Enter the selling price.");
   if(o.mrp && o.price && o.price > o.mrp) e.push("Selling price is higher than MRP. Please check.");
+  (o.variants || []).forEach(v => { if(v.mrp && v.price > v.mrp) e.push("Variant " + v.name + ": price is higher than MRP."); });
+  if([...document.querySelectorAll(".vrow")].some(r => (r.querySelector(".vname").value.trim() && !+r.querySelector(".vprice").value) || (!r.querySelector(".vname").value.trim() && +r.querySelector(".vprice").value))) e.push("Each variant needs both a name and a price.");
   if(!o.img) e.push("Add at least one photo.");
   return e;
 }
@@ -370,6 +439,8 @@ function update(){
 $("colorList").addEventListener("input", update);
 $("colorList").addEventListener("change", update);
 $("addColor").onclick = addColorRow;
+$("addVariant").onclick = () => addVariantRow();
+$("variantList").addEventListener("input", update);
 
 /* ---------- GitHub ---------- */
 const getToken = () => localStorage.getItem("sd_token") || "";
@@ -483,9 +554,12 @@ async function loadForEdit(id){
       const row = addColorRow();
       row.querySelector(".cname").value = c.name || "";
       row.querySelector(".cpick").value = c.code || "#2E3B5B";
+      if(Array.isArray(c.codes) && c.codes.length > 1) setMix(row, true, c.codes);
       row.querySelector(".cimgs").value = (c.images || []).map(stripImg).join(", ");
     });
     $("imgs").value = (p.images || []).map(stripImg).join(", ");
+    $("variantList").innerHTML = "";
+    (Array.isArray(p.variants) ? p.variants : []).forEach(v => addVariantRow(v));
 
     $("status").className = "status";
     update();
@@ -577,6 +651,7 @@ function resetForm(nextId, keepStatus){
   $("commonFiles").value = ""; $("commonFiles")._cache = []; $("commonStat").textContent = "";
   $("id").value = nextId || ""; $("tag").value = "";
   $("colorList").innerHTML = ""; addColorRow();
+  $("variantList").innerHTML = "";
   selected.clear();
   document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false"));
   if(!keepStatus) $("status").className = "status";

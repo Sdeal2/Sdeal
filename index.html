@@ -948,7 +948,7 @@ function renderCart(){
     bar.style.display = 'none'; price.innerHTML = ''; return;
   }
   bar.style.display = 'block';
-  const mrpOf = i => { const p = (typeof PRODUCTS !== 'undefined') ? PRODUCTS.find(x => x.id === i.id) : null; const m = Number(p && p.mrp) || 0; return m > i.price ? m : i.price; };
+  const mrpOf = i => { const p = (typeof PRODUCTS !== 'undefined') ? PRODUCTS.find(x => x.id === i.id) : null; const m = Number(i.mrp) || Number(p && p.mrp) || 0; return m > i.price ? m : i.price; };
   container.innerHTML = cart.map((item, idx) => {
     const mrp = mrpOf(item), off = mrp > item.price ? Math.round((mrp - item.price) * 100 / mrp) : 0;
     return `<div class="ci"><div class="ci-row">
@@ -1034,7 +1034,7 @@ function couponDiscount(sub){
   return Math.max(0, Math.min(d, sub));
 }
 let resellOn = false, reseller = null, resalePrice = {};
-const rkey = i => `${i.id}|${i.size||''}|${i.color||''}`;
+const rkey = i => `${i.id}|${i.size||''}|${i.color||''}|${i.variant||''}`;
 function resaleUnit(i){ const p = Number(resalePrice[rkey(i)]); return p >= i.price ? p : i.price; }
 function payTotals(){
   const cost = cartSubtotal();
