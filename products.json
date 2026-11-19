@@ -591,14 +591,20 @@
     "colors": [
       {
         "name": "Multiple colour",
-        "code": "#FFFFFF",
+        "code": "#2E64D6",
+        "codes": [
+          "#2E64D6",
+          "#E6508C",
+          "#F2C230",
+          "#000000"
+        ],
         "images": []
       }
     ],
     "tag": "Sale",
     "swatch": [
-      "#FFFFFF",
-      "#FFFFFF"
+      "#2E64D6",
+      "#779AE4"
     ]
   },
   {
