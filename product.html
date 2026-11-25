@@ -61,7 +61,7 @@ svg{display:block}
 .round-btn svg{width:20px;height:20px;transition:transform .2s}
 .round-btn.dark{background:var(--ink);color:#fff;border-radius:18px;width:60px}
 .collapsed .round-btn svg{transform:rotate(180deg)}
-.delivery-card{margin-top:12px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:6px 14px}
+.delivery-card{margin-top:12px;background:#fff;border:0;border-radius:0;padding:6px 14px}
 .collapsed .delivery-card{display:none}
 .d-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #eee}
 .d-row:last-child{border-bottom:0}
@@ -86,7 +86,7 @@ svg{display:block}
 .sim-list{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding:14px 16px 8px}
 .sim-list::-webkit-scrollbar{display:none}
 .sim{flex:none;width:44%;max-width:200px;scroll-snap-align:start;cursor:pointer;text-decoration:none;color:inherit}
-.sim-img{aspect-ratio:1/1.1;border-radius:14px;background:#efefef;overflow:hidden}
+.sim-img{aspect-ratio:1/1.1;border-radius:0;background:#efefef;overflow:hidden}
 .sim-img img{width:100%;height:100%;object-fit:cover}
 .sim-name{margin-top:8px;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sim-off{margin-top:3px;font-size:13px;font-weight:700;color:var(--green)}
@@ -146,15 +146,15 @@ svg{display:block}
 .rev-bar{display:grid; grid-template-columns:22px 1fr 32px; gap:6px; align-items:center}
 .rev-bar .t{height:7px; background:#eee; border-radius:4px; overflow:hidden}
 .rev-bar .t i{display:block; height:100%; background:#E2A33D}
-.rev-list{margin-bottom:8px}
-.rev-item{padding:14px 0; border-top:1px solid #eee}
-.rev-item:first-child{border-top:0}
+.rev-list{margin-bottom:8px; display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:8px; -webkit-overflow-scrolling:touch}
+.rev-item{flex:0 0 82%; max-width:320px; scroll-snap-align:start; padding:14px; border:1px solid #eee; border-radius:12px; background:#fff}
 .rev-item-top{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
 .rev-name{font-weight:700; font-size:13.5px}
 .rev-date{font-size:11.5px; color:#999; white-space:nowrap}
 .rev-stars-sm{color:#E2A33D; font-size:13px; margin:3px 0 6px}
 .rev-text{color:#333; line-height:1.55; font-size:13.5px; margin-bottom:8px; white-space:pre-wrap}
-.rev-photos{display:flex; gap:8px; flex-wrap:wrap}
+.rev-photos{display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto}
+.rev-photos .rev-photo{flex:none}
 .rev-photo{width:76px; height:76px; object-fit:cover; border-radius:8px; border:1px solid #ddd; cursor:pointer}
 .rev-empty{color:#888; font-size:13.5px; padding:6px 0 10px}
 .rev-form{margin-top:18px; padding:16px; background:#f6f6f6; border-radius:10px}
