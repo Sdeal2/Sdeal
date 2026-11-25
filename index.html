@@ -572,8 +572,52 @@ if ('serviceWorker' in navigator) {
   .rs-sum{ margin-top:10px; padding:10px 12px; background:#f4f3ef; border-radius:10px; font-size:13px; line-height:1.6; }
   .rs-sum b{ font-weight:700; } .rs-sum .g{ color:#1b8a3a; font-weight:700; }
 </style>
+<style id="sdSplashCss">
+#sdSplash{position:fixed;inset:0;z-index:100000;background:#fff;transition:opacity .45s;overflow:hidden}
+#sdSplash.out{opacity:0;pointer-events:none}
+#sdSplash .l{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s}
+#sdSplash .a{background:#e8561f;z-index:3}
+#sdSplash .a b{color:#fff;font:700 22px system-ui,-apple-system,sans-serif;animation:sdIn .5s ease both}
+#sdSplash .b{z-index:2;opacity:0;color:#7b7680;text-align:center;padding:0 28px;font:13px system-ui,sans-serif}
+#sdIco{font-size:42px;height:58px;line-height:58px;opacity:0}
+#sdSplash .c{z-index:1;opacity:0;justify-content:flex-start;align-items:stretch;padding:14px 16px;gap:12px;background:#fff}
+#sdSplash[data-p="2"] .a,#sdSplash[data-p="3"] .a,#sdSplash[data-p="4"] .a{opacity:0}
+#sdSplash[data-p="2"] .b{opacity:1}
+#sdSplash[data-p="3"] .c,#sdSplash[data-p="4"] .c{opacity:1;z-index:4}
+.sdsk{background:linear-gradient(90deg,#ece8e1 25%,#f7f4ef 50%,#ece8e1 75%);background-size:200% 100%;border-radius:10px;animation:sdSh 1.1s linear infinite}
+.sdlogo{font:800 24px system-ui,-apple-system,sans-serif;color:#e8561f}.sdlogo i{font-style:normal;color:#201c18}
+.sdg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@keyframes sdIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+@keyframes sdPop{0%{opacity:0;transform:scale(.55) translateY(8px)}30%{opacity:1;transform:none}80%{opacity:1;transform:none}100%{opacity:0;transform:scale(.9)}}
+@keyframes sdSh{to{background-position:-200% 0}}
+.sdpop{animation:sdPop .7s ease both}
+@media (prefers-reduced-motion:reduce){.sdsk,#sdSplash .a b,.sdpop{animation:none!important}#sdIco{opacity:1}}
+</style>
 </head>
 <body>
+<div id="sdSplash" data-p="1" aria-hidden="true">
+  <div class="l a"><b>Smart Deal</b></div>
+  <div class="l b"><div id="sdIco">👕</div><div>Shop fashion, shoes, electronics and more</div></div>
+  <div class="l c">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div class="sdlogo">Smart <i>Deal</i></div><div class="sdsk" style="width:84px;height:30px"></div></div>
+    <div class="sdsk" style="height:46px"></div>
+    <div class="sdsk" style="height:44vw;max-height:200px"></div>
+    <div style="display:flex;gap:10px"><div class="sdsk" style="flex:1;height:52px"></div><div class="sdsk" style="flex:1;height:52px"></div><div class="sdsk" style="flex:1;height:52px"></div><div class="sdsk" style="flex:1;height:52px"></div></div>
+    <div class="sdg"><div><div class="sdsk" style="height:34vw;max-height:170px"></div><div class="sdsk" style="height:12px;margin-top:8px"></div><div class="sdsk" style="height:12px;width:60%;margin-top:6px"></div></div><div><div class="sdsk" style="height:34vw;max-height:170px"></div><div class="sdsk" style="height:12px;margin-top:8px"></div><div class="sdsk" style="height:12px;width:60%;margin-top:6px"></div></div></div>
+  </div>
+</div>
+<script>
+(function(){
+  var el=document.getElementById('sdSplash');if(!el)return;
+  try{if(sessionStorage.getItem('sdSplashDone')){el.remove();return}sessionStorage.setItem('sdSplashDone','1')}catch(e){}
+  var ico=document.getElementById('sdIco'),icons=['👕','👗','👟'],i=0,iv,root=document.documentElement;
+  root.style.overflow='hidden';
+  function show(n){ico.textContent=icons[n%icons.length];ico.classList.remove('sdpop');void ico.offsetWidth;ico.classList.add('sdpop')}
+  setTimeout(function(){el.dataset.p='2';show(0);iv=setInterval(function(){i++;show(i)},700)},1300);
+  setTimeout(function(){clearInterval(iv);el.dataset.p='3'},1300+icons.length*700);
+  setTimeout(function(){el.dataset.p='4';el.classList.add('out');setTimeout(function(){el.remove();root.style.overflow=''},500)},1300+icons.length*700+1300);
+})();
+</script>
 
 <header>
   <div class="sd-top">

@@ -159,6 +159,19 @@
   .dash-toast{position:fixed; left:50%; bottom:80px; transform:translateX(-50%) translateY(20px); background:#222; color:#fff; font-size:14px; font-weight:600; padding:12px 20px; border-radius:24px; opacity:0; transition:.25s; pointer-events:none; z-index:200; max-width:90vw; text-align:center;}
   .dash-toast.on{opacity:1; transform:translateX(-50%) translateY(0);}
   .dash-toast.ok{background:var(--ok);} .dash-toast.no{background:var(--rose);}
+.rv-row{padding:12px 0;border-top:1px solid #E4DCCB}
+.rv-row:first-child{border-top:0}
+.rv-top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.rv-badge{font-size:11px;padding:1px 8px;border-radius:9px;background:#e6f4ea;color:#2F7D4F;margin-left:6px}
+.rv-badge.wait{background:#fff3e0;color:#b26a00}
+.rv-stars{color:#E2A33D}
+.rv-text{margin:4px 0;white-space:pre-wrap;font-size:13.5px}
+.rv-ph{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}
+.rv-ph img{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #ddd}
+.rv-btns{display:flex;gap:8px;margin-top:6px}
+.rv-btns button{padding:7px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;font-size:12.5px}
+.rv-btns .ok{background:#2F7D4F;color:#fff;border-color:#2F7D4F}
+.rv-btns .del{color:#B5495B;border-color:#B5495B}
 </style>
 </head>
 <body>
@@ -232,6 +245,11 @@
         <button class="cp-save" id="costSaveBtn" style="margin-top:12px" onclick="saveCosts()">Save costs</button>
         <div class="cp-note" id="costNote"></div>
       </div>
+    </section>
+
+    <section>
+      <h3 id="rvHead">Customer Reviews</h3>
+      <div id="reviewList"><div class="empty">Loading…</div></div>
     </section>
 
     <section>
@@ -310,7 +328,7 @@ function tryLogin(){
     loadReturnRequests();
     loadRecentOrders();
     loadCoupons();
-    loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings();
+    loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings(); loadReviewsAdmin();
   } else {
     document.getElementById('loginErr').style.display = 'block';
   }
@@ -324,7 +342,7 @@ function logout(){
 if(sessionStorage.getItem('smartd_admin') === 'true'){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminScreen').style.display = 'block';
-  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings(); });
+  window.addEventListener('load', () => { loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons(); loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings(); loadReviewsAdmin(); });
 }
 
 /* ---------- Overview stats ---------- */
@@ -573,6 +591,41 @@ async function createCoupon(){
     loadCoupons();
   }catch(e){ console.error(e); cpNote('Could not save the coupon. Check your Firebase setup.','no'); }
 }
+/* ---------- Customer reviews (approve before they go live) ---------- */
+function rvEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rvPhotos(r){const a=Array.isArray(r.photos)&&r.photos.length?r.photos:(r.photo?[r.photo]:[]);return a.filter(u=>typeof u==='string'&&u.startsWith('data:image/'))}
+async function loadReviewsAdmin(){
+  const box=document.getElementById('reviewList'), head=document.getElementById('rvHead');
+  try{
+    const snap=await db.collection('reviews').get();
+    if(snap.empty){box.innerHTML='<div class="empty">No reviews yet.</div>';head.textContent='Customer Reviews';return}
+    const list=[];snap.forEach(x=>list.push(Object.assign({_id:x.id},x.data())));
+    list.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+    const wait=list.filter(r=>r.approved===false).length;
+    head.textContent='Customer Reviews'+(wait?' ('+wait+' waiting)':'');
+    box.innerHTML=list.map(r=>{
+      const w=r.approved===false, ph=rvPhotos(r);
+      return `<div class="rv-row">
+        <div class="rv-top"><span><b>${rvEsc(r.name||'Anonymous')}</b><span class="rv-badge ${w?'wait':''}">${w?'Waiting':'Live'}</span></span><span>${rvEsc(String(r.createdAt||'').slice(0,10))}</span></div>
+        <div class="rv-stars">${'★'.repeat(Math.round(r.rating||0))}${'☆'.repeat(5-Math.round(r.rating||0))} <span style="color:#777;font-size:12px">Product: ${rvEsc(r.productId||'')}</span></div>
+        ${r.text?`<div class="rv-text">${rvEsc(r.text)}</div>`:''}
+        ${ph.length?`<div class="rv-ph">${ph.map(u=>`<img src="${u}" alt="Review photo">`).join('')}</div>`:''}
+        <div class="rv-btns">
+          ${w?`<button class="ok" onclick="setReviewApproved('${r._id}',true)">Approve</button>`:`<button onclick="setReviewApproved('${r._id}',false)">Hide</button>`}
+          <button class="del" onclick="deleteReview('${r._id}')">Delete</button>
+        </div></div>`}).join('');
+  }catch(e){console.error(e);box.innerHTML='<div class="empty">Could not load reviews.</div>'}
+}
+async function setReviewApproved(id,ok){
+  try{await db.collection('reviews').doc(id).update({approved:ok});loadReviewsAdmin()}
+  catch(e){console.error(e);alert('Could not update this review.')}
+}
+async function deleteReview(id){
+  if(!confirm('Delete this review?'))return;
+  try{await db.collection('reviews').doc(id).delete();loadReviewsAdmin()}
+  catch(e){console.error(e);alert('Could not delete this review.')}
+}
+
 async function loadCoupons(){
   const box = document.getElementById('couponList');
   try{
