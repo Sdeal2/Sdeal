@@ -960,5 +960,38 @@
       "#A6992B",
       "#C5BD75"
     ]
+  },
+  {
+    "id": 44,
+    "name": "Women'S Strapless Tube Dress with Lace Hem and A-Line Detail - Sleeveless, Ribbed Texture, Perfect for Summer Vacation, Casual to Formal Wear",
+    "category": "Kurti",
+    "description": "Name: Women'S Strapless Tube Dress with Lace Hem and A-Line Detail - Sleeveless, Ribbed Texture, Perfect for Summer Vacation, Casual to Formal Wear\nFabric: Viscose\nSleeve Length: Sleeveless\nPattern: Solid\nNet Quantity 1\n\nWomen'S Strapless Tube Dress with Lace Hem and A-Line Detail - Sleeveless, Ribbed Texture, Perfect for Summer Vacation, Casual to Formal Wear\nCountry of Origin: India",
+    "price": 599,
+    "mrp": 750,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "img": "images/p44-common-1.jpg",
+    "images": [
+      "images/p44-common-1.jpg",
+      "images/p44-common-2.jpg",
+      "images/p44-common-3.jpg",
+      "images/p44-common-4.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Red",
+        "code": "#FF0000",
+        "images": []
+      }
+    ],
+    "tag": "New",
+    "swatch": [
+      "#FF0000",
+      "#FF5959"
+    ]
   }
 ]
