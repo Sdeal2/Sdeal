@@ -18,6 +18,7 @@ if ('serviceWorker' in navigator) {
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -386,6 +387,8 @@ if ('serviceWorker' in navigator) {
   }
   .place-order-btn:hover{background:#1FBE5B;}
 
+  .card.oos .card-img img{opacity:.45;filter:grayscale(1);}
+  .oos-tag{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.62);color:#fff;text-align:center;font-size:12px;font-weight:600;padding:5px 0;z-index:2;}
   .policy-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
   .policy-links a{display:inline-block;padding:10px 18px;border:1.5px solid var(--sd-brand,#e8561f);border-radius:999px;color:var(--sd-brand,#e8561f);background:#fff7f3;font-size:14px;font-weight:600;text-decoration:none;}
   .policy-links a:active,.policy-links a:focus-visible{background:var(--sd-brand,#e8561f);color:#fff;outline:none;}
@@ -600,6 +603,29 @@ if ('serviceWorker' in navigator) {
 .sdpop{animation:sdPop .7s ease both}
 @media (prefers-reduced-motion:reduce){.sdsk,.sdpop{animation:none!important}#sdIco{opacity:1}.sdbrand i{opacity:1!important;transform:none!important;animation:none!important}.sdline{width:min(36vw,140px)!important;animation:none!important}}
 </style>
+<style id="sdAuthCss">
+#authSheet{position:fixed;inset:0;z-index:300;background:#fff;display:none;overflow:auto;padding-bottom:env(safe-area-inset-bottom,0px)}
+#authSheet.open{display:block}
+.au-top{display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px;border-bottom:1px solid #eee;font-weight:700}
+.au-top button{background:none;border:0;font-size:22px;padding:0 6px}
+.au-body{max-width:420px;margin:0 auto;padding:18px 16px 40px}
+.au-tabs{display:flex;gap:8px;margin-bottom:12px}
+.au-tabs button{flex:1;padding:11px;border:1px solid #ddd;border-radius:10px;background:#fff;font-weight:600;font-size:14px}
+.au-tabs button.on{background:#e8561f;border-color:#e8561f;color:#fff}
+.au-body label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+.au-body input{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;font-size:15px}
+.au-btn{width:100%;margin-top:16px;padding:13px;border:0;border-radius:10px;background:#201c18;color:#fff;font-weight:700;font-size:15px}
+.au-btn:disabled{opacity:.5}
+.au-link{background:none;border:0;color:#e8561f;font-weight:600;margin-top:12px;padding:6px 0;font-size:14px}
+.au-msg{margin-top:12px;font-size:13.5px;min-height:18px}.au-msg.err{color:#c62828}.au-msg.ok{color:#2e7d32}
+.au-note{font-size:12.5px;color:#777;line-height:1.6;margin-top:10px}
+.au-oh{padding:12px 16px 4px;font-weight:700;font-size:14px}
+.au-oc{margin:6px 16px;padding:10px 12px;border:1px solid #eee;border-radius:10px;font-size:13px;line-height:1.5}
+.au-oc b{font-size:13.5px}
+.au-st{float:right;font-size:11px;padding:2px 8px;border-radius:9px;background:#fff3e0;color:#b26a00}
+.au-oe{padding:6px 16px 12px;color:#777;font-size:13px}
+.au-oc a{color:#e8561f;font-weight:600;text-decoration:none}
+</style>
 </head>
 <body>
 <div id="sdSplash" data-p="1" aria-hidden="true">
@@ -691,6 +717,9 @@ if ('serviceWorker' in navigator) {
       <button onclick="closeAccount();navWishlist();"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg><i id="acWishN"></i></span>Wishlist</button>
       <button onclick="location.href='my-orders.html';"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span>Orders</button>
     </div>
+    <div class="ac-li" id="acLogin" onclick="openAuth()"><span class="ac-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg></span><div>Login / Create account<br><small style="color:#888">See all your orders with your mobile number</small></div><span class="ac-ar">›</span></div>
+    <div class="ac-li" id="acLogout" style="display:none" onclick="authLogout()"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4"/><path d="M14 8l4 4-4 4M18 12H9"/></svg></span><div>Log out<br><small id="acWho" style="color:#888"></small></div><span class="ac-ar">›</span></div>
+    <div id="acOrders" style="display:none"></div>
     <div class="ac-li" onclick="location.href='reseller.html';"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M4 18V9l4 3 4-6 4 6 4-3v9z"/><path d="M4 21h16"/></svg></span><div>Reseller Orders &amp; Earnings</div><span class="ac-ar">›</span></div>
     <div class="ac-li" onclick="document.getElementById('acReturn').classList.toggle('open')"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M9 7 4.5 11.5 9 16"/><path d="M4.5 11.5H15a4.5 4.5 0 0 1 0 9h-3"/></svg></span><div>Return Policy</div><span class="ac-ar">›</span></div>
     <div class="ac-info" id="acReturn">Not happy with your order? Open <b>My Orders</b>, choose the order and tap Return within 7 days of delivery.</div>
@@ -859,6 +888,8 @@ if ('serviceWorker' in navigator) {
    swatch   -> [color1, color2] — placeholder background gradient colors
    ============================================================ */
 let PRODUCTS = [];
+let OUT_MAP = {};
+async function loadStock(){ try{ if(typeof db!=='undefined' && db && typeof db.collection==='function'){ const d = await db.collection('settings').doc('stock').get(); OUT_MAP = (d.exists && d.data().out) || {}; } }catch(e){} return OUT_MAP; }
 let dataReady = false;
 
 /* ============================================================ */
@@ -918,8 +949,9 @@ function renderGrid(){
   }
 
   grid.innerHTML = list.map(p => `
-    <div class="card" onclick="openProductPage(${p.id})">
+    <div class="card ${OUT_MAP[String(p.id)] ? 'oos' : ''}" onclick="openProductPage(${p.id})">
       <div class="card-img" style="--swatch1:${p.swatch[0]}; --swatch2:${p.swatch[1]}">
+        ${OUT_MAP[String(p.id)] ? '<span class="oos-tag">Out of stock</span>' : ''}
         <button class="wishlist-btn ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation();toggleWishlist(${p.id})">${isWishlisted(p.id)?'♥':'♡'}</button>
         ${p.tag ? `<span class="tag">${p.tag}</span>` : ''}
         ${p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover;">` : `<span class="initial">${p.name.charAt(0)}</span>`}
@@ -1249,10 +1281,13 @@ async function placeOrder(){
   }
   const utr=(document.getElementById('utrInput').value||'').replace(/\D/g,'');
   if(payMode==='UPI' && utr.length!==12){alert('Please pay first, then enter the 12-digit UTR / Transaction ID. Or choose Cash on Delivery.');return;}
+  await loadStock();
+  const _oos=cart.filter(i=>OUT_MAP[String(i.id)]);
+  if(_oos.length){alert('Sorry, these items are out of stock: '+_oos.map(i=>i.name).join(', ')+'. Please remove them from your cart to continue.');return;}
   const btn=document.getElementById('placeOrderBtn');btn.textContent='Placing order...';btn.disabled=true;
   const sub=T.sub,disc=T.disc,total=T.total,orderId=pendingOrderId||generateOrderId();
   const isUPI = payMode==='UPI';
-  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({id:i.id,name:i.name,size:i.size,color:i.color||'',qty:i.qty,price:i.price,img:i.img||'',...(resellOn?{resalePrice:Number(resalePrice[rkey(i)])}:{})})),total,payment:isUPI?'UPI':'Cash on Delivery',...(isUPI?{utr:utr,paymentStatus:utr?'UTR given - verify':'UTR not given - contact customer'}:{}),...(resellOn?{resale:true,resellerId:reseller.id,resellerName:reseller.name||'',resellerPhone:reseller.phone||'',costTotal:T.cost,resellerProfit:T.profit}:{}),...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString()};
+  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({id:i.id,name:i.name,size:i.size,color:i.color||'',qty:i.qty,price:i.price,img:i.img||'',...(resellOn?{resalePrice:Number(resalePrice[rkey(i)])}:{})})),total,payment:isUPI?'UPI':'Cash on Delivery',...(isUPI?{utr:utr,paymentStatus:utr?'UTR given - verify':'UTR not given - contact customer'}:{}),...(resellOn?{resale:true,resellerId:reseller.id,resellerName:reseller.name||'',resellerPhone:reseller.phone||'',costTotal:T.cost,resellerProfit:T.profit}:{}),...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString(),...(window.AUTH_USER?{uid:window.AUTH_USER.uid}:{})};
   try{
     if(typeof db==='undefined'||!db||typeof db.collection!=='function') throw new Error('Firebase unavailable');
     await Promise.race([
@@ -1366,6 +1401,7 @@ async function loadStoreData(){
     dataReady = true;
     renderFilters();
     renderGrid();
+    loadStock().then(function(){ if(dataReady) renderGrid(); });
     renderHomeSlider();
     if(new URLSearchParams(location.search).get('checkout') === '1'){
       setTimeout(()=>{ openCart(); if(cart.length) goToCheckout(); }, 50);
@@ -1492,6 +1528,117 @@ function contactWhatsApp(){
       else { closeCart(); }
     }
   });
+})();
+</script>
+<div id="authSheet" role="dialog" aria-label="Login">
+  <div class="au-top"><button onclick="closeAuth()" aria-label="Back">←</button><span id="auTitle">Login</span></div>
+  <div class="au-body">
+    <div class="au-tabs" id="auTabs"><button id="auTabLogin" class="on" onclick="authView('login')">Login</button><button id="auTabSignup" onclick="authView('signup')">Create account</button></div>
+    <div id="auNameWrap" style="display:none"><label for="auName">Your name</label><input id="auName" maxlength="40" autocomplete="name"></div>
+    <label for="auPhone">Mobile number</label><input id="auPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" autocomplete="tel-national">
+    <div id="auCodeWrap" style="display:none"><label for="auCode">Reset code or link from Smart Deal</label><input id="auCode" placeholder="Paste the code or link here" autocomplete="off"></div>
+    <label for="auPass" id="auPassLbl">Password</label><input id="auPass" type="password" autocomplete="current-password" placeholder="At least 6 characters">
+    <button class="au-btn" id="auGo" onclick="authSubmit()">Login</button>
+    <div class="au-msg" id="auMsg" role="alert"></div>
+    <button class="au-link" id="auForgot" onclick="authView('forgot')">Forgot password?</button>
+    <div class="au-note" id="auNote"></div>
+  </div>
+</div>
+<script>
+(function(){
+  if(typeof firebase==='undefined'||!firebase.auth)return;
+  var auth=firebase.auth(),view='login',busy=false,tok=0;
+  function $(i){return document.getElementById(i)}
+  function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function emailFor(p){return 'sdeal7045+'+p+'@gmail.com'}
+  function phoneOf(u){var m=/^sdeal7045\+(\d{10})@gmail\.com$/i.exec((u&&u.email)||'');return m?m[1]:''}
+  window.AUTH_USER=null;
+  function msg(t,k){var m=$('auMsg');m.textContent=t||'';m.className='au-msg'+(k?' '+k:'')}
+  window.openAuth=function(){authView('login');$('authSheet').classList.add('open')};
+  window.closeAuth=function(){$('authSheet').classList.remove('open')};
+  window.authAskCode=function(){var p=$('auPhone').value.replace(/\D/g,'');var t='Hello Smart Deal, I forgot my password. My mobile number: '+(p||'');window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent(t),'_blank')};
+  window.authView=function(v){
+    view=v;msg('');
+    $('auTabs').style.display=v==='forgot'?'none':'flex';
+    $('auTabLogin').classList.toggle('on',v==='login');$('auTabSignup').classList.toggle('on',v==='signup');
+    $('auNameWrap').style.display=v==='signup'?'block':'none';
+    $('auCodeWrap').style.display=v==='forgot'?'block':'none';
+    $('auPassLbl').textContent=v==='forgot'?'New password':'Password';
+    $('auPass').setAttribute('autocomplete',v==='login'?'current-password':'new-password');
+    $('auGo').textContent=v==='login'?'Login':(v==='signup'?'Create account':'Set new password');
+    $('auTitle').textContent=v==='login'?'Login':(v==='signup'?'Create account':'Reset password');
+    $('auForgot').style.display=v==='login'?'inline-block':'none';
+    $('auNote').innerHTML=v==='forgot'
+      ?'1. <a href="#" onclick="authAskCode();return false" style="color:#e8561f;font-weight:600">Message us on WhatsApp</a> to get a reset code.<br>2. Paste the code or link we send you, then choose a new password.<br>The code works for about 1 hour.'
+      :(v==='signup'?'One account per mobile number. Use the same number when you order.':'');
+  };
+  function errText(e){
+    var c=(e&&e.code)||'';
+    if(c==='auth/email-already-in-use')return 'This number is already registered. Please log in.';
+    if(c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found'||c==='auth/invalid-login-credentials')return 'Wrong mobile number or password.';
+    if(c==='auth/too-many-requests')return 'Too many tries. Please wait a few minutes and try again.';
+    if(c==='auth/weak-password')return 'Password must be at least 6 characters.';
+    if(c==='auth/network-request-failed')return 'No internet. Please check your connection.';
+    if(c==='auth/expired-action-code')return 'This code has expired. Ask us for a new one.';
+    if(c==='auth/invalid-action-code')return 'This code is not valid or was already used. Ask us for a new one.';
+    if(c==='auth/operation-not-allowed')return 'Login is not turned on yet. Please try later.';
+    return 'Something went wrong. Please try again.';
+  }
+  window.authSubmit=async function(){
+    if(busy)return;
+    var p=$('auPhone').value.replace(/\D/g,''),pw=$('auPass').value,name=$('auName').value.trim(),code='';
+    if(view!=='forgot'&&!/^\d{10}$/.test(p)){msg('Enter a valid 10-digit mobile number.','err');return}
+    if(pw.length<6){msg('Password must be at least 6 characters.','err');return}
+    if(view==='signup'&&!name){msg('Please enter your name.','err');return}
+    if(view==='forgot'){var raw=$('auCode').value.trim(),mm=/oobCode=([^&\s]+)/.exec(raw);code=mm?decodeURIComponent(mm[1]):raw;if(!code){msg('Paste the reset code or link we sent you.','err');return}}
+    busy=true;$('auGo').disabled=true;msg('Please wait…');
+    try{
+      if(view==='login'){await auth.signInWithEmailAndPassword(emailFor(p),pw);closeAuth()}
+      else if(view==='signup'){var c=await auth.createUserWithEmailAndPassword(emailFor(p),pw);await c.user.updateProfile({displayName:name.slice(0,40)});applyUser(auth.currentUser);closeAuth()}
+      else{await auth.confirmPasswordReset(code,pw);authView('login');if(p)$('auPhone').value=p;msg('Password changed. Please log in with your new password.','ok')}
+      $('auPass').value='';
+    }catch(e){console.error(e);msg(errText(e),'err')}
+    busy=false;$('auGo').disabled=false;
+  };
+  window.authLogout=function(){auth.signOut()};
+  function applyUser(u){
+    if(u&&!phoneOf(u))u=null;
+    window.AUTH_USER=u||null;
+    if(u){
+      try{if(u.displayName)localStorage.setItem(NAME_KEY,u.displayName.slice(0,40))}catch(e){}
+      var n=$('custName'),t=$('custPhone');
+      if(n&&!n.value&&u.displayName)n.value=u.displayName;
+      if(t&&!t.value)t.value=phoneOf(u);
+    }
+    authRenderRows();
+  }
+  function authRenderRows(){
+    var u=window.AUTH_USER;
+    $('acLogin').style.display=u?'none':'flex';
+    $('acLogout').style.display=u?'flex':'none';
+    var box=$('acOrders');
+    if(!u){box.style.display='none';box.innerHTML='';return}
+    $('acWho').textContent=(u.displayName?u.displayName+' · ':'')+phoneOf(u);
+    box.style.display='block';loadMyOrders();
+  }
+  async function loadMyOrders(){
+    var u=window.AUTH_USER,box=$('acOrders'),my=++tok;
+    box.innerHTML='<div class="au-oh">Your orders</div><div class="au-oe">Loading…</div>';
+    try{
+      var snap=await db.collection('orders').where('phone','==',phoneOf(u)).get();
+      if(my!==tok)return;
+      var list=[];snap.forEach(function(d){list.push(d.data())});
+      list.sort(function(a,b){return String(b.createdAt||'').localeCompare(String(a.createdAt||''))});
+      if(!list.length){box.innerHTML='<div class="au-oh">Your orders</div><div class="au-oe">No orders yet for this number.</div>';return}
+      box.innerHTML='<div class="au-oh">Your orders</div>'+list.slice(0,20).map(function(o){
+        var it=o.items||[],first=it[0]?esc(it[0].name):'Order',more=it.length>1?' + '+(it.length-1)+' more':'';
+        return '<div class="au-oc"><span class="au-st">'+esc(o.status||'Order Placed')+'</span><b>'+esc(o.orderId||'')+'</b><br>'+first+more+'<br>₹'+esc(o.total)+' · '+esc(String(o.createdAt||'').slice(0,10))+' · <a href="track.html?id='+encodeURIComponent(o.orderId||'')+'">Track order</a></div>';
+      }).join('');
+    }catch(e){console.error(e);if(my===tok)box.innerHTML='<div class="au-oh">Your orders</div><div class="au-oe">Could not load your orders. Please try again.</div>'}
+  }
+  var _ra=window.renderAccount;
+  window.renderAccount=function(){if(_ra)_ra();authRenderRows()};
+  auth.onAuthStateChanged(function(u){applyUser(u)});
 })();
 </script>
 </body>

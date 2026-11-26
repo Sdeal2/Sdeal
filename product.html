@@ -14,9 +14,9 @@ svg{display:block}
 
 /* ---------- Gallery ---------- */
 .gallery{position:relative;padding:10px 10px 0;background:var(--bg);border-radius:0;overflow:visible}
-.main{position:relative;aspect-ratio:1/1.05;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;background:#f1f1f1;border-radius:14px;-webkit-overflow-scrolling:touch}
+.main{position:relative;aspect-ratio:1/1.05;display:flex;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:none;background:#f1f1f1;border-radius:14px;-webkit-overflow-scrolling:touch}
 .main::-webkit-scrollbar{display:none}
-.main img{flex:none;width:100%;height:100%;object-fit:contain;scroll-snap-align:center;scroll-snap-stop:always}
+.main img{flex:none;width:100%;height:100%;object-fit:contain;scroll-snap-align:center}
 .bars{display:flex;gap:4px;padding:10px 14px 0}
 .bars i{flex:1;height:3px;background:#ddd;border-radius:2px;transition:background .2s}
 .bars i.on{background:var(--ink)}
@@ -83,10 +83,11 @@ svg{display:block}
 .description p{white-space:pre-line;margin:0}
 
 /* ---------- Similar products ---------- */
-.sim-list{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding:14px 16px 8px}
+.sim-list{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:14px 16px 8px}
 .sim-list::-webkit-scrollbar{display:none}
 .sim{flex:none;width:44%;max-width:200px;scroll-snap-align:start;cursor:pointer;text-decoration:none;color:inherit}
-.sim-img{aspect-ratio:1/1.1;border-radius:0;background:#efefef;overflow:hidden}
+.sim-img{position:relative;aspect-ratio:1/1.1;border-radius:0;background:#efefef;overflow:hidden}
+.sim-oos{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.62);color:#fff;text-align:center;font-size:12px;font-weight:600;padding:4px 0}
 .sim-img img{width:100%;height:100%;object-fit:cover}
 .sim-name{margin-top:8px;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sim-off{margin-top:3px;font-size:13px;font-weight:700;color:var(--green)}
@@ -146,7 +147,7 @@ svg{display:block}
 .rev-bar{display:grid; grid-template-columns:22px 1fr 32px; gap:6px; align-items:center}
 .rev-bar .t{height:7px; background:#eee; border-radius:4px; overflow:hidden}
 .rev-bar .t i{display:block; height:100%; background:#E2A33D}
-.rev-list{margin-bottom:8px; display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:8px; -webkit-overflow-scrolling:touch}
+.rev-list{margin-bottom:8px; display:flex; gap:12px; overflow-x:auto; overscroll-behavior-x:contain; padding-bottom:8px; -webkit-overflow-scrolling:touch}
 .rev-item{flex:0 0 82%; max-width:320px; scroll-snap-align:start; padding:14px; border:1px solid #eee; border-radius:12px; background:#fff}
 .rev-item-top{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
 .rev-name{font-weight:700; font-size:13.5px}
@@ -155,21 +156,25 @@ svg{display:block}
 .rev-text{color:#333; line-height:1.55; font-size:13.5px; margin-bottom:8px; white-space:pre-wrap}
 .rev-photos{display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto}
 .rev-photos .rev-photo{flex:none}
-.rev-photo{width:76px; height:76px; object-fit:cover; border-radius:8px; border:1px solid #ddd; cursor:pointer}
+.rev-photo{width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid #ddd; cursor:pointer}
+.rev-vote{display:flex; gap:10px; margin-top:10px}
+.vb{display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border:1px solid #ddd; border-radius:999px; background:#fff; color:#555; font-size:12.5px; cursor:pointer}
+.vb svg{width:16px; height:16px}
+.vb.on{border-color:#111; background:#111; color:#fff}
 .rev-empty{color:#888; font-size:13.5px; padding:6px 0 10px}
-.rev-form{margin-top:18px; padding:16px; background:#f6f6f6; border-radius:10px}
-.rev-form h4{font-size:14.5px; margin-bottom:6px}
-.star-pick{display:flex; gap:4px; margin:4px 0 12px}
-.star-pick button{background:none; border:0; padding:2px; font-size:32px; line-height:1; color:#ccc; cursor:pointer}
+.rev-form{margin-top:12px; padding:12px; background:#f6f6f6; border-radius:10px}
+.rev-form h4{font-size:14px; margin:0 0 2px}
+.star-pick{display:flex; gap:2px; margin:2px 0 8px}
+.star-pick button{background:none; border:0; padding:2px; font-size:26px; line-height:1; color:#ccc; cursor:pointer}
 .star-pick button.on{color:#E2A33D}
-.rev-form input[type=text],.rev-form textarea{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px; font:inherit; font-size:14px}
-.rev-form textarea{min-height:72px; resize:vertical}
-.rev-thumbs{display:flex; gap:8px; flex-wrap:wrap}
-.rev-th{position:relative; width:76px; height:76px; border-radius:8px; overflow:hidden; border:1px solid #ddd; margin-bottom:10px}
+.rev-form input[type=text],.rev-form textarea{width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:8px; margin-bottom:8px; font:inherit; font-size:13.5px}
+.rev-form textarea{min-height:44px; resize:vertical}
+.rev-thumbs{display:flex; gap:6px; flex-wrap:wrap}
+.rev-th{position:relative; width:54px; height:54px; border-radius:8px; overflow:hidden; border:1px solid #ddd; margin-bottom:8px}
 .rev-th img{width:100%; height:100%; object-fit:cover; display:block}
 .rev-th button{position:absolute; top:2px; right:2px; width:24px; height:24px; border-radius:12px; border:0; background:rgba(0,0,0,.65); color:#fff; font-size:16px; line-height:1; padding:0}
-.rev-addph{background:#fff; color:#111; border:1px solid #111; padding:10px 14px; border-radius:8px; font-weight:600; font-size:13.5px; margin-bottom:10px}
-.rev-photo-stat{font-size:12px; color:#777; margin:-4px 0 10px}
+.rev-addph{background:#fff; color:#111; border:1px solid #111; padding:7px 12px; border-radius:8px; font-weight:600; font-size:13px; margin-bottom:8px}
+.rev-photo-stat{font-size:12px; color:#777; margin:-2px 0 8px}
 .rev-submit{background:#111; color:#fff; border:0; padding:12px 20px; border-radius:8px; font-weight:700; font-size:14px}
 .rev-submit:disabled{opacity:.5}
 .rev-status{font-size:13px; margin-top:10px}
@@ -219,6 +224,10 @@ function checkPin(){
   if(r){r.className='pin-result '+pinCls;r.textContent=pinMsg}
 }
 
+/* out of stock (set from the admin dashboard) */
+let outMap={};
+async function loadStock(){try{if(typeof db!=='undefined'&&db){const s=await db.collection('settings').doc('stock').get();outMap=(s.exists&&s.data().out)||{}}}catch(e){}}
+function isOutNow(){return !!(product&&outMap[String(product.id)])}
 /* similar products */
 function similarList(){
   const cat=(product.category||'').toLowerCase();
@@ -281,6 +290,7 @@ function render(){
       ${cur().mrp&&cur().mrp>cur().price?`<span class="mrp">₹${cur().mrp}</span>`:''}
       <span class="price">₹${cur().price}</span>
     </div>
+    ${isOutNow()?'<div style="margin-top:8px;color:#b5495b;font-weight:700;font-size:14px">Out of stock</div>':''}
 
     <h4>Color</h4><div class="row">${getColors().length?getColors().map((c,i)=>`<button class="color ${selectedColor?.name===c.name?'active':''}" title="${esc(c.name)}" style="background:${esc(swatchBg(c))}" onclick="chooseColor(${i})"></button>`).join(''):'<span class="msg">Default color</span>'}</div>${selectedColor?`<div class="msg">Selected: ${esc(selectedColor.name)}</div>`:''}
     ${getVariants().length?`<h4>Variant</h4><div class="row">${getVariants().map((v,i)=>`<button class="pill ${selectedVariant&&selectedVariant.name===v.name?'active':''}" onclick="chooseVariant(${i})">${esc(v.name)} · ₹${esc(v.price)}</button>`).join('')}</div>`:''}
@@ -313,9 +323,9 @@ function render(){
   <div class="description"><h3>Description</h3><p class="desc-text ${descOpen?'open':''}" id="descText" onclick="toggleDesc()">${esc(formatDescription(product.description))||'Premium quality product from Smart Deal. Please check the available colors and sizes before ordering.'}</p><button class="more" id="descMore" onclick="toggleDesc()">${descOpen?'less':'...more'}</button></div>
 
   ${sim.length?`<div class="section"><div class="sec-head"><h3>Similar Products</h3><button class="round-btn dark" onclick="simNext()" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button></div></div>
-  <div class="sim-list" id="simList">${sim.map(p=>`<a class="sim" href="product.html?id=${encodeURIComponent(p.id)}"><div class="sim-img"><img src="${esc(p.img||(p.images||[])[0]||'')}" alt="" onerror="this.style.display='none'"></div><div class="sim-name">${esc(p.name)}</div>${pct(p.price,p.mrp)?`<div class="sim-off">${pct(p.price,p.mrp)}% OFF</div>`:''}<div class="sim-price">${p.mrp&&p.mrp>p.price?`<s>₹${p.mrp}</s>`:''}₹${p.price}</div></a>`).join('')}</div>`:''}
+  <div class="sim-list" id="simList">${sim.map(p=>`<a class="sim" href="product.html?id=${encodeURIComponent(p.id)}"><div class="sim-img"><img src="${esc(p.img||(p.images||[])[0]||'')}" alt="" onerror="this.style.display='none'">${outMap[String(p.id)]?'<div class="sim-oos">Out of stock</div>':''}</div><div class="sim-name">${esc(p.name)}</div>${pct(p.price,p.mrp)?`<div class="sim-off">${pct(p.price,p.mrp)}% OFF</div>`:''}<div class="sim-price">${p.mrp&&p.mrp>p.price?`<s>₹${p.mrp}</s>`:''}₹${p.price}</div></a>`).join('')}</div>`:''}
 
-  <div class="product-action-bar"><button class="btn cart" onclick="addCart()">Add to cart</button><button class="btn buy" onclick="buyNow()">Buy at ${rupee(product.price*qty)}</button></div>`;
+  ${isOutNow()?'<div class="product-action-bar"><button class="btn" disabled style="background:#e5e1d8;color:#777">Out of stock</button></div>':`<div class="product-action-bar"><button class="btn cart" onclick="addCart()">Add to cart</button><button class="btn buy" onclick="buyNow()">Buy at ${rupee(product.price*qty)}</button></div>`}`;
 
   /* show "...more" only when the title is really cut */
   const t=document.getElementById('ptitle'),mb=document.getElementById('moreBtn');
@@ -327,10 +337,10 @@ function render(){
 }
 function onSlide(el){const i=Math.round(el.scrollLeft/(el.clientWidth||1));if(i!==idx&&i>=0&&i<images.length){idx=i;const b=document.getElementById('bars');if(b)[...b.children].forEach((x,k)=>x.classList.toggle('on',k===i))}}
 function chooseColor(i){selectedColor=getColors()[i];idx=0;render()}function move(n){if(!images.length)return;idx=(idx+n+images.length)%images.length;render()}
-function addCart(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');const color=selectedColor?.name||'Default';let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color&&(x.variant||'')===(selectedVariant?selectedVariant.name:''));if(e)e.qty+=qty;else cart.push({id:product.id,name:itemName(),variant:selectedVariant?selectedVariant.name:'',mrp:cur().mrp,price:cur().price,size:selectedSize||'',color,qty,img:(images[0]||product.img||'')});localStorage.setItem('smartDealCart',JSON.stringify(cart));alert('Added to cart');}
-function buyNow(){if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}const color=selectedColor?.name||'Default';let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color&&(x.variant||'')===(selectedVariant?selectedVariant.name:''));if(e)e.qty+=qty;else cart.push({id:product.id,name:itemName(),variant:selectedVariant?selectedVariant.name:'',mrp:cur().mrp,price:cur().price,size:selectedSize||'',color,qty,img:(images[0]||product.img||''),swatch:product.swatch});localStorage.setItem('smartDealCart',JSON.stringify(cart));location.href='index.html?checkout=1'}
+function addCart(){if(isOutNow()){alert('This product is currently out of stock');return}if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');const color=selectedColor?.name||'Default';let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color&&(x.variant||'')===(selectedVariant?selectedVariant.name:''));if(e)e.qty+=qty;else cart.push({id:product.id,name:itemName(),variant:selectedVariant?selectedVariant.name:'',mrp:cur().mrp,price:cur().price,size:selectedSize||'',color,qty,img:(images[0]||product.img||'')});localStorage.setItem('smartDealCart',JSON.stringify(cart));alert('Added to cart');}
+function buyNow(){if(isOutNow()){alert('This product is currently out of stock');return}if((product.sizes||[]).length&&!selectedSize){alert('Please select a size');return}const color=selectedColor?.name||'Default';let cart=JSON.parse(localStorage.getItem('smartDealCart')||'[]');let e=cart.find(x=>x.id===product.id&&x.size===(selectedSize||'')&&x.color===color&&(x.variant||'')===(selectedVariant?selectedVariant.name:''));if(e)e.qty+=qty;else cart.push({id:product.id,name:itemName(),variant:selectedVariant?selectedVariant.name:'',mrp:cur().mrp,price:cur().price,size:selectedSize||'',color,qty,img:(images[0]||product.img||''),swatch:product.swatch});localStorage.setItem('smartDealCart',JSON.stringify(cart));location.href='index.html?checkout=1'}
 async function shareProduct(){const url=location.href;if(navigator.share){try{await navigator.share({title:product.name,text:'Check this product on Smart Deal',url})}catch(e){}}else{await navigator.clipboard?.writeText(url);alert('Product link copied');}}
-(async()=>{try{products=await (await fetch('products.json?ts='+Date.now())).json();product=products.find(p=>p.id===id);if(!product){document.getElementById('app').innerHTML='<h2>Product not found</h2>';return}selectedColor=getColors()[0]||null;selectedVariant=getVariants()[0]||null;selectedSize=(product.sizes||[])[0]||null;render();initReviews()}catch(e){document.getElementById('app').innerHTML='<h2>Could not load products.json</h2>'}})();
+(async()=>{try{products=await (await fetch('products.json?ts='+Date.now())).json();product=products.find(p=>p.id===id);if(!product){document.getElementById('app').innerHTML='<h2>Product not found</h2>';return}selectedColor=getColors()[0]||null;selectedVariant=getVariants()[0]||null;selectedSize=(product.sizes||[])[0]||null;await Promise.race([loadStock(),new Promise(r=>setTimeout(r,2500))]);render();initReviews()}catch(e){document.getElementById('app').innerHTML='<h2>Could not load products.json</h2>'}})();
 
 /* ---------- Reviews (no login needed) ---------- */
 let reviews=[], revRating=0, revPhotos=[], revBusy=false;
@@ -347,6 +357,41 @@ function revTimeAgo(iso){
 function revPhotosOf(r){
   const a=Array.isArray(r.photos)&&r.photos.length?r.photos:(r.photo?[r.photo]:[]);
   return a.filter(u=>typeof u==='string'&&u.startsWith('data:image/'));
+}
+
+/* like / dislike on reviews */
+function revVotes(){try{return JSON.parse(localStorage.getItem('sdRevVotes')||'{}')}catch(e){return {}}}
+const TH_UP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
+const TH_DN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>';
+function revVoteHtml(r){
+  const v=revVotes()[r._id]||'', l=Math.max(0,Number(r.likes)||0), d=Math.max(0,Number(r.dislikes)||0), id=revEsc(r._id);
+  return `<div class="rev-vote" data-rid="${id}"><button type="button" class="vb ${v==='like'?'on':''}" data-t="like" onclick="voteReview('${id}','like')" aria-label="Like">${TH_UP}<span>${l}</span></button><button type="button" class="vb ${v==='dislike'?'on':''}" data-t="dislike" onclick="voteReview('${id}','dislike')" aria-label="Dislike">${TH_DN}<span>${d}</span></button></div>`;
+}
+function paintVotes(r){
+  const box=document.querySelector('.rev-vote[data-rid="'+r._id+'"]'); if(!box)return;
+  const v=revVotes()[r._id]||'';
+  box.querySelector('[data-t=like]').className='vb'+(v==='like'?' on':'');
+  box.querySelector('[data-t=dislike]').className='vb'+(v==='dislike'?' on':'');
+  box.querySelector('[data-t=like] span').textContent=Math.max(0,Number(r.likes)||0);
+  box.querySelector('[data-t=dislike] span').textContent=Math.max(0,Number(r.dislikes)||0);
+}
+async function voteReview(rid,type){
+  const r=reviews.find(x=>x._id===rid); if(!r)return;
+  const votes=revVotes(), beforeVotes=revVotes(), prev=votes[rid]||'';
+  const f=t=>t==='like'?'likes':'dislikes', dl={likes:0,dislikes:0}, before={likes:r.likes,dislikes:r.dislikes};
+  if(prev===type){ dl[f(type)]-=1; delete votes[rid]; }
+  else { dl[f(type)]+=1; if(prev) dl[f(prev)]-=1; votes[rid]=type; }
+  r.likes=Math.max(0,(Number(r.likes)||0)+dl.likes); r.dislikes=Math.max(0,(Number(r.dislikes)||0)+dl.dislikes);
+  try{localStorage.setItem('sdRevVotes',JSON.stringify(votes))}catch(e){}
+  paintVotes(r);
+  try{
+    const upd={}; if(dl.likes) upd.likes=firebase.firestore.FieldValue.increment(dl.likes); if(dl.dislikes) upd.dislikes=firebase.firestore.FieldValue.increment(dl.dislikes);
+    await db.collection('reviews').doc(rid).update(upd);
+  }catch(e){
+    console.error(e); r.likes=before.likes; r.dislikes=before.dislikes;
+    try{localStorage.setItem('sdRevVotes',JSON.stringify(beforeVotes))}catch(_){}
+    paintVotes(r);
+  }
 }
 
 function renderReviews(){
@@ -367,6 +412,7 @@ function renderReviews(){
       <div class="rev-stars-sm">${revStars(r.rating)}</div>
       ${r.text?`<div class="rev-text">${revEsc(r.text)}</div>`:''}
       ${ph.length?`<div class="rev-photos">${ph.map(u=>`<img class="rev-photo" src="${u}" alt="Customer photo" onclick="openRevPhoto(this.src)">`).join('')}</div>`:''}
+      ${r._id?revVoteHtml(r):''}
     </div>`}).join('');
 
   root.innerHTML=`
@@ -455,7 +501,7 @@ async function onRevPhotoChange(e){
 async function loadReviews(){
   try{
     const snap=await db.collection('reviews').where('productId','==',id).get();
-    reviews=[]; snap.forEach(d=>{const r=d.data(); if(r.approved!==false) reviews.push(r);});
+    reviews=[]; snap.forEach(d=>{const r=d.data(); if(r.approved!==false) reviews.push(Object.assign({_id:d.id},r));});
     reviews.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
   }catch(e){
     console.error('Could not load reviews:',e);

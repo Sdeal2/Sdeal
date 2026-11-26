@@ -266,6 +266,15 @@
     </section>
 
     <section>
+      <h3>Customer password reset</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="rsPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="Customer mobile number" style="flex:1;min-width:180px;padding:10px;border:1px solid #ccc;border-radius:8px">
+        <button onclick="sendCustomerReset()" style="padding:10px 16px;border:0;border-radius:8px;background:#201c18;color:#fff;font-weight:600">Send reset email</button>
+      </div>
+      <div id="rsMsg" class="empty" style="margin-top:8px;line-height:1.5"></div>
+    </section>
+
+    <section>
       <h3>Coupon Codes</h3>
       <div class="cp-form">
         <div class="cp-grid">
@@ -628,6 +637,20 @@ async function deleteReview(id){
   if(!confirm('Delete this review?'))return;
   try{await db.collection('reviews').doc(id).delete();loadReviewsAdmin()}
   catch(e){console.error(e);alert('Could not delete this review.')}
+}
+
+/* ---------- Customer password reset (code goes to your Gmail) ---------- */
+async function sendCustomerReset(){
+  const p=document.getElementById('rsPhone').value.replace(/\D/g,''), m=document.getElementById('rsMsg');
+  if(!/^\d{10}$/.test(p)){ m.textContent='Enter the 10-digit mobile number.'; return; }
+  m.textContent='Sending…';
+  try{
+    await firebase.auth().sendPasswordResetEmail('sdeal7045+'+p+'@gmail.com');
+    m.textContent='Done. Open your Gmail (sdeal7045@gmail.com). A "Reset your password" email for '+p+' should arrive within a minute. Long-press its link, copy it, and send it to the customer on WhatsApp. They paste it in the app under Login > Forgot password. It works for about 1 hour. If no email arrives, this number has no account. Check the customer’s identity before you send the link.';
+  }catch(e){
+    console.error(e);
+    m.textContent=e.code==='auth/too-many-requests'?'Too many tries. Wait a few minutes and try again.':'Could not send. Check the number and try again.';
+  }
 }
 
 async function loadCoupons(){
