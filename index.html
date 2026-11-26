@@ -728,7 +728,27 @@ if ('serviceWorker' in navigator) {
 .lg-f input{flex:1;min-width:0;border:0;outline:0;padding:13px;font-size:15px;font-family:inherit;background:none}
 .lg-f button{border:0;background:none;color:#e8561f;font-weight:600;font-size:12.5px;padding:0 13px;font-family:inherit}
 .lg-go{width:100%;margin-top:20px;padding:14px;border:0;border-radius:12px;background:linear-gradient(135deg,#e8561f,#f08a4b);color:#fff;font-weight:700;font-size:16px;font-family:inherit;box-shadow:0 8px 18px rgba(232,86,31,.28)}
-.lg-go:disabled{opacity:.55}
+.lg-go{position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.lg-go::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:sdShine 3s ease-in-out infinite;pointer-events:none}
+@keyframes sdShine{0%,60%{left:-60%}100%{left:130%}}
+.lg-go:not(:disabled):active{transform:scale(.97);box-shadow:0 3px 8px rgba(232,86,31,.3)}
+.lg-go:disabled{opacity:.9;cursor:wait}
+.lg-go:disabled::after{animation:none;display:none}
+.lg-go.loading{background-size:200% 100%;animation:sdPulse 1.2s ease-in-out infinite}
+@keyframes sdPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.12)}}
+.sd-spin{display:inline-block;width:16px;height:16px;margin-right:9px;vertical-align:-3px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sdRot .7s linear infinite}
+@keyframes sdRot{to{transform:rotate(360deg)}}
+.sd-dots i{display:inline-block;font-style:normal;animation:sdDot 1.2s infinite}
+.sd-dots i:nth-child(2){animation-delay:.2s}.sd-dots i:nth-child(3){animation-delay:.4s}
+@keyframes sdDot{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.lg-msg.slow{color:#b26a00}
+.lg-tabs button,.lg-link{transition:transform .12s,background .2s,color .2s}
+.lg-tabs button:active,.lg-link:active{transform:scale(.94)}
+.sd-rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);animation:sdRip .6s ease-out forwards;pointer-events:none}
+@keyframes sdRip{to{transform:scale(4);opacity:0}}
+/* press effect for every button in the app */
+button{-webkit-tap-highlight-color:transparent}
+.bottom-nav button:active,.sd-wal:active,.ac-li:active,.ac-wal:active{transform:scale(.95)}
 .lg-link{display:block;margin:12px auto 0;background:none;border:0;color:#e8561f;font-weight:600;font-size:14px;font-family:inherit}
 .lg-msg{margin-top:12px;font-size:13.5px;min-height:18px;text-align:center}
 .lg-msg.err{color:#c62828}
@@ -1245,7 +1265,7 @@ let resellOn = false, reseller = null, resalePrice = {};
 const rkey = i => `${i.id}|${i.size||''}|${i.color||''}|${i.variant||''}`;
 function resaleUnit(i){ const p = Number(resalePrice[rkey(i)]); return p >= i.price ? p : i.price; }
 let walletOn = false;
-const WALLET_BONUS_PCT = 10;   // bonus & cashback balance can pay at most 10% of an order (Rs 10 per Rs 100)
+const WALLET_BONUS_PCT = 5;   // bonus & cashback balance can pay at most 5% of an order (Rs 5 per Rs 100)
 function payTotals(){
   const cost = cartSubtotal();
   if(resellOn){
@@ -1703,7 +1723,7 @@ function contactWhatsApp(){
       <small>Total balance</small>
       <div class="wl-big" id="wlTotal">₹0</div>
       <div class="wl-two"><div>Add Balance<b id="wlAdd">₹0</b></div><div>Bonus &amp; Cashback<b id="wlBonus">₹0</b></div></div>
-      <div class="wl-note">Add Balance can pay for a full order. Bonus &amp; Cashback can be used up to ₹10 on every ₹100 of an order.</div>
+      <div class="wl-note">Add Balance can pay for a full order. Bonus &amp; Cashback can be used up to ₹5 on every ₹100 of an order.</div>
     </div>
 
     <div class="wl-sec">Add money</div>
@@ -1742,7 +1762,11 @@ function contactWhatsApp(){
   function emailFor(p){return 'sdeal7045+'+p+'@gmail.com'}
   function phoneOf(u){var m=/^sdeal7045\+(\d{10})@gmail\.com$/i.exec((u&&u.email)||'');return m?m[1]:''}
   function skipped(){try{return sessionStorage.getItem('sdSkip')==='1'}catch(e){return false}}
-  window.AUTH_USER=null;
+  /* Stay logged in until the user taps Log out */
+  var authReady=false,readyQ=[];
+  var persistP=Promise.resolve();
+  try{persistP=auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){})}catch(e){}
+  Object.defineProperty(window,'AUTH_USER',{configurable:true,get:function(){var u=auth.currentUser;return(u&&phoneOf(u))?u:null}});
   window.WALLET={add:0,bonus:0};
 
   /* ---------- login page ---------- */
@@ -1758,7 +1782,11 @@ function contactWhatsApp(){
   window.closeAuth=function(){$('authSheet').classList.remove('open')};
   window.authBack=function(){after=null;closeAuth()};
   window.authSkip=function(){try{sessionStorage.setItem('sdSkip','1')}catch(e){}closeAuth()};
-  window.requireLogin=function(cb){after=cb||null;openAuth('checkout')};
+  window.requireLogin=function(cb){
+    if(window.AUTH_USER){if(cb)setTimeout(cb,0);return}
+    if(!authReady){readyQ.push(function(){window.requireLogin(cb)});return}
+    after=cb||null;openAuth('checkout')
+  };
   window.authEye=function(b){var i=$('auPass');var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'Hide':'Show'};
   window.authCall=function(){var n=String(WHATSAPP_NUMBER||'').replace(/\D/g,'');if(n)location.href='tel:+'+n};
   window.authAskCode=function(){var p=$('auPhone').value.replace(/\D/g,'');var t='Hello Smart Deal, I forgot my password. My mobile number: '+(p||'');window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent(t),'_blank')};
@@ -1799,14 +1827,21 @@ function contactWhatsApp(){
     if(pw.length<6){msg('Password must be at least 6 characters.','err');return}
     if(view==='signup'&&!name){msg('Please enter your name.','err');return}
     if(view==='forgot'){var raw=$('auCode').value.trim(),mm=/oobCode=([^&\s]+)/.exec(raw);code=mm?decodeURIComponent(mm[1]):raw;if(!code){msg('Paste the reset code or link we sent you.','err');return}}
-    busy=true;$('auGo').disabled=true;msg('Please wait…');
+    busy=true;$('auGo').disabled=true;$('auGo').classList.add('loading');
+    $('auGo').innerHTML='<span class="sd-spin"></span>'+(view==='login'?'Logging in':(view==='signup'?'Creating account':'Saving'))+'<span class="sd-dots"><i>.</i><i>.</i><i>.</i></span>';
+    msg('Please wait…');
+    var slowT=setTimeout(function(){if(busy){msg('Internet is slow, still working… please wait','slow')}},5000);
+    var slowT2=setTimeout(function(){if(busy){msg('Taking longer than usual. Please keep this screen open.','slow')}},15000);
     try{
+      await persistP;
       if(view==='login'){await auth.signInWithEmailAndPassword(emailFor(p),pw);loginDone()}
       else if(view==='signup'){var c=await auth.createUserWithEmailAndPassword(emailFor(p),pw);await c.user.updateProfile({displayName:name.slice(0,40)});applyUser(auth.currentUser);loginDone()}
       else{await auth.confirmPasswordReset(code,pw);authView('login');if(p)$('auPhone').value=p;msg('Password changed. Please log in with your new password.','ok')}
       $('auPass').value='';
     }catch(e){console.error(e);msg(errText(e),'err')}
-    busy=false;$('auGo').disabled=false;
+    clearTimeout(slowT);clearTimeout(slowT2);
+    busy=false;$('auGo').disabled=false;$('auGo').classList.remove('loading');
+    $('auGo').textContent=view==='login'?'Login':(view==='signup'?'Create account':'Set new password');
   };
   window.authLogout=function(){
     try{sessionStorage.removeItem('sdSkip')}catch(e){}
@@ -1817,7 +1852,6 @@ function contactWhatsApp(){
   /* ---------- user / wallet state ---------- */
   function applyUser(u){
     if(u&&!phoneOf(u))u=null;
-    window.AUTH_USER=u||null;
     var n=$('custName'),t=$('custPhone');
     if(u){
       try{if(u.displayName)localStorage.setItem(NAME_KEY,u.displayName.slice(0,40))}catch(e){}
@@ -2000,9 +2034,60 @@ function contactWhatsApp(){
 
   auth.onAuthStateChanged(function(u){
     applyUser(u);
+    if(!authReady){authReady=true;var q=readyQ;readyQ=[];q.forEach(function(f){try{f()}catch(e){}})}
     if(!window.AUTH_USER&&!skipped()&&!$('authSheet').classList.contains('open'))openAuth('gate');
   });
 })();
+</script>
+
+<script>
+/* Back button: close Wallet / Orders / Login sheet instead of leaving the app */
+(function(){
+  function el(i){return document.getElementById(i)}
+  function isOpen(i){var e=el(i);return !!(e&&e.classList.contains('open'))}
+  var S=[
+    {id:'walSheet',open:'openWallet',close:'closeWallet'},
+    {id:'ordSheet',open:'openOrders',close:'closeOrders'},
+    {id:'authSheet',open:'openAuth',close:'closeAuth'}
+  ];
+  S.forEach(function(x){
+    var oOpen=window[x.open],oClose=window[x.close];
+    if(!oOpen||!oClose)return;
+    x.pushed=false;x.oClose=oClose;
+    window[x.open]=function(){
+      var was=isOpen(x.id);
+      oOpen.apply(this,arguments);
+      if(!was&&isOpen(x.id)&&!x.pushed){try{history.pushState({sd:2},'',location.href);x.pushed=true}catch(e){}}
+    };
+    window[x.close]=function(){
+      if(x.pushed&&isOpen(x.id)){x.pushed=false;history.back();return}
+      x.pushed=false;oClose.apply(this,arguments);
+    };
+  });
+  window.addEventListener('popstate',function(e){
+    for(var i=0;i<S.length;i++){
+      var x=S[i];
+      if(x.oClose&&isOpen(x.id)){
+        x.pushed=false;
+        if(x.id==='authSheet'){try{window.authBack()}catch(_){x.oClose()}}else x.oClose();
+        e.stopImmediatePropagation();return;
+      }
+    }
+  },true);
+})();
+</script>
+<script>
+/* tap ripple on login-sheet buttons */
+document.addEventListener('pointerdown',function(e){
+  var b=e.target.closest&&e.target.closest('.lg-go,.wl-btn,.ac-wal');
+  if(!b||b.disabled)return;
+  if(getComputedStyle(b).position==='static')b.style.position='relative';
+  b.style.overflow='hidden';
+  var r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)/3,x=document.createElement('span');
+  x.className='sd-rip';x.style.width=x.style.height=d+'px';
+  x.style.left=(e.clientX-r.left-d/2)+'px';x.style.top=(e.clientY-r.top-d/2)+'px';
+  b.appendChild(x);setTimeout(function(){x.remove()},650);
+},{passive:true});
 </script>
 
 </body>

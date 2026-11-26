@@ -30,11 +30,45 @@
 
   main{max-width:760px; margin:0 auto; padding:24px 20px 80px;}
 
-  .login-wrap{max-width:340px; margin:100px auto; text-align:center;}
-  .login-wrap h2{font-size:20px; margin-bottom:18px;}
-  .login-wrap input{width:100%; padding:12px; border:1px solid var(--line); font-size:14px; margin-bottom:12px;}
-  .login-wrap button{width:100%; background:var(--ink); color:#fff; padding:12px; font-weight:600; font-size:14px;}
-  .login-err{color:var(--rose); font-size:13px; margin-top:8px; display:none;}
+  /* ===== Admin login ===== */
+  .adm-login{position:fixed; inset:0; overflow:auto; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:radial-gradient(1100px 600px at 85% -10%, rgba(226,163,61,.28), transparent 60%),
+               radial-gradient(900px 600px at -10% 110%, rgba(181,73,91,.30), transparent 60%),
+               linear-gradient(160deg,#161C2E 0%,#212A42 55%,#2E3B5B 100%); color:#fff;}
+  .adm-login::before,.adm-login::after{content:""; position:absolute; border-radius:50%; filter:blur(60px); opacity:.45; pointer-events:none; animation:admFloat 12s ease-in-out infinite;}
+  .adm-login::before{width:260px; height:260px; background:#E2A33D; top:-60px; left:-50px;}
+  .adm-login::after{width:300px; height:300px; background:#B5495B; bottom:-90px; right:-70px; animation-delay:-6s;}
+  @keyframes admFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,24px)}}
+  .adm-card{position:relative; z-index:1; width:100%; max-width:380px; padding:34px 28px 26px; border-radius:26px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16);
+    -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); box-shadow:0 30px 70px rgba(0,0,0,.45); animation:admIn .6s cubic-bezier(.2,.8,.2,1) both;}
+  @keyframes admIn{from{opacity:0; transform:translateY(18px) scale(.98)}to{opacity:1; transform:none}}
+  .adm-mark{width:64px; height:64px; margin:0 auto 16px; border-radius:20px; display:grid; place-items:center;
+    background:linear-gradient(135deg,#E2A33D,#f3c871); color:#201C18; box-shadow:0 12px 30px rgba(226,163,61,.45); transform:rotate(-6deg);}
+  .adm-mark svg{width:32px; height:32px;}
+  .adm-card h2{font-size:26px; text-align:center; letter-spacing:.2px;}
+  .adm-card h2 span{color:#E2A33D;}
+  .adm-sub{text-align:center; font-size:13px; color:rgba(255,255,255,.62); margin:6px 0 24px;}
+  .adm-f{position:relative; margin-bottom:14px;}
+  .adm-f svg.ic{position:absolute; left:14px; top:50%; width:18px; height:18px; transform:translateY(-50%); stroke:rgba(255,255,255,.55); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; pointer-events:none;}
+  .adm-f input{width:100%; padding:15px 44px 15px 44px; font-size:15px; color:#fff; background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.14); border-radius:14px; outline:none; transition:.2s;}
+  .adm-f input::placeholder{color:rgba(255,255,255,.45);}
+  .adm-f input:focus{border-color:#E2A33D; background:rgba(255,255,255,.11); box-shadow:0 0 0 4px rgba(226,163,61,.18);}
+  .adm-eye{position:absolute; right:6px; top:50%; transform:translateY(-50%); width:36px; height:36px; background:none; color:rgba(255,255,255,.6); display:grid; place-items:center; border-radius:10px;}
+  .adm-eye svg{width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+  .adm-go{width:100%; margin-top:6px; padding:15px; font-size:15px; font-weight:700; letter-spacing:.3px; color:#201C18; border-radius:14px;
+    background:linear-gradient(135deg,#E2A33D,#f3c871); box-shadow:0 10px 26px rgba(226,163,61,.4); transition:transform .15s, box-shadow .15s;}
+  .adm-go:active{transform:scale(.98);}
+  .adm-go{position:relative; overflow:hidden;}
+  .adm-go::after{content:""; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg); animation:admShine 3s ease-in-out infinite; pointer-events:none;}
+  @keyframes admShine{0%,60%{left:-60%}100%{left:130%}}
+  .adm-go:disabled{opacity:.9; cursor:wait;}
+  .adm-go:disabled::after{display:none;}
+  .adm-spin{display:inline-block; width:15px; height:15px; margin-right:9px; vertical-align:-2px; border:2.5px solid rgba(32,28,24,.3); border-top-color:#201C18; border-radius:50%; animation:admRot .7s linear infinite;}
+  @keyframes admRot{to{transform:rotate(360deg)}}
+  .adm-foot{margin-top:18px; text-align:center; font-size:11.5px; color:rgba(255,255,255,.45); display:flex; align-items:center; justify-content:center; gap:6px;}
+  .adm-foot svg{width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+  .login-err{color:#ffb4bf; background:rgba(181,73,91,.22); border:1px solid rgba(181,73,91,.5); border-radius:12px; padding:10px 12px; font-size:13px; margin-top:14px; text-align:center; display:none;}
 
   section{margin-bottom:30px;}
   section h3{font-size:15px; margin-bottom:14px; font-weight:700;}
@@ -219,12 +253,24 @@ header .logo{flex:1;}
 </head>
 <body>
 
-<div id="loginScreen" class="login-wrap">
-  <h2>Dashboard Login</h2>
-  <input type="email" id="emailInput" placeholder="Email" autocomplete="username">
-  <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') tryLogin()">
-  <button onclick="tryLogin()">Login</button>
-  <div class="login-err" id="loginErr">Incorrect email or password</div>
+<div id="loginScreen" class="adm-login">
+  <div class="adm-card">
+    <div class="adm-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.6-3.1 8.1-7.5 9.5-4.4-1.4-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.4"/></svg></div>
+    <h2>Smart <span>Deal</span></h2>
+    <div class="adm-sub">Admin Dashboard · sign in to continue</div>
+    <div class="adm-f">
+      <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg>
+      <input type="email" id="emailInput" placeholder="Admin email" autocomplete="username" onkeydown="if(event.key==='Enter') document.getElementById('passwordInput').focus()">
+    </div>
+    <div class="adm-f">
+      <svg class="ic" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+      <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') tryLogin()">
+      <button type="button" class="adm-eye" aria-label="Show password" onclick="admEye(this)"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+    <button class="adm-go" id="admGo" onclick="tryLogin()">Login</button>
+    <div class="login-err" id="loginErr">Incorrect email or password</div>
+    <div class="adm-foot"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg>Secure admin access only</div>
+  </div>
 </div>
 
 <div id="adminScreen" style="display:none;">
@@ -441,12 +487,14 @@ function startAdmin(){
   startListeners();
   showView(location.hash.slice(1));
 }
-function showLoginErr(t){ const e = document.getElementById('loginErr'); e.textContent = t; e.style.display = 'block'; }
+function showLoginErr(t){ const e = document.getElementById('loginErr'); e.textContent = t; e.style.display = 'block'; const b=document.getElementById('admGo'); if(b){ b.disabled=false; b.textContent='Login'; } }
+function admEye(b){ const i=document.getElementById('passwordInput'); i.type = i.type==='password' ? 'text' : 'password'; b.style.color = i.type==='text' ? '#E2A33D' : ''; }
 function tryLogin(){
   const email = document.getElementById('emailInput').value.trim();
   const pw = document.getElementById('passwordInput').value;
   document.getElementById('loginErr').style.display = 'none';
   if(!email || !pw){ showLoginErr('Enter your email and password'); return; }
+  const gb=document.getElementById('admGo'); if(gb){ gb.disabled=true; gb.innerHTML='<span class="adm-spin"></span>Signing in...'; }
   firebase.auth().signInWithEmailAndPassword(email, pw).catch(function(e){
     showLoginErr(e && e.code === 'auth/too-many-requests' ? 'Too many attempts. Please wait a few minutes and try again.' : 'Incorrect email or password');
   });
@@ -454,7 +502,7 @@ function tryLogin(){
 function logout(){ firebase.auth().signOut().then(function(){ location.reload(); }); }
 firebase.auth().onAuthStateChanged(function(u){
   const isAdmin = !!(u && u.email && u.email.toLowerCase() === ADMIN_EMAIL);
-  document.getElementById('loginScreen').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('loginScreen').style.display = isAdmin ? 'none' : 'flex';
   document.getElementById('adminScreen').style.display = isAdmin ? 'block' : 'none';
   if(isAdmin) startAdmin(); else if(u) showLoginErr('This account is not an admin account');
 });
