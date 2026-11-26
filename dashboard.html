@@ -175,6 +175,46 @@
 .rv-btns button{padding:7px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;font-size:12.5px}
 .rv-btns .ok{background:#2F7D4F;color:#fff;border-color:#2F7D4F}
 .rv-btns .del{color:#B5495B;border-color:#B5495B}
+
+/* ---------- menu, views, notifications ---------- */
+header{position:sticky;top:0;z-index:40;background:var(--bg);gap:10px;}
+header .logo{flex:1;}
+.menu-btn{position:relative;width:40px;height:40px;background:#fff;border:1px solid var(--line);color:var(--ink);display:grid;place-items:center;flex:none;}
+.menu-btn svg{width:22px;height:22px;}
+.menu-btn i{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;border-radius:9px;background:var(--rose);color:#fff;font-style:normal;font-size:10.5px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px;}
+.menu-ov{position:fixed;inset:0;background:rgba(32,28,24,.5);z-index:90;display:none;}
+.menu-ov.open{display:block;}
+.menu{position:fixed;top:0;left:-100%;bottom:0;width:min(300px,86vw);background:#fff;z-index:91;transition:left .25s ease;overflow-y:auto;padding-bottom:30px;}
+.menu.open{left:0;}
+.menu-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;font-weight:700;font-size:17px;border-bottom:1px solid var(--line);}
+.menu-head button{background:none;font-size:18px;color:var(--ink);}
+.mi{display:flex;align-items:center;gap:12px;width:100%;padding:13px 18px;font-size:14.5px;font-weight:600;color:var(--ink);text-decoration:none;background:none;text-align:left;border:0;border-bottom:1px solid #f4f1ea;}
+.mi .ic{width:26px;text-align:center;font-size:18px;flex:none;}
+.mi.on{background:#FFF8EB;color:var(--indigo);box-shadow:inset 3px 0 0 var(--marigold);}
+.bd{margin-left:auto;min-width:20px;height:20px;border-radius:10px;background:var(--rose);color:#fff;font-size:11.5px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 6px;}
+.menu-sep{height:8px;background:var(--bg);}
+.menu-test{display:flex;gap:8px;padding:6px 18px;}
+.menu-test button{flex:1;padding:8px 6px;font-size:12px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink-soft);}
+.view{display:none;}
+.view.on{display:block;}
+.crumb{display:inline-block;font-size:13px;color:var(--ink-soft);margin-bottom:14px;text-decoration:none;}
+.attn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.attn{display:block;text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--line);padding:14px 12px;}
+.attn .n{font-family:'Fraunces',serif;font-weight:700;font-size:26px;line-height:1.1;}
+.attn .l{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+.attn.hot{border-color:var(--rose);background:#FDF1F3;}
+.attn.hot .n{color:var(--rose);}
+.attn.warm{border-color:var(--marigold);background:#FFF8EB;}
+.act{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f1eee6;text-decoration:none;color:var(--ink);font-size:13.5px;}
+.act:last-child{border-bottom:0;}
+.act .ai{font-size:18px;flex:none;}
+.act .at{flex:1;min-width:0;}
+.act small{display:block;color:var(--ink-soft);font-size:11.5px;margin-top:1px;}
+#actList{background:#fff;border:1px solid var(--line);padding:4px 14px;}
+.notif{position:fixed;left:50%;top:12px;transform:translate(-50%,-140%);transition:transform .3s;z-index:120;width:min(440px,94vw);background:var(--indigo);color:#fff;padding:13px 16px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;line-height:1.4;}
+.notif.on{transform:translate(-50%,0);}
+.notif.order{background:var(--rose);font-size:15px;}
+.notif small{display:block;font-weight:400;opacity:.9;font-size:12.5px;margin-top:2px;}
 </style>
 </head>
 <body>
@@ -189,10 +229,35 @@
 
 <div id="adminScreen" style="display:none;">
   <header>
+    <button class="menu-btn" onclick="openMenu()" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i id="menuDot"></i></button>
     <div class="logo">SMART DEAL<span>.</span> Dashboard</div>
     <button class="logout-link" onclick="logout()">Log out</button>
   </header>
+  <div class="menu-ov" id="menuOv" onclick="closeMenu()"></div>
+  <nav class="menu" id="menu">
+    <div class="menu-head">Menu<button onclick="closeMenu()" aria-label="Close">✕</button></div>
+    <a class="mi" data-v="home" href="#home"><span class="ic">🏠</span>Home</a>
+    <a class="mi" data-v="orders" href="#orders"><span class="ic">📦</span>Orders &amp; Returns<b class="bd" id="bd-orders"></b></a>
+    <a class="mi" data-v="reviews" href="#reviews"><span class="ic">⭐</span>Reviews<b class="bd" id="bd-reviews"></b></a>
+    <a class="mi" data-v="wallet" href="#wallet"><span class="ic">👛</span>Wallet<b class="bd" id="bd-wallet"></b></a>
+    <a class="mi" data-v="coupons" href="#coupons"><span class="ic">🏷️</span>Coupon codes</a>
+    <a class="mi" data-v="resellers" href="#resellers"><span class="ic">🤝</span>Resellers</a>
+    <a class="mi" data-v="payouts" href="#payouts"><span class="ic">💸</span>Reseller payouts</a>
+    <a class="mi" data-v="stock" href="#stock"><span class="ic">📋</span>Product stock</a>
+    <a class="mi" data-v="costs" href="#costs"><span class="ic">🧾</span>Product costs</a>
+    <a class="mi" data-v="reset" href="#reset"><span class="ic">🔑</span>Customer password reset</a>
+    <div class="menu-sep"></div>
+    <a class="mi" href="product-form.html"><span class="ic">➕</span>Add product</a>
+    <a class="mi" href="delete-product.html"><span class="ic">✏️</span>Edit / Delete products</a>
+    <a class="mi" href="slider-form.html"><span class="ic">🖼️</span>Home slider</a>
+    <a class="mi" href="index.html"><span class="ic">🏬</span>View store</a>
+    <div class="menu-sep"></div>
+    <button class="mi" id="soundBtn" onclick="toggleSound()"><span class="ic">🔔</span><span id="soundTxt">Sound: On</span></button>
+    <div class="menu-test"><button onclick="soundOrder()">Test order sound</button><button onclick="soundOther()">Test other sound</button></div>
+  </nav>
+  <div class="notif" id="notif" onclick="notifClick()"></div>
   <main>
+    <div class="view" id="v-home">
     <section>
       <h3>Overview</h3>
       <div class="stats-grid" id="statsGrid">
@@ -206,13 +271,18 @@
     </section>
 
     <section>
-      <h3>Manage Store</h3>
-      <div class="links-grid">
-        <a class="link-card" href="product-form.html"><div class="ic">➕</div><div class="lbl">Add Product</div></a>
-        <a class="link-card" href="delete-product.html"><div class="ic">✏️</div><div class="lbl">Edit / Delete Products</div></a>
-        <a class="link-card" href="slider-form.html"><div class="ic">🖼️</div><div class="lbl">Home Slider</div></a>
-        <a class="link-card" href="index.html"><div class="ic">🏬</div><div class="lbl">View Store</div></a>
+      <h3>Needs attention</h3>
+      <div class="attn-grid" id="attnGrid"></div>
+    </section>
+
+    <section>
+      <h3>Visitors</h3>
+      <div class="stats-grid vis-grid" id="visGrid">
+        <div class="stat-card"><div class="num">…</div><div class="lbl">Today</div><div class="vs"></div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">Last 7 days</div><div class="vs"></div></div>
+        <div class="stat-card"><div class="num">…</div><div class="lbl">All time</div><div class="vs"></div></div>
       </div>
+      <div class="vis-note">Each customer is counted once per day. "Link" = WhatsApp, social media, direct link or other sites. "Search" = came from Google, Bing etc.</div>
     </section>
 
     <section>
@@ -228,52 +298,37 @@
       <div class="pf-box"><div class="pf-h">Top products by profit</div><div id="pfTop"></div></div>
     </section>
 
-    <section>
-      <h3>Visitors</h3>
-      <div class="stats-grid vis-grid" id="visGrid">
-        <div class="stat-card"><div class="num">…</div><div class="lbl">Today</div><div class="vs"></div></div>
-        <div class="stat-card"><div class="num">…</div><div class="lbl">Last 7 days</div><div class="vs"></div></div>
-        <div class="stat-card"><div class="num">…</div><div class="lbl">All time</div><div class="vs"></div></div>
-      </div>
-      <div class="vis-note">Each customer is counted once per day. "Link" = WhatsApp, social media, direct link or other sites. "Search" = came from Google, Bing etc.</div>
+    <section id="actSec" style="display:none;">
+      <h3>Recent activity</h3>
+      <div id="actList"><div class="empty">New orders, reviews and requests will show here while this page is open.</div></div>
+    </section>
+    </div>
+    <div class="view" id="v-orders">
+    <a class="crumb" href="#home">← Home</a>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search by Order ID (e.g. SD4F8K2)">
+      <button onclick="searchOrder()">Find</button>
+    </div>
+
+    <section id="returnsSection" style="display:none;">
+      <h3>Return Requests</h3>
+      <div id="returnsList"></div>
     </section>
 
     <section>
-      <h3>Product stock</h3>
-      <div class="cost-form">
-        <input type="text" id="stockSearch" placeholder="Search product…" oninput="renderStockList()" style="width:100%; padding:10px; border:1px solid var(--line); margin-bottom:8px; font:inherit; font-size:14px;">
-        <div class="cp-note" id="stockSum"></div>
-        <div id="stockList" style="max-height:60vh; overflow-y:auto;"><div class="empty">Loading products…</div></div>
-      </div>
+      <h3>Recent Orders</h3>
+      <div id="ordersList"><div class="loading">Loading orders...</div></div>
     </section>
-
-    <section>
-      <h3>Product costs</h3>
-      <div class="cost-form">
-        <div class="cost-extra"><span>Extra cost per order ₹<br><small style="color:var(--ink-soft)">packing, courier etc. (optional)</small></span><input type="number" id="extraCost" min="0" placeholder="0"></div>
-        <details class="cost-dd" id="costDD">
-          <summary><span id="costSum">Select product to set cost price</span><i>▾</i></summary>
-          <div id="costList"><div class="empty">Loading products…</div></div>
-        </details>
-        <button class="cp-save" id="costSaveBtn" style="margin-top:12px" onclick="saveCosts()">Save costs</button>
-        <div class="cp-note" id="costNote"></div>
-      </div>
-    </section>
-
+    </div>
+    <div class="view" id="v-reviews">
+    <a class="crumb" href="#home">← Home</a>
     <section>
       <h3 id="rvHead">Customer Reviews</h3>
       <div id="reviewList"><div class="empty">Loading…</div></div>
     </section>
-
-    <section>
-      <h3>Customer password reset</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input id="rsPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="Customer mobile number" style="flex:1;min-width:180px;padding:10px;border:1px solid #ccc;border-radius:8px">
-        <button onclick="sendCustomerReset()" style="padding:10px 16px;border:0;border-radius:8px;background:#201c18;color:#fff;font-weight:600">Send reset email</button>
-      </div>
-      <div id="rsMsg" class="empty" style="margin-top:8px;line-height:1.5"></div>
-    </section>
-
+    </div>
+    <div class="view" id="v-wallet">
+    <a class="crumb" href="#home">← Home</a>
     <section>
       <h3 id="wrHead">Wallet: add money requests</h3>
       <div id="walReqList"><div class="empty">Loading…</div></div>
@@ -289,7 +344,9 @@
         <div id="wInfo" style="margin-top:12px"></div>
       </div>
     </section>
-
+    </div>
+    <div class="view" id="v-coupons">
+    <a class="crumb" href="#home">← Home</a>
     <section>
       <h3>Coupon Codes</h3>
       <div class="cp-form">
@@ -305,7 +362,9 @@
       </div>
       <div id="couponList"></div>
     </section>
-
+    </div>
+    <div class="view" id="v-resellers">
+    <a class="crumb" href="#home">← Home</a>
     <section>
       <h3>Resellers</h3>
       <div class="rs-form">
@@ -319,27 +378,52 @@
       </div>
       <div id="resellerList"></div>
     </section>
-
+    </div>
+    <div class="view" id="v-payouts">
+    <a class="crumb" href="#home">← Home</a>
     <section>
       <h3>Reseller payouts</h3>
       <div class="po-sum" id="poSum"></div>
       <div id="payoutList"></div>
     </section>
-
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Search by Order ID (e.g. SD4F8K2)">
-      <button onclick="searchOrder()">Find</button>
     </div>
-
-    <section id="returnsSection" style="display:none;">
-      <h3>Return Requests</h3>
-      <div id="returnsList"></div>
-    </section>
-
+    <div class="view" id="v-stock">
+    <a class="crumb" href="#home">← Home</a>
     <section>
-      <h3>Recent Orders</h3>
-      <div id="ordersList"><div class="loading">Loading orders...</div></div>
+      <h3>Product stock</h3>
+      <div class="cost-form">
+        <input type="text" id="stockSearch" placeholder="Search product…" oninput="renderStockList()" style="width:100%; padding:10px; border:1px solid var(--line); margin-bottom:8px; font:inherit; font-size:14px;">
+        <div class="cp-note" id="stockSum"></div>
+        <div id="stockList" style="max-height:60vh; overflow-y:auto;"><div class="empty">Loading products…</div></div>
+      </div>
     </section>
+    </div>
+    <div class="view" id="v-costs">
+    <a class="crumb" href="#home">← Home</a>
+    <section>
+      <h3>Product costs</h3>
+      <div class="cost-form">
+        <div class="cost-extra"><span>Extra cost per order ₹<br><small style="color:var(--ink-soft)">packing, courier etc. (optional)</small></span><input type="number" id="extraCost" min="0" placeholder="0"></div>
+        <details class="cost-dd" id="costDD">
+          <summary><span id="costSum">Select product to set cost price</span><i>▾</i></summary>
+          <div id="costList"><div class="empty">Loading products…</div></div>
+        </details>
+        <button class="cp-save" id="costSaveBtn" style="margin-top:12px" onclick="saveCosts()">Save costs</button>
+        <div class="cp-note" id="costNote"></div>
+      </div>
+    </section>
+    </div>
+    <div class="view" id="v-reset">
+    <a class="crumb" href="#home">← Home</a>
+    <section>
+      <h3>Customer password reset</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="rsPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="Customer mobile number" style="flex:1;min-width:180px;padding:10px;border:1px solid #ccc;border-radius:8px">
+        <button onclick="sendCustomerReset()" style="padding:10px 16px;border:0;border-radius:8px;background:#201c18;color:#fff;font-weight:600">Send reset email</button>
+      </div>
+      <div id="rsMsg" class="empty" style="margin-top:8px;line-height:1.5"></div>
+    </section>
+    </div>
   </main>
 </div>
 
@@ -353,8 +437,9 @@ const RETURN_STATUSES = ["Return Requested","Return Approved","Return Rejected"]
 let _adminStarted = false;
 function startAdmin(){
   if(_adminStarted) return; _adminStarted = true;
-  loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons();
-  loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings(); loadStock(); loadReviewsAdmin(); loadWalletRequests();
+  loadStats(); loadVisitors(); loadCostSettings();
+  startListeners();
+  showView(location.hash.slice(1));
 }
 function showLoginErr(t){ const e = document.getElementById('loginErr'); e.textContent = t; e.style.display = 'block'; }
 function tryLogin(){
@@ -494,9 +579,9 @@ async function loadRecentOrders(){
       container.innerHTML = '<div class="empty">No orders yet.</div>';
       return;
     }
-    let html = '';
-    snap.forEach(doc => { html += renderOrderRow(doc.data()); });
-    container.innerHTML = html;
+    const arr = []; snap.forEach(doc => arr.push(doc.data()));
+    arr.sort((a, b) => (b.status === 'Order Placed') - (a.status === 'Order Placed'));   // orders waiting to be processed come first
+    container.innerHTML = arr.map(renderOrderRow).join('');
   }catch(e){
     console.error(e);
     container.innerHTML = '<div class="empty">Could not load orders. Check your Firebase setup.</div>';
@@ -1062,6 +1147,136 @@ async function wGive(ph){
     dashToast('₹' + amt + ' bonus given ✓', 'ok');
     wLookup();
   }catch(e){ console.error(e); m.textContent = 'Could not save. Please try again.'; m.className = 'cp-note no'; }
+}
+
+/* ---------- Menu + pages ---------- */
+const VIEWS = ['home','orders','reviews','wallet','coupons','resellers','payouts','stock','costs','reset'];
+let CUR_VIEW = 'home';
+function openMenu(){ document.getElementById('menu').classList.add('open'); document.getElementById('menuOv').classList.add('open'); }
+function closeMenu(){ document.getElementById('menu').classList.remove('open'); document.getElementById('menuOv').classList.remove('open'); }
+function go(v){ if(location.hash === '#' + v) showView(v); else location.hash = v; }
+function showView(v){
+  if(!VIEWS.includes(v)) v = 'home';
+  CUR_VIEW = v;
+  document.querySelectorAll('.view').forEach(e => e.classList.toggle('on', e.id === 'v-' + v));
+  document.querySelectorAll('.mi[data-v]').forEach(e => e.classList.toggle('on', e.dataset.v === v));
+  closeMenu(); window.scrollTo(0, 0);
+  if(v === 'home'){ loadStats(); loadVisitors(); }
+  if(v === 'orders'){ loadReturnRequests(); if(document.getElementById('searchInput').value.trim()) searchOrder(); else loadRecentOrders(); }
+  if(v === 'reviews') loadReviewsAdmin();
+  if(v === 'wallet') loadWalletRequests();
+  if(v === 'coupons') loadCoupons();
+  if(v === 'resellers') loadResellers();
+  if(v === 'payouts') loadPayouts();
+  if(v === 'stock') loadStock();
+}
+window.addEventListener('hashchange', () => { if(_adminStarted) showView(location.hash.slice(1)); });
+
+/* ---------- Sounds (no audio files needed) ---------- */
+let AC = null, SOUND_ON = true;
+try{ SOUND_ON = localStorage.getItem('sdAdminSound') !== 'off'; }catch(e){}
+function audioCtx(){
+  try{ if(!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if(AC.state === 'suspended') AC.resume(); }catch(e){}
+  return AC;
+}
+document.addEventListener('pointerdown', audioCtx, { once: true });
+function tone(freq, t0, dur, vol, type){
+  const c = audioCtx(); if(!c) return;
+  const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+  o.type = type || 'sine'; o.frequency.value = freq; o.connect(g); g.connect(c.destination);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || .25, t + .02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.start(t); o.stop(t + dur + .05);
+}
+function soundOther(){ tone(880, 0, .12, .25); tone(880, .2, .12, .25); }   // short "tu-tu" for everything except orders
+function soundOrder(){ [0, .9].forEach(d => [523, 659, 784, 1047].forEach((f, i) => tone(f, d + i * .14, .2, .32, 'triangle'))); }   // longer rising chime, played twice, only for new orders
+function toggleSound(){
+  SOUND_ON = !SOUND_ON;
+  try{ localStorage.setItem('sdAdminSound', SOUND_ON ? 'on' : 'off'); }catch(e){}
+  document.getElementById('soundTxt').textContent = 'Sound: ' + (SOUND_ON ? 'On' : 'Off');
+document.getElementById('menu').addEventListener('click', e => { if(e.target.closest('a.mi')) closeMenu(); });
+  if(SOUND_ON) soundOther();
+}
+document.getElementById('soundTxt').textContent = 'Sound: ' + (SOUND_ON ? 'On' : 'Off');
+
+/* ---------- Live alerts: new order / return / review / wallet request ---------- */
+const COUNTS = { orders: 0, returns: 0, reviews: 0, wal: 0 };
+const EVENTS = [], SEEN = new Set();
+let _notifT = null, _notifView = 'home', _listening = false;
+function fmtTime(d){ return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
+function renderAttention(){
+  const cards = [
+    ['🛒', 'New orders to process', COUNTS.orders, 'orders', 'hot'],
+    ['↩️', 'Return requests', COUNTS.returns, 'orders', 'warm'],
+    ['⭐', 'Reviews waiting', COUNTS.reviews, 'reviews', 'warm'],
+    ['👛', 'Wallet money requests', COUNTS.wal, 'wallet', 'warm']
+  ];
+  document.getElementById('attnGrid').innerHTML = cards.map(c => `<a class="attn ${c[2] ? c[4] : ''}" href="#${c[3]}"><div class="n">${c[0]} ${c[2]}</div><div class="l">${c[1]}</div></a>`).join('');
+  const set = (id, n) => { const e = document.getElementById(id); e.textContent = n; e.style.display = n ? 'flex' : 'none'; };
+  set('bd-orders', COUNTS.orders + COUNTS.returns); set('bd-reviews', COUNTS.reviews); set('bd-wallet', COUNTS.wal);
+  const total = COUNTS.orders + COUNTS.returns + COUNTS.reviews + COUNTS.wal, dot = document.getElementById('menuDot');
+  dot.textContent = total; dot.style.display = total ? 'flex' : 'none';
+  document.title = (total ? '(' + total + ') ' : '') + 'Dashboard — Smart Deal';
+}
+function renderActivity(){
+  const box = document.getElementById('actList');
+  if(!EVENTS.length) return;
+  document.getElementById('actSec').style.display = 'block';
+  box.innerHTML = EVENTS.map(e => `<a class="act" href="#${e.view}"><span class="ai">${e.icon}</span><span class="at">${escH(e.title)}<small>${escH(e.text)} · ${fmtTime(e.ts)}</small></span></a>`).join('');
+}
+function notify(kind, icon, title, text, view){
+  EVENTS.unshift({ kind, icon, title, text, view, ts: new Date() }); if(EVENTS.length > 20) EVENTS.pop();
+  renderActivity();
+  if(SOUND_ON){ if(kind === 'order') soundOrder(); else soundOther(); }
+  try{ if(navigator.vibrate) navigator.vibrate(kind === 'order' ? [200, 100, 200, 100, 200] : 120); }catch(e){}
+  const n = document.getElementById('notif');
+  n.className = 'notif on ' + (kind === 'order' ? 'order' : '');
+  n.innerHTML = icon + ' ' + escH(title) + '<small>' + escH(text) + '</small>';
+  _notifView = view; clearTimeout(_notifT); _notifT = setTimeout(() => n.classList.remove('on'), kind === 'order' ? 15000 : 7000);
+}
+function notifClick(){ document.getElementById('notif').classList.remove('on'); go(_notifView); }
+function refreshCurrent(kind){
+  if(CUR_VIEW === 'home') loadStats();
+  if(kind === 'orders' && CUR_VIEW === 'orders'){ loadReturnRequests(); if(!document.getElementById('searchInput').value.trim()) loadRecentOrders(); }
+  if(kind === 'reviews' && CUR_VIEW === 'reviews') loadReviewsAdmin();
+  if(kind === 'wal' && CUR_VIEW === 'wallet') loadWalletRequests();
+}
+function startListeners(){
+  if(_listening) return; _listening = true;
+  let first = { o: true, r: true, w: true };
+  const err = e => console.error('Live alerts error:', e);
+  db.collection('orders').where('status', 'in', ['Order Placed', 'Return Requested']).onSnapshot(snap => {
+    let o = 0, r = 0;
+    snap.forEach(d => { if(d.data().status === 'Order Placed') o++; else r++; });
+    COUNTS.orders = o; COUNTS.returns = r;
+    if(!first.o){
+      snap.docChanges().forEach(ch => {
+        if(ch.type !== 'added') return;
+        const d = ch.doc.data(), key = ch.doc.id + '|' + d.status;
+        if(SEEN.has(key)) return; SEEN.add(key);
+        if(d.status === 'Order Placed') notify('order', '🛒', 'NEW ORDER ' + d.orderId, (d.name || '') + ' · ₹' + (d.total || 0) + ' · process it now', 'orders');
+        else notify('return', '↩️', 'Return request ' + d.orderId, (d.name || '') + ' wants to return an order', 'orders');
+      });
+      refreshCurrent('orders');
+    }else{ snap.forEach(d => SEEN.add(d.id + '|' + d.data().status)); first.o = false; }
+    renderAttention();
+  }, err);
+  db.collection('reviews').where('approved', '==', false).onSnapshot(snap => {
+    COUNTS.reviews = snap.size;
+    if(!first.r){
+      snap.docChanges().forEach(ch => { if(ch.type === 'added'){ const d = ch.doc.data(); notify('review', '⭐', 'New review waiting', (d.name || 'Customer') + ' · ' + (d.rating || 0) + ' stars', 'reviews'); } });
+      refreshCurrent('reviews');
+    }else first.r = false;
+    renderAttention();
+  }, err);
+  db.collection('walletRequests').where('status', '==', 'Pending').onSnapshot(snap => {
+    COUNTS.wal = snap.size;
+    if(!first.w){
+      snap.docChanges().forEach(ch => { if(ch.type === 'added'){ const d = ch.doc.data(); notify('wallet', '👛', 'Wallet money request', (d.phone || '') + ' · ₹' + (d.amount || 0) + ' · UTR ' + (d.utr || ''), 'wallet'); } });
+      refreshCurrent('wal');
+    }else first.w = false;
+    renderAttention();
+  }, err);
+  renderAttention();
 }
 </script>
 </body>

@@ -737,6 +737,8 @@ if ('serviceWorker' in navigator) {
 .lg-note a{color:#e8561f;font-weight:600}
 .lg-skip{display:none;max-width:420px;margin:16px auto 28px;text-align:center;color:#666;font-size:14.5px;font-weight:600;background:none;border:0;font-family:inherit;width:100%;padding:10px}
 .lg-skip u{color:#e8561f}
+.lg-info{background:#fff7ec;border:1px solid #f6d9b0;border-radius:12px;padding:11px 12px;font-size:13px;line-height:1.55;color:#7a4a00;margin:8px 0 2px;display:none}
+.lg-info a{display:inline-block;margin:6px 8px 0 0;padding:7px 12px;border-radius:20px;background:#e8561f;color:#fff!important;font-weight:600;text-decoration:none;font-size:12.5px}
 </style>
 </head>
 <body>
@@ -1673,6 +1675,7 @@ function contactWhatsApp(){
   <div class="lg-card">
     <div class="lg-tabs" id="auTabs"><button id="auTabLogin" class="on" onclick="authView('login')">Login</button><button id="auTabSignup" onclick="authView('signup')">Create account</button></div>
     <div class="lg-h" id="auTitle">Login</div>
+    <div class="lg-info" id="auInfo"><b>How to get your reset code</b><br>First contact Smart Deal customer care on WhatsApp or by call. After they verify you, they will give you a reset code or link. Paste it below and choose a new password.<br><a href="#" onclick="authAskCode();return false">WhatsApp us</a><a href="#" onclick="authCall();return false">Call us</a></div>
     <div id="auNameWrap" style="display:none"><label for="auName">Your name</label><div class="lg-f"><input id="auName" maxlength="40" autocomplete="name" placeholder="e.g. Ravi Kumar"></div></div>
     <label for="auPhone">Mobile number</label>
     <div class="lg-f"><span>+91</span><input id="auPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" autocomplete="tel-national"></div>
@@ -1723,7 +1726,7 @@ function contactWhatsApp(){
     <div class="wl-sec">Add money requests</div>
     <div class="wl-box" id="wlReqs"><div class="sh-empty" style="padding:14px">Loading…</div></div>
 
-    <div class="wl-sec">Wallet history</div>
+    <div class="wl-sec">Last 5 transactions</div>
     <div class="wl-box" id="wlHist"><div class="sh-empty" style="padding:14px">Loading…</div></div>
   </div>
 </div>
@@ -1757,6 +1760,7 @@ function contactWhatsApp(){
   window.authSkip=function(){try{sessionStorage.setItem('sdSkip','1')}catch(e){}closeAuth()};
   window.requireLogin=function(cb){after=cb||null;openAuth('checkout')};
   window.authEye=function(b){var i=$('auPass');var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'Hide':'Show'};
+  window.authCall=function(){var n=String(WHATSAPP_NUMBER||'').replace(/\D/g,'');if(n)location.href='tel:+'+n};
   window.authAskCode=function(){var p=$('auPhone').value.replace(/\D/g,'');var t='Hello Smart Deal, I forgot my password. My mobile number: '+(p||'');window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent(t),'_blank')};
   window.authView=function(v){
     view=v;msg('');
@@ -1770,8 +1774,9 @@ function contactWhatsApp(){
     $('auTitle').textContent=v==='login'?'Login to your account':(v==='signup'?'Create your account':'Reset password');
     $('auForgot').style.display=v==='login'?'block':'none';
     $('auBackLogin').style.display=v==='forgot'?'block':'none';
+    $('auInfo').style.display=v==='forgot'?'block':'none';
     $('auNote').innerHTML=v==='forgot'
-      ?'1. <a href="#" onclick="authAskCode();return false">Message us on WhatsApp</a> to get a reset code.<br>2. Paste the code or link we send you, then choose a new password.<br>The code works for about 1 hour.'
+      ?'The code works for about 1 hour. You will not get it automatically: customer care gives it to you after you contact us.'
       :(v==='signup'?'One account per mobile number. Use the same number when you order.':'');
   };
   function errText(e){
@@ -1986,7 +1991,7 @@ function contactWhatsApp(){
       var s2=await db.collection('walletTxns').where('phone','==',ph).get(),h=[];
       s2.forEach(function(d){h.push(d.data())});
       h.sort(function(x,y){return String(y.createdAt||'').localeCompare(String(x.createdAt||''))});
-      hs.innerHTML=h.length?h.slice(0,30).map(function(t){
+      hs.innerHTML=h.length?h.slice(0,5).map(function(t){
         var cr=t.type==='credit';
         return '<div class="wl-tx"><div>'+esc(t.note||(cr?'Credit':'Debit'))+'<small>'+(t.bucket==='bonus'?'Bonus & Cashback':'Add Balance')+' · '+dt(t.createdAt)+'</small></div><span class="'+(cr?'p':'m')+'">'+(cr?'+':'-')+rs(t.amount)+'</span></div>';
       }).join(''):'<div class="sh-empty" style="padding:14px">No wallet activity yet.</div>';
