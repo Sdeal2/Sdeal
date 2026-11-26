@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 <style>
   :root{
@@ -82,9 +83,10 @@
 
 <div id="loginScreen" class="login-wrap">
   <h2>Admin Login</h2>
-  <input type="password" id="passwordInput" placeholder="Enter password" onkeydown="if(event.key==='Enter') tryLogin()">
+  <input type="email" id="emailInput" placeholder="Email" autocomplete="username">
+  <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') tryLogin()">
   <button onclick="tryLogin()">Login</button>
-  <div class="login-err" id="loginErr">Incorrect password</div>
+  <div class="login-err" id="loginErr">Incorrect email or password</div>
 </div>
 
 <div id="adminScreen" style="display:none;">
@@ -111,40 +113,32 @@
 </div>
 
 <script>
-/* ============================================================
-   Change this password to something only you know.
-   Note: this is a simple lock for convenience, not bank-level
-   security — anyone who reads the page source could find it.
-   Good enough for a small store; don't use it for anything
-   more sensitive than order status.
-   ============================================================ */
-const ADMIN_PASSWORD = "smartd2026";
+const ADMIN_EMAIL = "sdeal7045@gmail.com";
 
 const STATUS_STEPS = ["Order Placed","Shipped","Out for Delivery","Delivered"];
 
+let _adminStarted = false;
+function startAdmin(){
+  if(_adminStarted) return; _adminStarted = true;
+  loadReturnRequests(); loadRecentOrders();
+}
+function showLoginErr(t){ const e = document.getElementById('loginErr'); e.textContent = t; e.style.display = 'block'; }
 function tryLogin(){
-  const val = document.getElementById('passwordInput').value;
-  if(val === ADMIN_PASSWORD){
-    sessionStorage.setItem('smartd_admin', 'true');
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminScreen').style.display = 'block';
-    loadReturnRequests();
-    loadRecentOrders();
-  } else {
-    document.getElementById('loginErr').style.display = 'block';
-  }
+  const email = document.getElementById('emailInput').value.trim();
+  const pw = document.getElementById('passwordInput').value;
+  document.getElementById('loginErr').style.display = 'none';
+  if(!email || !pw){ showLoginErr('Enter your email and password'); return; }
+  firebase.auth().signInWithEmailAndPassword(email, pw).catch(function(e){
+    showLoginErr(e && e.code === 'auth/too-many-requests' ? 'Too many attempts. Please wait a few minutes and try again.' : 'Incorrect email or password');
+  });
 }
-
-function logout(){
-  sessionStorage.removeItem('smartd_admin');
-  location.reload();
-}
-
-if(sessionStorage.getItem('smartd_admin') === 'true'){
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('adminScreen').style.display = 'block';
-  window.addEventListener('load', () => { loadReturnRequests(); loadRecentOrders(); });
-}
+function logout(){ firebase.auth().signOut().then(function(){ location.reload(); }); }
+firebase.auth().onAuthStateChanged(function(u){
+  const isAdmin = !!(u && u.email && u.email.toLowerCase() === ADMIN_EMAIL);
+  document.getElementById('loginScreen').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('adminScreen').style.display = isAdmin ? 'block' : 'none';
+  if(isAdmin) startAdmin(); else if(u) showLoginErr('This account is not an admin account');
+});
 
 function renderOrderRow(order){
   const itemsSummary = order.items.map(i => `${i.name} (${i.size}) x${i.qty}`).join(', ');
