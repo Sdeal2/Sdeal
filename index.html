@@ -626,6 +626,118 @@ if ('serviceWorker' in navigator) {
 .au-oe{padding:6px 16px 12px;color:#777;font-size:13px}
 .au-oc a{color:#e8561f;font-weight:600;text-decoration:none}
 </style>
+<style id="sdV3Css">
+/* ===== v3: search+wallet row, login redesign, orders sheet, wallet ===== */
+.sd-srow{display:flex;gap:8px;align-items:center}
+.sd-srow .sd-search{flex:1;min-width:0}
+.sd-wal{flex:none;display:flex;align-items:center;gap:6px;height:42px;padding:0 11px;border:1.5px solid var(--sd-line);border-radius:8px;background:#fff;color:var(--sd-ink);font-size:13.5px;font-weight:700}
+.sd-wal svg{width:22px;height:22px;color:var(--sd-brand)}
+
+/* checkout wallet box */
+.wl-use{display:flex!important;align-items:center;gap:10px;padding:12px 14px;border:1px dashed #1b8a3a;border-radius:10px;background:#f0faf3;font-size:13.5px;font-weight:600;cursor:pointer;margin-bottom:0!important}
+.wl-use input{width:20px!important;height:20px;accent-color:#1b8a3a;flex:none;padding:0!important}
+.wl-use small{display:block;font-weight:400;color:#666;font-size:11.5px;margin-top:2px}
+.wl-use.dis{opacity:.6;cursor:default}
+
+/* account wallet card */
+.ac-wal{margin:0 14px 4px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#2e3b5b,#44557f);color:#fff;display:flex;align-items:center;gap:12px;cursor:pointer}
+.ac-wal .wi{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}
+.ac-wal .wi svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ac-wal .wt{flex:1}
+.ac-wal .wt small{display:block;font-size:12px;opacity:.8}
+.ac-wal .wt b{font-size:22px}
+.ac-wal .wa{font-size:12.5px;font-weight:600;background:#fff;color:#2e3b5b;padding:7px 12px;border-radius:20px}
+
+/* generic full-screen sheets (orders, wallet) */
+.sheet{position:fixed;inset:0;z-index:250;background:#faf8f4;display:none;overflow:auto;-webkit-overflow-scrolling:touch}
+.sheet.open{display:block}
+.sh-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 14px;background:#fff;border-bottom:1px solid #eee;font-weight:700;font-size:17px}
+.sh-top button{background:none;border:0;font-size:22px;padding:0 6px;color:var(--ink)}
+.sh-body{max-width:560px;margin:0 auto;padding:14px 14px 50px}
+.sh-empty{text-align:center;color:#888;font-size:14px;padding:50px 10px}
+
+/* orders */
+.od{background:#fff;border:1px solid #eee;border-radius:14px;margin-bottom:12px;overflow:hidden}
+.od-h{display:flex;gap:12px;padding:14px;cursor:pointer;align-items:center}
+.od-im{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:none;display:grid;place-items:center;color:#fff;font-weight:700;background:var(--sd-brand)}
+.od-m{flex:1;min-width:0}
+.od-id{font-weight:700;font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.od-n{font-size:12.5px;color:#555;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.od-s{font-size:12px;color:#888;margin-top:3px}
+.od-st{font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;background:#fff3e0;color:#b26a00;flex:none}
+.od-st.g{background:#e6f4ea;color:#1b8a3a}
+.od-st.r{background:#fdecea;color:#c62828}
+.od-st.b{background:#e8f0fe;color:#1a56c4}
+.od-ar{color:#aaa;font-size:20px;transition:transform .2s;flex:none}
+.od.open .od-ar{transform:rotate(90deg)}
+.od-d{display:none;border-top:1px solid #f1f1f1;padding:12px 14px 14px;font-size:13px;line-height:1.55;color:#444}
+.od.open .od-d{display:block}
+.od-it{display:flex;gap:10px;align-items:center;padding:6px 0}
+.od-it .od-im{width:44px;height:44px;border-radius:8px}
+.od-it .t{flex:1;min-width:0;font-size:12.5px;line-height:1.3}
+.od-it small{display:block;color:#888;font-size:11.5px}
+.od-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+.od-row.tot{font-weight:700;border-top:1px dashed #ddd;margin-top:6px;padding-top:8px}
+.od-addr{margin-top:8px;color:#666;font-size:12.5px}
+.od-tr{display:block;text-align:center;margin-top:12px;padding:11px;border-radius:10px;background:var(--sd-brand);color:#fff;font-weight:700;text-decoration:none;font-size:14px}
+
+/* wallet sheet */
+.wl-card{border-radius:18px;background:linear-gradient(135deg,#e8561f,#f4944f);color:#fff;padding:18px}
+.wl-card small{opacity:.9;font-size:12.5px}
+.wl-big{font-size:34px;font-weight:700;line-height:1.2}
+.wl-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.wl-two div{background:rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;font-size:12px}
+.wl-two b{display:block;font-size:19px;margin-top:2px}
+.wl-note{font-size:11.5px;opacity:.95;margin-top:10px;line-height:1.5}
+.wl-sec{font-weight:700;font-size:15px;margin:20px 2px 8px}
+.wl-box{background:#fff;border:1px solid #eee;border-radius:14px;padding:14px}
+.wl-chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.wl-chips button{padding:8px 14px;border:1px solid #ddd;border-radius:20px;background:#fff;font-weight:600;font-size:13px}
+.wl-in{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;font-size:15px;font-family:inherit}
+.wl-btn{display:block;width:100%;margin-top:12px;padding:13px;border:0;border-radius:10px;background:#201c18;color:#fff;font-weight:700;font-size:15px;font-family:inherit}
+.wl-btn:disabled{opacity:.5}
+.wl-btn.alt{background:#fff;color:#201c18;border:1px solid #bbb;font-weight:600;font-size:14px;text-align:center;text-decoration:none}
+.wl-msg{margin-top:10px;font-size:13px;min-height:16px}
+.wl-msg.err{color:#c62828}
+.wl-msg.ok{color:#1b8a3a}
+.wl-tx{display:flex;justify-content:space-between;gap:10px;padding:11px 2px;border-bottom:1px solid #f0efe9;font-size:13px}
+.wl-tx:last-child{border-bottom:0}
+.wl-tx small{display:block;color:#888;font-size:11.5px;margin-top:1px}
+.wl-tx .p{color:#1b8a3a;font-weight:700;white-space:nowrap}
+.wl-tx .m{color:#c62828;font-weight:700;white-space:nowrap}
+.wl-tx .pd{color:#b26a00;font-weight:700;white-space:nowrap}
+
+/* login / signup page */
+#authSheet{position:fixed;inset:0;z-index:300;background:#fff7f2;display:none;overflow:auto;padding:0}
+#authSheet.open{display:block}
+.lg-hero{background:linear-gradient(160deg,#e8561f,#f4944f);color:#fff;padding:calc(38px + env(safe-area-inset-top,0px)) 24px 74px;text-align:center;position:relative;border-radius:0 0 38px 38px}
+.lg-x{position:absolute;left:10px;top:calc(10px + env(safe-area-inset-top,0px));background:rgba(255,255,255,.2);border:0;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px}
+.lg-brand{font:400 36px/1.2 'Pacifico',cursive,serif;text-shadow:0 3px 14px rgba(0,0,0,.18)}
+.lg-brand b{font-weight:400;color:#ffe9b8}
+.lg-tag{font-size:14px;opacity:.96;margin:8px auto 0;max-width:300px;line-height:1.45}
+.lg-card{max-width:420px;margin:-46px 16px 0;background:#fff;border-radius:22px;box-shadow:0 14px 36px rgba(232,86,31,.18);padding:20px 18px 22px;position:relative}
+@media(min-width:460px){.lg-card{margin:-46px auto 0}}
+.lg-tabs{display:flex;background:#f4f1ec;border-radius:12px;padding:4px;margin-bottom:6px}
+.lg-tabs button{flex:1;padding:10px;border:0;border-radius:9px;background:none;font-weight:600;font-size:14px;color:#666;font-family:inherit}
+.lg-tabs button.on{background:#fff;color:#e8561f;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.lg-h{font-size:18px;font-weight:700;margin:6px 2px 2px}
+.lg-card label{display:block;font-size:12.5px;font-weight:600;color:#555;margin:14px 2px 5px}
+.lg-f{display:flex;align-items:center;border:1.5px solid #e3ded6;border-radius:12px;background:#fff;overflow:hidden}
+.lg-f:focus-within{border-color:#e8561f}
+.lg-f span{padding:0 0 0 13px;font-size:14.5px;font-weight:600;color:#555;flex:none}
+.lg-f input{flex:1;min-width:0;border:0;outline:0;padding:13px;font-size:15px;font-family:inherit;background:none}
+.lg-f button{border:0;background:none;color:#e8561f;font-weight:600;font-size:12.5px;padding:0 13px;font-family:inherit}
+.lg-go{width:100%;margin-top:20px;padding:14px;border:0;border-radius:12px;background:linear-gradient(135deg,#e8561f,#f08a4b);color:#fff;font-weight:700;font-size:16px;font-family:inherit;box-shadow:0 8px 18px rgba(232,86,31,.28)}
+.lg-go:disabled{opacity:.55}
+.lg-link{display:block;margin:12px auto 0;background:none;border:0;color:#e8561f;font-weight:600;font-size:14px;font-family:inherit}
+.lg-msg{margin-top:12px;font-size:13.5px;min-height:18px;text-align:center}
+.lg-msg.err{color:#c62828}
+.lg-msg.ok{color:#2e7d32}
+.lg-note{font-size:12.5px;color:#777;line-height:1.6;margin-top:8px;text-align:center}
+.lg-note a{color:#e8561f;font-weight:600}
+.lg-skip{display:none;max-width:420px;margin:16px auto 28px;text-align:center;color:#666;font-size:14.5px;font-weight:600;background:none;border:0;font-family:inherit;width:100%;padding:10px}
+.lg-skip u{color:#e8561f}
+</style>
 </head>
 <body>
 <div id="sdSplash" data-p="1" aria-hidden="true">
@@ -671,11 +783,14 @@ if ('serviceWorker' in navigator) {
         </button>
       </div>
     </div>
+    <div class="sd-srow">
     <a class="sd-search" href="search.html" aria-label="Search for products">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <span>Search for products</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8.5" y="8.5" width="7" height="7" rx="1"/></svg>
     </a>
+      <button class="sd-wal" onclick="openWallet()" aria-label="Wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h12a1.5 1.5 0 0 1 1.5 1.5V9"/><path d="M3.5 7.5V17A2.5 2.5 0 0 0 6 19.5h13a1 1 0 0 0 1-1V10a1 1 0 0 0-1-1H6a2.5 2.5 0 0 1-2.5-1.5z"/><circle cx="16.2" cy="14.2" r="1.1" fill="currentColor"/></svg><b id="walTop"></b></button>
+    </div>
   </div>
 </header>
 
@@ -715,11 +830,11 @@ if ('serviceWorker' in navigator) {
     <div class="ac-mini">
       <button onclick="closeAccount();openCart();"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 10.5h10.3L20 7H6.3"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg><i id="acCartN"></i></span>Cart</button>
       <button onclick="closeAccount();navWishlist();"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg><i id="acWishN"></i></span>Wishlist</button>
-      <button onclick="location.href='my-orders.html';"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span>Orders</button>
+      <button onclick="closeAccount();openOrders();"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></span>Orders</button>
     </div>
+    <div class="ac-wal" onclick="closeAccount();openWallet();"><span class="wi"><svg viewBox="0 0 24 24"><path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h12a1.5 1.5 0 0 1 1.5 1.5V9"/><path d="M3.5 7.5V17A2.5 2.5 0 0 0 6 19.5h13a1 1 0 0 0 1-1V10a1 1 0 0 0-1-1H6a2.5 2.5 0 0 1-2.5-1.5z"/><circle cx="16.2" cy="14.2" r="1.1"/></svg></span><div class="wt"><small>Wallet balance</small><b id="acWalAmt">₹0</b></div><span class="wa">Add money</span></div>
     <div class="ac-li" id="acLogin" onclick="openAuth()"><span class="ac-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg></span><div>Login / Create account<br><small style="color:#888">See all your orders with your mobile number</small></div><span class="ac-ar">›</span></div>
     <div class="ac-li" id="acLogout" style="display:none" onclick="authLogout()"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M9 4H5v16h4"/><path d="M14 8l4 4-4 4M18 12H9"/></svg></span><div>Log out<br><small id="acWho" style="color:#888"></small></div><span class="ac-ar">›</span></div>
-    <div id="acOrders" style="display:none"></div>
     <div class="ac-li" onclick="location.href='reseller.html';"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M4 18V9l4 3 4-6 4 6 4-3v9z"/><path d="M4 21h16"/></svg></span><div>Reseller Orders &amp; Earnings</div><span class="ac-ar">›</span></div>
     <div class="ac-li" onclick="document.getElementById('acReturn').classList.toggle('open')"><span class="ac-ic"><svg viewBox="0 0 24 24"><path d="M9 7 4.5 11.5 9 16"/><path d="M4.5 11.5H15a4.5 4.5 0 0 1 0 9h-3"/></svg></span><div>Return Policy</div><span class="ac-ar">›</span></div>
     <div class="ac-info" id="acReturn">Not happy with your order? Open <b>My Orders</b>, choose the order and tap Return within 7 days of delivery.</div>
@@ -834,6 +949,11 @@ if ('serviceWorker' in navigator) {
           <button type="button" id="couponBtn" onclick="applyCoupon()">Apply</button>
         </div>
         <div class="cp-msg" id="couponMsg"></div>
+      </div>
+
+      <div class="form-group" id="walletBox">
+        <label class="wl-use" id="walletLab"><input type="checkbox" id="walletChk" onchange="toggleWallet()" disabled><span id="walletTxt">Use wallet balance</span></label>
+        <div class="cp-msg" id="walletMsg"></div>
       </div>
 
       <div class="form-group">
@@ -1079,6 +1199,7 @@ function moveCartToWishlist(idx){
 }
 let buyBackup = null; // when "Buy Now" is used on one item, the full cart is kept here
 function buyNowFromCart(idx){
+  if(!window.AUTH_USER){ if(typeof requireLogin === 'function') requireLogin(function(){ buyNowFromCart(idx); }); else alert('Please login to place your order.'); return; }
   buyBackup = { all: cart.slice(), idx };
   cart = [cart[idx]];
   goToCheckout();
@@ -1121,14 +1242,22 @@ function couponDiscount(sub){
 let resellOn = false, reseller = null, resalePrice = {};
 const rkey = i => `${i.id}|${i.size||''}|${i.color||''}|${i.variant||''}`;
 function resaleUnit(i){ const p = Number(resalePrice[rkey(i)]); return p >= i.price ? p : i.price; }
+let walletOn = false;
+const WALLET_BONUS_PCT = 10;   // bonus & cashback balance can pay at most 10% of an order (Rs 10 per Rs 100)
 function payTotals(){
   const cost = cartSubtotal();
   if(resellOn){
     const resale = cart.reduce((a, i) => a + resaleUnit(i) * i.qty, 0);
-    return { sub: cost, disc: 0, total: resale, cost, profit: resale - cost };
+    return { sub: cost, disc: 0, total: resale, cost, profit: resale - cost, walletAdd: 0, walletBonus: 0, payable: resale };
   }
   const disc = couponDiscount(cost);
-  return { sub: cost, disc, total: cost - disc, cost, profit: 0 };
+  const total = cost - disc;
+  let walletBonus = 0, walletAdd = 0;
+  if(walletOn && window.AUTH_USER && window.WALLET){
+    walletBonus = Math.min(window.WALLET.bonus || 0, Math.floor(total * WALLET_BONUS_PCT / 100));
+    walletAdd = Math.min(window.WALLET.add || 0, total - walletBonus);
+  }
+  return { sub: cost, disc, total, cost, profit: 0, walletAdd, walletBonus, payable: total - walletAdd - walletBonus };
 }
 function renderCheckoutSummary(){
   const T = payTotals(), sub = T.sub, disc = T.disc, total = T.total;
@@ -1137,7 +1266,9 @@ function renderCheckoutSummary(){
   document.getElementById('orderSummaryMini').innerHTML =
     cart.map(i => `<div class="sum-row">${i.img ? `<img class="sum-img" src="${i.img}" alt="">` : `<span class="sum-img sum-ph">${String(i.name||'?').charAt(0)}</span>`}<div class="sum-info"><span class="sum-name">${i.name}</span><span class="sum-meta">${i.size ? 'Size ' + i.size + ' · ' : ''}Qty ${i.qty}</span></div><span class="sum-price">₹${(resellOn ? resaleUnit(i) : i.price) * i.qty}</span></div>`).join('') +
     (disc ? `<div style="border-top:1px solid var(--line); margin-top:6px; padding-top:8px; color:#1b8a3a;"><span>Coupon (${appliedCoupon.code})</span><span>- ₹${disc}</span></div>` : '') +
-    `<div style="font-weight:700; border-top:1px solid var(--line); margin-top:6px; padding-top:8px;"><span>${resellOn ? 'Customer pays' : 'Total'}</span><span>₹${total}</span></div>`;
+    `<div style="font-weight:700; border-top:1px solid var(--line); margin-top:6px; padding-top:8px;"><span>${resellOn ? 'Customer pays' : 'Total'}</span><span>₹${total}</span></div>` +
+    ((T.walletAdd || T.walletBonus) ? `<div style="color:#1b8a3a; padding-top:6px;"><span>Wallet used</span><span>- ₹${T.walletAdd + T.walletBonus}</span></div><div style="font-weight:700; padding-top:4px;"><span>To pay</span><span>₹${T.payable}</span></div>` : '');
+  if(typeof updateWalletBox === 'function') updateWalletBox(T);
   const rs = document.getElementById('resellSum');
   if(rs) rs.innerHTML = resellOn ? `Customer pays (COD): <b>₹${T.total}</b><br>You pay Smart Deal: <b>₹${T.cost}</b><br>Your profit: <span class="g">₹${T.profit}</span><br><span style="color:#888;font-size:11.5px;">Profit is paid after the 7-day return period, if the order is not returned.</span>` : '';
 }
@@ -1206,6 +1337,7 @@ async function applyCoupon(){
 
 function goToCheckout(){
   if(cart.length === 0) return;
+  if(!window.AUTH_USER){ if(typeof requireLogin === 'function') requireLogin(goToCheckout); else alert('Please login to place your order.'); return; }
   document.getElementById('cartView').style.display = 'none';
   document.getElementById('checkoutView').style.display = 'block';
   if(resellOn) renderResellPrices();
@@ -1244,7 +1376,7 @@ function setPay(m){
 }
 function refreshUPI(){
   if(payMode!=='UPI' || !pendingOrderId) return;
-  const amt = payTotals().total;
+  const amt = payTotals().payable;
   const link = 'upi://pay?pa='+encodeURIComponent(UPI_ID)+'&pn='+encodeURIComponent(UPI_NAME)+'&am='+amt+'&cu=INR&tn='+pendingOrderId+(UPI_PAYTMQR?'&paytmqr='+UPI_PAYTMQR:'')+(UPI_MC?'&mc='+encodeURIComponent(UPI_MC)+'&tr='+pendingOrderId:'');
   document.getElementById('upiAmt').textContent = amt;
   document.getElementById('upiBtn').href = link;
@@ -1269,10 +1401,12 @@ function copyUPI(){
 }
 
 async function placeOrder(){
+  if(!window.AUTH_USER){ if(typeof requireLogin === 'function') requireLogin(); else alert('Please login to place your order.'); return; }
   const name=document.getElementById('custName').value.trim(),phone=document.getElementById('custPhone').value.trim(),address=document.getElementById('custAddress').value.trim(),state=document.getElementById('custState').value.trim(),city=document.getElementById('custCity').value.trim(),pincode=document.getElementById('custPincode').value.trim();
   if(!name||!phone||!address||!city||!state||!pincode){alert('Please fill in all details');return;}
   try{ localStorage.setItem(NAME_KEY, name.slice(0,40)); localStorage.setItem('smartDealCustomerPhone', String(phone).replace(/\D/g,'').slice(-10)); }catch(e){}
   if(!/^\d{10}$/.test(phone)){alert('Please enter a valid 10-digit mobile number');return;}
+  if(phone!==String(window.AUTH_USER.email||'').replace(/^sdeal7045\+(\d{10})@gmail\.com$/i,'$1')){alert('Orders must be placed with your logged-in mobile number.');return;}
   const T=payTotals();
   if(resellOn){
     if(!reseller){alert('Please enter and verify your Reseller ID first');return;}
@@ -1280,23 +1414,23 @@ async function placeOrder(){
     if(bad){alert('Please enter your selling price (at least ₹'+bad.price+') for: '+bad.name);return;}
   }
   const utr=(document.getElementById('utrInput').value||'').replace(/\D/g,'');
-  if(payMode==='UPI' && utr.length!==12){alert('Please pay first, then enter the 12-digit UTR / Transaction ID. Or choose Cash on Delivery.');return;}
+  if(payMode==='UPI' && T.payable>0 && utr.length!==12){alert('Please pay first, then enter the 12-digit UTR / Transaction ID. Or choose Cash on Delivery.');return;}
   await loadStock();
   const _oos=cart.filter(i=>OUT_MAP[String(i.id)]);
   if(_oos.length){alert('Sorry, these items are out of stock: '+_oos.map(i=>i.name).join(', ')+'. Please remove them from your cart to continue.');return;}
   const btn=document.getElementById('placeOrderBtn');btn.textContent='Placing order...';btn.disabled=true;
   const sub=T.sub,disc=T.disc,total=T.total,orderId=pendingOrderId||generateOrderId();
-  const isUPI = payMode==='UPI';
-  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({id:i.id,name:i.name,size:i.size,color:i.color||'',qty:i.qty,price:i.price,img:i.img||'',...(resellOn?{resalePrice:Number(resalePrice[rkey(i)])}:{})})),total,payment:isUPI?'UPI':'Cash on Delivery',...(isUPI?{utr:utr,paymentStatus:utr?'UTR given - verify':'UTR not given - contact customer'}:{}),...(resellOn?{resale:true,resellerId:reseller.id,resellerName:reseller.name||'',resellerPhone:reseller.phone||'',costTotal:T.cost,resellerProfit:T.profit}:{}),...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString(),...(window.AUTH_USER?{uid:window.AUTH_USER.uid}:{})};
+  const isUPI = payMode==='UPI' && T.payable>0;
+  const orderData={orderId,name,phone,address,city,state,pincode,items:cart.map(i=>({id:i.id,name:i.name,size:i.size,color:i.color||'',qty:i.qty,price:i.price,img:i.img||'',...(resellOn?{resalePrice:Number(resalePrice[rkey(i)])}:{})})),total,payable:T.payable,payment:(T.payable===0&&!resellOn)?'Wallet':(isUPI?'UPI':'Cash on Delivery'),...((T.walletAdd||T.walletBonus)?{walletAdd:T.walletAdd,walletBonus:T.walletBonus}:{}),...(isUPI?{utr:utr,paymentStatus:utr?'UTR given - verify':'UTR not given - contact customer'}:{}),...(resellOn?{resale:true,resellerId:reseller.id,resellerName:reseller.name||'',resellerPhone:reseller.phone||'',costTotal:T.cost,resellerProfit:T.profit}:{}),...(disc?{coupon:appliedCoupon.code,discount:disc,subtotal:sub}:{}),status:'Order Placed',createdAt:new Date().toISOString(),statusUpdatedAt:new Date().toISOString(),...(window.AUTH_USER?{uid:window.AUTH_USER.uid}:{})};
   try{
     if(typeof db==='undefined'||!db||typeof db.collection!=='function') throw new Error('Firebase unavailable');
     await Promise.race([
-      db.collection('orders').doc(orderId).set(orderData),
+      placeOrderWrite(orderId,orderData,phone,T),
       new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),15000))
     ]);
   }catch(e){
     console.error('Order save failed:',e);
-    alert('Order could not be placed. Please check your internet and try again.');
+    alert(e&&e.message==='wallet-low' ? 'Your wallet balance has changed. Please review your order and try again.' : 'Order could not be placed. Please check your internet and try again.');
     btn.disabled=false;btn.textContent='Place Order';return;
   }
   if(disc){ try{ db.collection('coupons').doc(appliedCoupon.code).update({usedCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{}); }catch(e){} }
@@ -1315,7 +1449,7 @@ function goToTracking(){
 }
 
 function closeCartAndReset(){
-  appliedCoupon = null; setCouponMsg(''); const _ci=document.getElementById('couponInput'); if(_ci) _ci.value=''; resetResell();
+  appliedCoupon = null; setCouponMsg(''); const _ci=document.getElementById('couponInput'); if(_ci) _ci.value=''; resetResell(); walletOn=false; { const _wc=document.getElementById('walletChk'); if(_wc) _wc.checked=false; }
   if(buyBackup){ restoreCartAfterBuyNow(true); } else { cart = []; }
   updateCartCount();
   document.getElementById('successView').style.display = 'none';
@@ -1531,31 +1665,98 @@ function contactWhatsApp(){
 })();
 </script>
 <div id="authSheet" role="dialog" aria-label="Login">
-  <div class="au-top"><button onclick="closeAuth()" aria-label="Back">←</button><span id="auTitle">Login</span></div>
-  <div class="au-body">
-    <div class="au-tabs" id="auTabs"><button id="auTabLogin" class="on" onclick="authView('login')">Login</button><button id="auTabSignup" onclick="authView('signup')">Create account</button></div>
-    <div id="auNameWrap" style="display:none"><label for="auName">Your name</label><input id="auName" maxlength="40" autocomplete="name"></div>
-    <label for="auPhone">Mobile number</label><input id="auPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" autocomplete="tel-national">
-    <div id="auCodeWrap" style="display:none"><label for="auCode">Reset code or link from Smart Deal</label><input id="auCode" placeholder="Paste the code or link here" autocomplete="off"></div>
-    <label for="auPass" id="auPassLbl">Password</label><input id="auPass" type="password" autocomplete="current-password" placeholder="At least 6 characters">
-    <button class="au-btn" id="auGo" onclick="authSubmit()">Login</button>
-    <div class="au-msg" id="auMsg" role="alert"></div>
-    <button class="au-link" id="auForgot" onclick="authView('forgot')">Forgot password?</button>
-    <div class="au-note" id="auNote"></div>
+  <div class="lg-hero">
+    <button class="lg-x" id="lgBack" onclick="authBack()" aria-label="Back">←</button>
+    <div class="lg-brand"><b>Smart</b> Deal</div>
+    <div class="lg-tag" id="lgTag">Welcome back! Login to continue.</div>
+  </div>
+  <div class="lg-card">
+    <div class="lg-tabs" id="auTabs"><button id="auTabLogin" class="on" onclick="authView('login')">Login</button><button id="auTabSignup" onclick="authView('signup')">Create account</button></div>
+    <div class="lg-h" id="auTitle">Login</div>
+    <div id="auNameWrap" style="display:none"><label for="auName">Your name</label><div class="lg-f"><input id="auName" maxlength="40" autocomplete="name" placeholder="e.g. Ravi Kumar"></div></div>
+    <label for="auPhone">Mobile number</label>
+    <div class="lg-f"><span>+91</span><input id="auPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" autocomplete="tel-national"></div>
+    <div id="auCodeWrap" style="display:none"><label for="auCode">Reset code or link from Smart Deal</label><div class="lg-f"><input id="auCode" placeholder="Paste the code or link here" autocomplete="off"></div></div>
+    <label for="auPass" id="auPassLbl">Password</label>
+    <div class="lg-f"><input id="auPass" type="password" autocomplete="current-password" placeholder="At least 6 characters" onkeydown="if(event.key==='Enter')authSubmit()"><button type="button" onclick="authEye(this)">Show</button></div>
+    <button class="lg-go" id="auGo" onclick="authSubmit()">Login</button>
+    <div class="lg-msg" id="auMsg" role="alert"></div>
+    <button class="lg-link" id="auForgot" onclick="authView('forgot')">Forgot password?</button>
+    <button class="lg-link" id="auBackLogin" style="display:none" onclick="authView('login')">← Back to login</button>
+    <div class="lg-note" id="auNote"></div>
+  </div>
+  <button class="lg-skip" id="lgSkip" onclick="authSkip()">Not now? <u>Skip and browse the store</u></button>
+</div>
+
+<div class="sheet" id="ordSheet" role="dialog" aria-label="My Orders">
+  <div class="sh-top"><button onclick="closeOrders()" aria-label="Back">←</button><span>My Orders</span></div>
+  <div class="sh-body" id="ordList"></div>
+</div>
+
+<div class="sheet" id="walSheet" role="dialog" aria-label="My Wallet">
+  <div class="sh-top"><button onclick="closeWallet()" aria-label="Back">←</button><span>My Wallet</span></div>
+  <div class="sh-body">
+    <div class="wl-card">
+      <small>Total balance</small>
+      <div class="wl-big" id="wlTotal">₹0</div>
+      <div class="wl-two"><div>Add Balance<b id="wlAdd">₹0</b></div><div>Bonus &amp; Cashback<b id="wlBonus">₹0</b></div></div>
+      <div class="wl-note">Add Balance can pay for a full order. Bonus &amp; Cashback can be used up to ₹10 on every ₹100 of an order.</div>
+    </div>
+
+    <div class="wl-sec">Add money</div>
+    <div class="wl-box">
+      <input id="wlAmt" class="wl-in" type="number" inputmode="numeric" min="10" placeholder="Enter amount (₹)">
+      <div class="wl-chips"><button onclick="wlPick(100)">₹100</button><button onclick="wlPick(200)">₹200</button><button onclick="wlPick(500)">₹500</button><button onclick="wlPick(1000)">₹1000</button></div>
+      <button class="wl-btn" id="wlPayBtn" onclick="wlShowPay()">Continue to pay</button>
+      <div id="wlPay" style="display:none">
+        <div style="font-weight:700;margin-top:14px">Pay ₹<span id="wlPayAmt"></span></div>
+        <div style="font-size:12.5px;color:#666;line-height:1.5;margin:4px 0 6px">1. Save the QR below (or scan it from another phone).<br>2. Open your UPI app, tap "Scan &amp; Pay" and pick the saved QR image.<br>3. Pay the exact amount, then enter the UTR below.</div>
+        <div id="wlQr" style="display:flex;justify-content:center;margin:8px 0"></div>
+        <a id="wlSave" class="wl-btn alt" download="smart-deal-wallet-qr.png">Save QR to phone</a>
+        <button class="wl-btn alt" id="wlCopyBtn" onclick="wlCopy()">Copy UPI ID</button>
+        <input id="wlUtr" class="wl-in" style="margin-top:14px" inputmode="numeric" maxlength="12" placeholder="UTR / Transaction ID (12 digits)">
+        <button class="wl-btn" id="wlSubmit" onclick="wlSubmit()">I have paid, submit</button>
+      </div>
+      <div class="wl-msg" id="wlMsg"></div>
+    </div>
+
+    <div class="wl-sec">Add money requests</div>
+    <div class="wl-box" id="wlReqs"><div class="sh-empty" style="padding:14px">Loading…</div></div>
+
+    <div class="wl-sec">Wallet history</div>
+    <div class="wl-box" id="wlHist"><div class="sh-empty" style="padding:14px">Loading…</div></div>
   </div>
 </div>
+
 <script>
 (function(){
   if(typeof firebase==='undefined'||!firebase.auth)return;
-  var auth=firebase.auth(),view='login',busy=false,tok=0;
+  var auth=firebase.auth(),view='login',mode='normal',after=null,busy=false,otok=0,walUnsub=null,wlAmount=0;
   function $(i){return document.getElementById(i)}
   function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function rs(n){return '₹'+Math.round(Number(n)||0).toLocaleString('en-IN')}
+  function dt(x){try{return new Date(x).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}catch(e){return ''}}
   function emailFor(p){return 'sdeal7045+'+p+'@gmail.com'}
   function phoneOf(u){var m=/^sdeal7045\+(\d{10})@gmail\.com$/i.exec((u&&u.email)||'');return m?m[1]:''}
+  function skipped(){try{return sessionStorage.getItem('sdSkip')==='1'}catch(e){return false}}
   window.AUTH_USER=null;
-  function msg(t,k){var m=$('auMsg');m.textContent=t||'';m.className='au-msg'+(k?' '+k:'')}
-  window.openAuth=function(){authView('login');$('authSheet').classList.add('open')};
+  window.WALLET={add:0,bonus:0};
+
+  /* ---------- login page ---------- */
+  function msg(t,k){var m=$('auMsg');m.textContent=t||'';m.className='lg-msg'+(k?' '+k:'')}
+  window.openAuth=function(m){
+    mode=m||'normal';authView('login');
+    var gate=mode==='gate';
+    $('lgSkip').style.display=gate?'block':'none';
+    $('lgBack').style.display=gate?'none':'block';
+    $('lgTag').textContent=gate?'Welcome! Login or create an account to track orders and use your wallet.':(mode==='checkout'?'Please login to place your order.':'Welcome back! Login to continue.');
+    $('authSheet').classList.add('open');
+  };
   window.closeAuth=function(){$('authSheet').classList.remove('open')};
+  window.authBack=function(){after=null;closeAuth()};
+  window.authSkip=function(){try{sessionStorage.setItem('sdSkip','1')}catch(e){}closeAuth()};
+  window.requireLogin=function(cb){after=cb||null;openAuth('checkout')};
+  window.authEye=function(b){var i=$('auPass');var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'Hide':'Show'};
   window.authAskCode=function(){var p=$('auPhone').value.replace(/\D/g,'');var t='Hello Smart Deal, I forgot my password. My mobile number: '+(p||'');window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent(t),'_blank')};
   window.authView=function(v){
     view=v;msg('');
@@ -1566,10 +1767,11 @@ function contactWhatsApp(){
     $('auPassLbl').textContent=v==='forgot'?'New password':'Password';
     $('auPass').setAttribute('autocomplete',v==='login'?'current-password':'new-password');
     $('auGo').textContent=v==='login'?'Login':(v==='signup'?'Create account':'Set new password');
-    $('auTitle').textContent=v==='login'?'Login':(v==='signup'?'Create account':'Reset password');
-    $('auForgot').style.display=v==='login'?'inline-block':'none';
+    $('auTitle').textContent=v==='login'?'Login to your account':(v==='signup'?'Create your account':'Reset password');
+    $('auForgot').style.display=v==='login'?'block':'none';
+    $('auBackLogin').style.display=v==='forgot'?'block':'none';
     $('auNote').innerHTML=v==='forgot'
-      ?'1. <a href="#" onclick="authAskCode();return false" style="color:#e8561f;font-weight:600">Message us on WhatsApp</a> to get a reset code.<br>2. Paste the code or link we send you, then choose a new password.<br>The code works for about 1 hour.'
+      ?'1. <a href="#" onclick="authAskCode();return false">Message us on WhatsApp</a> to get a reset code.<br>2. Paste the code or link we send you, then choose a new password.<br>The code works for about 1 hour.'
       :(v==='signup'?'One account per mobile number. Use the same number when you order.':'');
   };
   function errText(e){
@@ -1584,6 +1786,7 @@ function contactWhatsApp(){
     if(c==='auth/operation-not-allowed')return 'Login is not turned on yet. Please try later.';
     return 'Something went wrong. Please try again.';
   }
+  function loginDone(){var f=after;after=null;closeAuth();if(f)setTimeout(f,200)}
   window.authSubmit=async function(){
     if(busy)return;
     var p=$('auPhone').value.replace(/\D/g,''),pw=$('auPass').value,name=$('auName').value.trim(),code='';
@@ -1593,53 +1796,209 @@ function contactWhatsApp(){
     if(view==='forgot'){var raw=$('auCode').value.trim(),mm=/oobCode=([^&\s]+)/.exec(raw);code=mm?decodeURIComponent(mm[1]):raw;if(!code){msg('Paste the reset code or link we sent you.','err');return}}
     busy=true;$('auGo').disabled=true;msg('Please wait…');
     try{
-      if(view==='login'){await auth.signInWithEmailAndPassword(emailFor(p),pw);closeAuth()}
-      else if(view==='signup'){var c=await auth.createUserWithEmailAndPassword(emailFor(p),pw);await c.user.updateProfile({displayName:name.slice(0,40)});applyUser(auth.currentUser);closeAuth()}
+      if(view==='login'){await auth.signInWithEmailAndPassword(emailFor(p),pw);loginDone()}
+      else if(view==='signup'){var c=await auth.createUserWithEmailAndPassword(emailFor(p),pw);await c.user.updateProfile({displayName:name.slice(0,40)});applyUser(auth.currentUser);loginDone()}
       else{await auth.confirmPasswordReset(code,pw);authView('login');if(p)$('auPhone').value=p;msg('Password changed. Please log in with your new password.','ok')}
       $('auPass').value='';
     }catch(e){console.error(e);msg(errText(e),'err')}
     busy=false;$('auGo').disabled=false;
   };
-  window.authLogout=function(){auth.signOut()};
+  window.authLogout=function(){
+    try{sessionStorage.removeItem('sdSkip')}catch(e){}
+    try{closeAccount()}catch(e){}
+    auth.signOut();
+  };
+
+  /* ---------- user / wallet state ---------- */
   function applyUser(u){
     if(u&&!phoneOf(u))u=null;
     window.AUTH_USER=u||null;
+    var n=$('custName'),t=$('custPhone');
     if(u){
       try{if(u.displayName)localStorage.setItem(NAME_KEY,u.displayName.slice(0,40))}catch(e){}
-      var n=$('custName'),t=$('custPhone');
       if(n&&!n.value&&u.displayName)n.value=u.displayName;
-      if(t&&!t.value)t.value=phoneOf(u);
-    }
+      if(t){t.value=phoneOf(u);t.readOnly=true}
+    }else if(t){t.readOnly=false}
+    subWallet(u);
     authRenderRows();
+  }
+  function subWallet(u){
+    if(walUnsub){walUnsub();walUnsub=null}
+    window.WALLET={add:0,bonus:0};
+    renderWalletUI();
+    if(!u)return;
+    try{
+      walUnsub=db.collection('wallets').doc(phoneOf(u)).onSnapshot(function(s){
+        var d=s.exists?s.data():{};
+        window.WALLET={add:Math.max(0,Number(d.addBal)||0),bonus:Math.max(0,Number(d.bonusBal)||0)};
+        renderWalletUI();
+      },function(e){console.error(e)});
+    }catch(e){console.error(e)}
+  }
+  function renderWalletUI(){
+    var w=window.WALLET,t=w.add+w.bonus,u=window.AUTH_USER;
+    if($('walTop'))$('walTop').textContent=u?rs(t):'';
+    if($('acWalAmt'))$('acWalAmt').textContent=u?rs(t):'Login to use';
+    if($('wlTotal')){$('wlTotal').textContent=rs(t);$('wlAdd').textContent=rs(w.add);$('wlBonus').textContent=rs(w.bonus)}
+    if(t<=0&&typeof walletOn!=='undefined'&&walletOn){walletOn=false;var c=$('walletChk');if(c)c.checked=false}
+    var cv=$('checkoutView');
+    if(cv&&cv.style.display==='block'&&typeof renderCheckoutSummary==='function')renderCheckoutSummary();
   }
   function authRenderRows(){
     var u=window.AUTH_USER;
     $('acLogin').style.display=u?'none':'flex';
     $('acLogout').style.display=u?'flex':'none';
-    var box=$('acOrders');
-    if(!u){box.style.display='none';box.innerHTML='';return}
-    $('acWho').textContent=(u.displayName?u.displayName+' · ':'')+phoneOf(u);
-    box.style.display='block';loadMyOrders();
-  }
-  async function loadMyOrders(){
-    var u=window.AUTH_USER,box=$('acOrders'),my=++tok;
-    box.innerHTML='<div class="au-oh">Your orders</div><div class="au-oe">Loading…</div>';
-    try{
-      var snap=await db.collection('orders').where('phone','==',phoneOf(u)).get();
-      if(my!==tok)return;
-      var list=[];snap.forEach(function(d){list.push(d.data())});
-      list.sort(function(a,b){return String(b.createdAt||'').localeCompare(String(a.createdAt||''))});
-      if(!list.length){box.innerHTML='<div class="au-oh">Your orders</div><div class="au-oe">No orders yet for this number.</div>';return}
-      box.innerHTML='<div class="au-oh">Your orders</div>'+list.slice(0,20).map(function(o){
-        var it=o.items||[],first=it[0]?esc(it[0].name):'Order',more=it.length>1?' + '+(it.length-1)+' more':'';
-        return '<div class="au-oc"><span class="au-st">'+esc(o.status||'Order Placed')+'</span><b>'+esc(o.orderId||'')+'</b><br>'+first+more+'<br>₹'+esc(o.total)+' · '+esc(String(o.createdAt||'').slice(0,10))+' · <a href="track.html?id='+encodeURIComponent(o.orderId||'')+'">Track order</a></div>';
-      }).join('');
-    }catch(e){console.error(e);if(my===tok)box.innerHTML='<div class="au-oh">Your orders</div><div class="au-oe">Could not load your orders. Please try again.</div>'}
+    if(u)$('acWho').textContent=(u.displayName?u.displayName+' · ':'')+phoneOf(u);
   }
   var _ra=window.renderAccount;
-  window.renderAccount=function(){if(_ra)_ra();authRenderRows()};
-  auth.onAuthStateChanged(function(u){applyUser(u)});
+  window.renderAccount=function(){if(_ra)_ra();authRenderRows();renderWalletUI()};
+
+  /* ---------- checkout wallet box ---------- */
+  window.toggleWallet=function(){walletOn=$('walletChk').checked;renderCheckoutSummary()};
+  window.updateWalletBox=function(T){
+    var box=$('walletBox');if(!box)return;
+    var w=window.WALLET,tot=w.add+w.bonus;
+    box.style.display=resellOn?'none':'block';
+    var chk=$('walletChk');
+    chk.disabled=!window.AUTH_USER||tot<=0;
+    chk.checked=!!walletOn&&!chk.disabled;
+    $('walletLab').classList.toggle('dis',chk.disabled);
+    var cap=Math.floor(T.total*WALLET_BONUS_PCT/100);
+    $('walletTxt').innerHTML='Use wallet balance ('+rs(tot)+')<small>Add Balance '+rs(w.add)+' · Bonus '+rs(w.bonus)+' (bonus can cover up to '+rs(cap)+' of this order)</small>';
+    var used=(T.walletAdd||0)+(T.walletBonus||0);
+    $('walletMsg').textContent=used?('Wallet used: '+rs(used)):'';
+    $('walletMsg').className='cp-msg'+(used?' ok':'');
+    var pm=$('payCOD').parentNode;
+    pm.style.display=(T.payable===0&&!resellOn)?'none':'block';
+    $('placeNote').textContent=(T.payable===0&&!resellOn)?'Paid fully from your wallet':(payMode==='UPI'?'Pay first, then tap Place Order':'Cash on Delivery — no advance payment required');
+  };
+  window.placeOrderWrite=function(orderId,orderData,phone,T){
+    var oref=db.collection('orders').doc(orderId);
+    if(!(T.walletAdd||T.walletBonus))return oref.set(orderData);
+    var wref=db.collection('wallets').doc(phone),now=new Date().toISOString();
+    return db.runTransaction(function(tx){
+      return tx.get(wref).then(function(s){
+        var d=s.exists?s.data():{},a=Number(d.addBal)||0,b=Number(d.bonusBal)||0;
+        if(a<T.walletAdd||b<T.walletBonus)throw new Error('wallet-low');
+        tx.set(wref,{addBal:a-T.walletAdd,bonusBal:b-T.walletBonus,updatedAt:now},{merge:true});
+        tx.set(oref,orderData);
+        [['add',T.walletAdd],['bonus',T.walletBonus]].forEach(function(x){
+          if(x[1]>0)tx.set(db.collection('walletTxns').doc(),{phone:phone,type:'debit',bucket:x[0],amount:x[1],orderId:orderId,note:'Order '+orderId,createdAt:now});
+        });
+      });
+    });
+  };
+
+  /* ---------- My Orders ---------- */
+  function stCls(s){s=String(s||'');if(s==='Delivered'||s==='Return Approved')return 'g';if(s==='Cancelled'||s==='Return Rejected')return 'r';if(s==='Shipped'||s==='Out for Delivery')return 'b';return ''}
+  function thumb(i){return i.img?'<img class="od-im" src="'+esc(i.img)+'" alt="">':'<span class="od-im">'+esc(String(i.name||'?').charAt(0))+'</span>'}
+  window.openOrders=function(){
+    if(!window.AUTH_USER){requireLogin(openOrders);return}
+    $('ordSheet').classList.add('open');
+    loadOrders();
+  };
+  window.closeOrders=function(){$('ordSheet').classList.remove('open')};
+  window.toggleOrd=function(el){el.parentNode.classList.toggle('open')};
+  async function loadOrders(){
+    var u=window.AUTH_USER,box=$('ordList'),my=++otok;
+    box.innerHTML='<div class="sh-empty">Loading…</div>';
+    try{
+      var snap=await db.collection('orders').where('phone','==',phoneOf(u)).get();
+      if(my!==otok)return;
+      var list=[];snap.forEach(function(d){list.push(d.data())});
+      list.sort(function(a,b){return String(b.createdAt||'').localeCompare(String(a.createdAt||''))});
+      if(!list.length){box.innerHTML='<div class="sh-empty">No orders yet for this number.</div>';return}
+      box.innerHTML=list.slice(0,30).map(function(o){
+        var it=o.items||[],f=it[0]||{},more=it.length>1?' + '+(it.length-1)+' more':'';
+        var wal=(Number(o.walletAdd)||0)+(Number(o.walletBonus)||0);
+        return '<div class="od"><div class="od-h" onclick="toggleOrd(this)">'+thumb(f)+
+          '<div class="od-m"><div class="od-id"><span>'+esc(o.orderId)+'</span><span class="od-st '+stCls(o.status)+'">'+esc(o.status||'Order Placed')+'</span></div>'+
+          '<div class="od-n">'+esc(f.name||'Order')+more+'</div><div class="od-s">'+rs(o.total)+' · '+dt(o.createdAt)+'</div></div><span class="od-ar">›</span></div>'+
+          '<div class="od-d">'+it.map(function(i){return '<div class="od-it">'+thumb(i)+'<div class="t">'+esc(i.name)+'<small>'+(i.color?'Color: '+esc(i.color)+' · ':'')+(i.size?'Size: '+esc(i.size)+' · ':'')+'Qty '+esc(i.qty)+' · '+rs(i.price)+'</small></div></div>'}).join('')+
+          '<div class="od-row tot"><span>Order total</span><span>'+rs(o.total)+'</span></div>'+
+          (o.coupon?'<div class="od-row"><span>Coupon '+esc(o.coupon)+'</span><span>- '+rs(o.discount)+'</span></div>':'')+
+          (wal?'<div class="od-row"><span>Paid from wallet</span><span>'+rs(wal)+'</span></div>':'')+
+          '<div class="od-row"><span>Payment</span><span>'+esc(o.payment||'Cash on Delivery')+'</span></div>'+
+          '<div class="od-addr">'+esc(o.name)+' · '+esc(o.phone)+'<br>'+esc(o.address)+', '+esc(o.city)+(o.state?', '+esc(o.state):'')+' - '+esc(o.pincode)+'</div>'+
+          '<a class="od-tr" href="track.html?id='+encodeURIComponent(o.orderId||'')+'">Track order</a></div></div>';
+      }).join('');
+    }catch(e){console.error(e);if(my===otok)box.innerHTML='<div class="sh-empty">Could not load your orders. Please try again.</div>'}
+  }
+
+  /* ---------- Wallet sheet ---------- */
+  function wmsg(t,k){var m=$('wlMsg');m.textContent=t||'';m.className='wl-msg'+(k?' '+k:'')}
+  window.openWallet=function(){
+    if(!window.AUTH_USER){requireLogin(openWallet);return}
+    $('walSheet').classList.add('open');
+    renderWalletUI();wlReset();loadWalletLists();
+  };
+  window.closeWallet=function(){$('walSheet').classList.remove('open')};
+  function wlReset(){$('wlPay').style.display='none';$('wlPayBtn').style.display='block';$('wlUtr').value='';wmsg('')}
+  window.wlPick=function(n){$('wlAmt').value=n;wlReset()};
+  window.wlShowPay=function(){
+    var a=Math.floor(Number($('wlAmt').value)||0);
+    if(a<10){wmsg('Minimum amount is ₹10.','err');return}
+    if(a>50000){wmsg('Maximum amount is ₹50,000 at a time.','err');return}
+    wlAmount=a;wmsg('');
+    var link='upi://pay?pa='+encodeURIComponent(UPI_ID)+'&pn='+encodeURIComponent(UPI_NAME)+'&am='+a+'&cu=INR&tn=WALLET'+(UPI_PAYTMQR?'&paytmqr='+UPI_PAYTMQR:'');
+    $('wlPayAmt').textContent=a;
+    var q=$('wlQr');q.innerHTML='';
+    if(window.QRCode){try{new QRCode(q,{text:link,width:170,height:170})}catch(e){}}
+    setTimeout(function(){
+      var im=q.querySelector('img'),cv=q.querySelector('canvas'),src='';
+      try{src=(im&&im.src&&im.src.indexOf('data:')===0)?im.src:(cv?cv.toDataURL('image/png'):'')}catch(e){}
+      if(src)$('wlSave').href=src;
+    },50);
+    $('wlPay').style.display='block';$('wlPayBtn').style.display='none';
+  };
+  window.wlCopy=function(){
+    var b=$('wlCopyBtn');
+    function done(){b.textContent='Copied: '+UPI_ID}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(UPI_ID).then(done).catch(function(){prompt('Copy this UPI ID:',UPI_ID)})}
+    else{prompt('Copy this UPI ID:',UPI_ID)}
+  };
+  window.wlSubmit=async function(){
+    var u=window.AUTH_USER;if(!u)return;
+    var utr=$('wlUtr').value.replace(/\D/g,'');
+    if(utr.length!==12){wmsg('Enter the 12-digit UTR / Transaction ID from your UPI app.','err');return}
+    var b=$('wlSubmit');b.disabled=true;wmsg('Sending…');
+    try{
+      await db.collection('walletRequests').add({phone:phoneOf(u),uid:u.uid,name:u.displayName||'',amount:wlAmount,utr:utr,status:'Pending',createdAt:new Date().toISOString()});
+      $('wlAmt').value='';wlReset();
+      wmsg('Request sent. The money is added to your wallet after we verify your payment.','ok');
+      loadWalletLists();
+    }catch(e){console.error(e);wmsg('Could not send. Please try again.','err')}
+    b.disabled=false;
+  };
+  async function loadWalletLists(){
+    var u=window.AUTH_USER;if(!u)return;
+    var ph=phoneOf(u),rq=$('wlReqs'),hs=$('wlHist');
+    try{
+      var s1=await db.collection('walletRequests').where('phone','==',ph).get(),a=[];
+      s1.forEach(function(d){a.push(d.data())});
+      a.sort(function(x,y){return String(y.createdAt||'').localeCompare(String(x.createdAt||''))});
+      rq.innerHTML=a.length?a.slice(0,10).map(function(r){
+        var c=r.status==='Approved'?'p':(r.status==='Rejected'?'m':'pd');
+        return '<div class="wl-tx"><div>'+rs(r.amount)+'<small>UTR '+esc(r.utr)+' · '+dt(r.createdAt)+'</small></div><span class="'+c+'">'+esc(r.status)+'</span></div>';
+      }).join(''):'<div class="sh-empty" style="padding:14px">No requests yet.</div>';
+    }catch(e){console.error(e);rq.innerHTML='<div class="sh-empty" style="padding:14px">Could not load.</div>'}
+    try{
+      var s2=await db.collection('walletTxns').where('phone','==',ph).get(),h=[];
+      s2.forEach(function(d){h.push(d.data())});
+      h.sort(function(x,y){return String(y.createdAt||'').localeCompare(String(x.createdAt||''))});
+      hs.innerHTML=h.length?h.slice(0,30).map(function(t){
+        var cr=t.type==='credit';
+        return '<div class="wl-tx"><div>'+esc(t.note||(cr?'Credit':'Debit'))+'<small>'+(t.bucket==='bonus'?'Bonus & Cashback':'Add Balance')+' · '+dt(t.createdAt)+'</small></div><span class="'+(cr?'p':'m')+'">'+(cr?'+':'-')+rs(t.amount)+'</span></div>';
+      }).join(''):'<div class="sh-empty" style="padding:14px">No wallet activity yet.</div>';
+    }catch(e){console.error(e);hs.innerHTML='<div class="sh-empty" style="padding:14px">Could not load.</div>'}
+  }
+
+  auth.onAuthStateChanged(function(u){
+    applyUser(u);
+    if(!window.AUTH_USER&&!skipped()&&!$('authSheet').classList.contains('open'))openAuth('gate');
+  });
 })();
 </script>
+
 </body>
 </html>

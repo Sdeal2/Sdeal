@@ -275,6 +275,22 @@
     </section>
 
     <section>
+      <h3 id="wrHead">Wallet: add money requests</h3>
+      <div id="walReqList"><div class="empty">Loading…</div></div>
+    </section>
+
+    <section>
+      <h3>Wallet: give bonus / cashback</h3>
+      <div class="cp-form">
+        <div class="cp-grid">
+          <div class="full"><label>Customer mobile number</label><input type="tel" id="wPhone" maxlength="10" inputmode="numeric" placeholder="10-digit number"></div>
+        </div>
+        <button class="cp-save" onclick="wLookup()">Check wallet</button>
+        <div id="wInfo" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <section>
       <h3>Coupon Codes</h3>
       <div class="cp-form">
         <div class="cp-grid">
@@ -295,7 +311,7 @@
       <div class="rs-form">
         <div class="cp-grid">
           <div class="full"><label>Reseller name</label><input type="text" id="rsName" placeholder="e.g. Rahul Kumar"></div>
-          <div><label>Mobile number</label><input type="tel" id="rsPhone" maxlength="10" placeholder="10-digit number"></div>
+          <div><label>Mobile number</label><input type="tel" id="rsMobile" maxlength="10" placeholder="10-digit number"></div>
           <div><label>UPI ID (to pay profit)</label><input type="text" id="rsUpi" placeholder="e.g. rahul@upi"></div>
         </div>
         <button class="cp-save" onclick="createReseller()">Create Reseller ID</button>
@@ -338,7 +354,7 @@ let _adminStarted = false;
 function startAdmin(){
   if(_adminStarted) return; _adminStarted = true;
   loadStats(); loadReturnRequests(); loadRecentOrders(); loadCoupons();
-  loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings(); loadStock(); loadReviewsAdmin();
+  loadVisitors(); loadResellers(); loadPayouts(); loadCostSettings(); loadStock(); loadReviewsAdmin(); loadWalletRequests();
 }
 function showLoginErr(t){ const e = document.getElementById('loginErr'); e.textContent = t; e.style.display = 'block'; }
 function tryLogin(){
@@ -445,6 +461,7 @@ function renderOrderRow(order){
       <div class="order-row-meta" style="line-height:1.6;">Phone: ${order.phone}<br>Address: ${order.address}<br>City: ${order.city}<br>State: ${order.state || '—'}<br>Pincode: ${order.pincode}${order.coupon ? '<br>Coupon: ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
       <div class="order-row-meta" style="color:#1f6f43;">Payment: ${escH(order.payment||'Cash on Delivery')}${order.payment==='UPI' ? ' · UTR: '+escH(order.utr||'not given')+' · '+escH(order.paymentStatus||'') : ''}</div>
       <div class="order-row-meta op" data-o="${order.orderId}">${profitLine(order)}</div>
+      ${walletLine(order)}
       ${order.resale ? `<div class="order-row-meta" style="color:#6b4fa0;">Reseller: ${escH(order.resellerName||'')} (${escH(order.resellerId)}) · Customer pays ₹${order.total} · We get ₹${order.costTotal} · Reseller profit ₹${order.resellerProfit}${order.payoutPaid ? ' · Paid' : ''}</div>` : ''}
       ${itemsHtml(order)}
       ${order.cancelledBy === 'customer' ? `<div class="order-row-meta" style="color:#b5495b;">Cancelled by customer${order.cancelReason ? ': ' + order.cancelReason : ''}${order.cancelNote ? ' · "' + order.cancelNote + '"' : ''}</div>` : ''}
@@ -460,6 +477,7 @@ async function cancelOrderAdmin(orderId){
       cancelledAt: new Date().toISOString(),
       statusUpdatedAt: new Date().toISOString()
     });
+    try{ await refundWallet(orderId); }catch(e){ console.error(e); alert('Order cancelled, but the wallet refund failed. Use the "Refund wallet" button on this order.'); }
     loadStats();
     if(document.getElementById('searchInput').value.trim()){ searchOrder(); } else { loadRecentOrders(); }
   }catch(e){
@@ -496,6 +514,7 @@ function renderReturnRow(order){
       <div class="order-row-name">${order.name} — ₹${order.total}</div>
       <div class="order-row-meta" style="line-height:1.6;">Phone: ${order.phone}<br>Address: ${order.address}<br>City: ${order.city}<br>State: ${order.state || '—'}<br>Pincode: ${order.pincode}${order.coupon ? '<br>Coupon: ' + order.coupon + ' (- ₹' + order.discount + ')' : ''}</div>
       ${order.resale ? `<div class="order-row-meta" style="color:#6b4fa0;">Reseller: ${escH(order.resellerName||'')} (${escH(order.resellerId)}) · Customer pays ₹${order.total} · We get ₹${order.costTotal} · Reseller profit ₹${order.resellerProfit}${order.payoutPaid ? ' · Paid' : ''}</div>` : ''}
+      ${walletLine(order)}
       ${itemsHtml(order)}
       ${(order.returnReason || order.returnNote) ? `<div class="order-row-meta" style="color:#b8431a;">Return reason: ${order.returnReason || '—'}${order.returnNote ? ' · "' + order.returnNote + '"' : ''}</div>` : ''}
       <div class="return-btns">
@@ -534,6 +553,7 @@ async function decideReturn(orderId, decision){
       returnDecisionAt: new Date().toISOString(),
       statusUpdatedAt: new Date().toISOString()
     });
+    if(decision === 'Return Approved'){ try{ await refundWallet(orderId); }catch(e){ console.error(e); alert('Return approved, but the wallet refund failed. Use the "Refund wallet" button on this order.'); } }
     loadReturnRequests();
     loadStats();
     if(document.getElementById('searchInput').value.trim()){ searchOrder(); } else { loadRecentOrders(); }
@@ -706,7 +726,7 @@ async function loadVisitors(){
 function rsNote(t, cls){ const n=document.getElementById('rsNote'); n.textContent=t||''; n.className='cp-note '+(cls||''); }
 async function createReseller(){
   const name = document.getElementById('rsName').value.trim();
-  const phone = document.getElementById('rsPhone').value.replace(/\D/g,'').slice(-10);
+  const phone = document.getElementById('rsMobile').value.replace(/\D/g,'').slice(-10);
   const upi = document.getElementById('rsUpi').value.trim();
   if(!name){ rsNote('Enter the reseller name','no'); return; }
   if(phone.length !== 10){ rsNote('Enter a valid 10-digit mobile number','no'); return; }
@@ -720,7 +740,7 @@ async function createReseller(){
     if(!id){ rsNote('Could not make a new ID. Please try again.','no'); return; }
     await db.collection('resellers').doc(id).set({ id, name, phone, upi, active:true, createdAt:new Date().toISOString() });
     rsNote('Reseller ID created: ' + id + ' (give this ID to ' + name + ')','ok');
-    ['rsName','rsPhone','rsUpi'].forEach(x => document.getElementById(x).value='');
+    ['rsName','rsMobile','rsUpi'].forEach(x => document.getElementById(x).value='');
     loadResellers();
   }catch(e){ console.error(e); rsNote('Could not save. Check your Firebase setup.','no'); }
 }
@@ -806,7 +826,7 @@ function orderProfit(o){
     if(c == null){ missing = true; return; }
     profit += (Number(i.price) - c) * Number(i.qty);
   });
-  profit -= (Number(o.discount) || 0) + EXTRA;
+  profit -= (Number(o.discount) || 0) + (Number(o.walletBonus) || 0) + EXTRA;
   return { profit, missing };
 }
 function profitLine(o){
@@ -839,7 +859,7 @@ function renderProfit(){
     cards[i].querySelector('.num').textContent = rup(v[0]);
     cards[i].querySelector('.vs').textContent = v[1] + ' delivered order' + (v[1] === 1 ? '' : 's');
   });
-  document.getElementById('pfNote').innerHTML = 'Profit is counted on the day an order is delivered. Cancelled and returned orders are not counted. Coupon discounts' + (EXTRA ? ' and the extra cost per order' : '') + ' are subtracted.' + (missingOrders ? `<br><b style="color:var(--rose)">${missingOrders} order(s) have products without a cost price. Set them in “Product costs” for correct profit.</b>` : '');
+  document.getElementById('pfNote').innerHTML = 'Profit is counted on the day an order is delivered. Cancelled and returned orders are not counted. Coupon discounts' + (EXTRA ? ', wallet bonus used and the extra cost per order' : ' and wallet bonus used') + ' are subtracted.' + (missingOrders ? `<br><b style="color:var(--rose)">${missingOrders} order(s) have products without a cost price. Set them in “Product costs” for correct profit.</b>` : '');
   const max = Math.max(1, ...days.map(k => Math.abs(byDay[k] || 0)));
   document.getElementById('pfBars').innerHTML = days.map(k => { const v = byDay[k] || 0, dt = new Date(k + 'T00:00:00');
     return `<div class="pf-bar"><span class="d">${dt.toLocaleDateString('en-IN', {weekday:'short', day:'numeric'})}</span><div class="tr"><div class="fl ${v < 0 ? 'neg' : ''}" style="width:${Math.round(Math.abs(v) / max * 100)}%"></div></div><span class="v ${v < 0 ? 'neg-t' : ''}">${rup(v)}</span></div>`; }).join('');
@@ -935,6 +955,113 @@ async function saveCosts(){
     dashToast('Could not save. Please try again.', 'no');
   }
   btn.disabled = false;
+}
+
+/* ---------- Wallet (admin) ---------- */
+function walletLine(o){
+  const a = Number(o.walletAdd) || 0, b = Number(o.walletBonus) || 0;
+  if(!a && !b) return '';
+  const canRefund = (o.status === 'Cancelled' || o.status === 'Return Approved') && !o.walletRefunded;
+  return `<div class="order-row-meta" style="color:#1f6f43;">Wallet used: Add ₹${a} + Bonus ₹${b} · Customer pays ₹${Number(o.payable) || 0}${o.walletRefunded ? ' · Wallet refunded' : ''}${canRefund ? ` <button class="cp-save" style="padding:5px 10px;font-size:12px;margin-left:6px" onclick="refundWalletBtn('${o.orderId}')">Refund wallet</button>` : ''}</div>`;
+}
+async function refundWallet(orderId){
+  const oref = db.collection('orders').doc(orderId);
+  await db.runTransaction(async tx => {
+    const os = await tx.get(oref); if(!os.exists) return;
+    const o = os.data(), a = Number(o.walletAdd) || 0, b = Number(o.walletBonus) || 0;
+    if((!a && !b) || o.walletRefunded) return;
+    const wref = db.collection('wallets').doc(o.phone), ws = await tx.get(wref), d = ws.exists ? ws.data() : {}, now = new Date().toISOString();
+    tx.set(wref, { addBal: (Number(d.addBal) || 0) + a, bonusBal: (Number(d.bonusBal) || 0) + b, updatedAt: now }, { merge: true });
+    tx.update(oref, { walletRefunded: true });
+    [['add', a], ['bonus', b]].forEach(x => { if(x[1] > 0) tx.set(db.collection('walletTxns').doc(), { phone: o.phone, type: 'credit', bucket: x[0], amount: x[1], orderId, note: 'Refund for order ' + orderId, createdAt: now }); });
+  });
+}
+async function refundWalletBtn(orderId){
+  if(!confirm('Refund the wallet money used in order ' + orderId + ' back to the customer?')) return;
+  try{ await refundWallet(orderId); dashToast('Wallet refunded ✓', 'ok'); }
+  catch(e){ console.error(e); dashToast('Could not refund. Please try again.', 'no'); }
+  if(document.getElementById('searchInput').value.trim()){ searchOrder(); } else { loadRecentOrders(); }
+}
+
+async function loadWalletRequests(){
+  const box = document.getElementById('walReqList'), head = document.getElementById('wrHead');
+  try{
+    const snap = await db.collection('walletRequests').get();
+    const list = []; snap.forEach(d => list.push(Object.assign({ _id: d.id }, d.data())));
+    list.sort((a,b) => String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+    const pend = list.filter(r => r.status === 'Pending');
+    head.textContent = 'Wallet: add money requests' + (pend.length ? ' (' + pend.length + ' waiting)' : '');
+    if(!pend.length){ box.innerHTML = '<div class="empty">No pending requests.</div>'; return; }
+    const utrCount = {}; list.forEach(r => { utrCount[r.utr] = (utrCount[r.utr] || 0) + 1; });
+    box.innerHTML = pend.map(r => `
+      <div class="order-row return-row">
+        <div class="order-row-top"><span class="order-row-id">₹${escH(r.amount)}</span><span class="order-row-status">Pending</span></div>
+        <div class="order-row-name">${escH(r.name || '—')} · ${escH(r.phone)}</div>
+        <div class="order-row-meta">UTR: <b>${escH(r.utr)}</b> · ${escH(String(r.createdAt||'').slice(0,16).replace('T',' '))}${utrCount[r.utr] > 1 ? '<br><b style="color:var(--rose)">This UTR was submitted ' + utrCount[r.utr] + ' times. Check before approving.</b>' : ''}</div>
+        <div class="return-btns">
+          <button class="accept-btn" onclick="wApprove('${r._id}')">Approve (add ₹${escH(r.amount)})</button>
+          <button class="reject-btn" onclick="wReject('${r._id}')">Reject</button>
+        </div>
+      </div>`).join('');
+  }catch(e){ console.error(e); box.innerHTML = '<div class="empty">Could not load requests.</div>'; }
+}
+async function wApprove(id){
+  if(!confirm('Approve only after you saw this payment in your bank/Paytm. Add the money to the wallet?')) return;
+  const rref = db.collection('walletRequests').doc(id);
+  try{
+    await db.runTransaction(async tx => {
+      const rs = await tx.get(rref); if(!rs.exists) throw new Error('missing');
+      const r = rs.data(); if(r.status !== 'Pending') throw new Error('done');
+      const wref = db.collection('wallets').doc(r.phone), ws = await tx.get(wref), a = ws.exists ? (Number(ws.data().addBal) || 0) : 0, now = new Date().toISOString();
+      tx.set(wref, { addBal: a + Number(r.amount), updatedAt: now }, { merge: true });
+      tx.update(rref, { status: 'Approved', decidedAt: now });
+      tx.set(db.collection('walletTxns').doc(), { phone: r.phone, type: 'credit', bucket: 'add', amount: Number(r.amount), note: 'Money added (UTR ' + r.utr + ')', createdAt: now });
+    });
+    dashToast('Money added to wallet ✓', 'ok');
+  }catch(e){ console.error(e); dashToast(e.message === 'done' ? 'This request was already handled' : 'Could not approve. Please try again.', 'no'); }
+  loadWalletRequests();
+}
+async function wReject(id){
+  if(!confirm('Reject this request?')) return;
+  try{ await db.collection('walletRequests').doc(id).update({ status: 'Rejected', decidedAt: new Date().toISOString() }); dashToast('Request rejected', 'ok'); }
+  catch(e){ console.error(e); dashToast('Could not reject. Please try again.', 'no'); }
+  loadWalletRequests();
+}
+async function wLookup(){
+  const ph = document.getElementById('wPhone').value.replace(/\D/g,''), box = document.getElementById('wInfo');
+  if(!/^\d{10}$/.test(ph)){ box.innerHTML = '<div class="cp-note no">Enter the 10-digit mobile number.</div>'; return; }
+  box.innerHTML = '<div class="loading">Checking…</div>';
+  try{
+    const d = await db.collection('wallets').doc(ph).get(), w = d.exists ? d.data() : {};
+    const a = Number(w.addBal) || 0, b = Number(w.bonusBal) || 0;
+    box.innerHTML = `
+      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="stat-card"><div class="num">₹${a}</div><div class="lbl">Add Balance</div></div>
+        <div class="stat-card accent"><div class="num">₹${b}</div><div class="lbl">Bonus &amp; Cashback</div></div>
+      </div>
+      <div class="cp-grid" style="margin-top:12px">
+        <div><label>Bonus / cashback amount ₹</label><input type="number" id="wAmt" min="1" placeholder="e.g. 50"></div>
+        <div><label>Note (optional)</label><input type="text" id="wNote" maxlength="60" placeholder="e.g. Diwali cashback"></div>
+      </div>
+      <button class="cp-save" onclick="wGive('${ph}')">Give bonus / cashback</button>
+      <div class="cp-note" id="wNoteMsg"></div>`;
+  }catch(e){ console.error(e); box.innerHTML = '<div class="cp-note no">Could not load this wallet.</div>'; }
+}
+async function wGive(ph){
+  const amt = Math.floor(Number(document.getElementById('wAmt').value) || 0), note = document.getElementById('wNote').value.trim();
+  const m = document.getElementById('wNoteMsg');
+  if(amt < 1 || amt > 100000){ m.textContent = 'Enter an amount between ₹1 and ₹1,00,000'; m.className = 'cp-note no'; return; }
+  if(!confirm('Give ₹' + amt + ' bonus / cashback to ' + ph + '?')) return;
+  const wref = db.collection('wallets').doc(ph);
+  try{
+    await db.runTransaction(async tx => {
+      const ws = await tx.get(wref), b = ws.exists ? (Number(ws.data().bonusBal) || 0) : 0, now = new Date().toISOString();
+      tx.set(wref, { bonusBal: b + amt, updatedAt: now }, { merge: true });
+      tx.set(db.collection('walletTxns').doc(), { phone: ph, type: 'credit', bucket: 'bonus', amount: amt, note: note || 'Bonus / Cashback from Smart Deal', createdAt: now });
+    });
+    dashToast('₹' + amt + ' bonus given ✓', 'ok');
+    wLookup();
+  }catch(e){ console.error(e); m.textContent = 'Could not save. Please try again.'; m.className = 'cp-note no'; }
 }
 </script>
 </body>
